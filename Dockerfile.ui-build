@@ -1,0 +1,8 @@
+FROM nginx:latest
+
+RUN apt-get update && apt-get install -y nginx-extras
+RUN rm /etc/nginx/conf.d/default.conf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+COPY ./ui/dist/ /srv/ui/
+
+CMD ["nginx", "-g", "daemon off;"]
