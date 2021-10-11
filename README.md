@@ -1,10 +1,21 @@
 # Oni
 
-The Oni application.
+- [Oni](#oni)
+  - [Start developing](#start-developing)
+  - [Running the tests](#running-the-tests)
+  - [Tech](#tech)
+    - [Frontend - VueJS and friends](#frontend---vuejs-and-friends)
+    - [Backend - Restify and sequelize](#backend---restify-and-sequelize)
+  - [Repo layout](#repo-layout)
 
-Oni consists of a VueJS SPA (ui) and restify JS backend (api).
+Oni consists of a VueJS SPA (ui) and restify JS backend (api). This repo structure is shared with
+[Describo Online](https://github.com/Arkisto-Platform/describo-online) and the
+[Nyingarn Workspace](https://github.com/CoEDL/nyingarn-workspace). Look there for more code.
 
 ## Start developing
+
+To get started developing copy `configuration/example-configuration.json` to
+`configuration/development-configuration.json` and edit as required.
 
 ```
 > docker-compose up
@@ -13,8 +24,16 @@ Oni consists of a VueJS SPA (ui) and restify JS backend (api).
 This will start the UI, API and db containers. It will automatically run `npm install` in both ui
 and api folders so you don't need to.
 
-To get started developing copy `configuration/example-configuration.json` to
-`configuration/development-configuration.json` and edit as required.
+Saving UI and API code triggers auto reload.
+
+## Running the tests
+
+-   Find the api container ID : `dps | grep api | awk '{print $1}'`
+-   Exec into the container: `docker exec -it ${CONTAINER ID} bash`
+-   Run the Jest Testing environment: `npm run test:watch`
+
+When you save a test file the tests will re-run automatically. Saving a changed code file (ie not a
+test file) does not re-run the tests.
 
 ## Tech
 
