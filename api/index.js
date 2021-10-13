@@ -19,7 +19,7 @@ global.fetch = require("node-fetch");
 (async () => {
     let configuration;
     try {
-        configuration = await loadConfiguration();
+      configuration = await loadConfiguration();
     } catch (error) {
         console.error("configuration.json not found - stopping now");
         process.exit();

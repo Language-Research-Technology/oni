@@ -2,5 +2,18 @@
     "ui": {
         "siteName": "Oni"
     },
-    "api": {}
+    "api": {
+        "administrators": [
+            "{user@email.com}",
+            "{other user@somewhere.else.com}"
+        ],
+        "session": {
+            "lifetime": {
+                "hours": 5
+            },
+            "secret": "{some secret - 32 characters or longer}"
+        },
+        "services": {},
+        "authentication": {}
+    }
 }

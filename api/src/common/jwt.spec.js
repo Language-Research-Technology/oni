@@ -1,5 +1,4 @@
 require("regenerator-runtime");
-import { createUser } from "../lib/user";
 import { generateToken, verifyToken } from "./jwt";
 import { loadConfiguration } from "../common";
 const chance = require("chance").Chance();
@@ -63,13 +62,15 @@ describe("JWT tests", () => {
         let configuration = await loadConfiguration();
         let { token, expires } = await generateToken({ configuration, user });
 
+        const configPath = process.env.ONI_CONFIG_PATH || "/srv/configuration/development-configuration.json";
+        const configPathCopy = `${process.env.ONI_CONFIG_PATH}.copy` || "/srv/configuration/development-configuration-copy.json"
         await copy(
-            "/srv/configuration/development-configuration.json",
-            "/srv/configuration/development-configuration-copy.json"
+          configPath,
+          configPathCopy
         );
-        let config = await readJSON("/srv/configuration/development-configuration.json");
+        let config = await readJSON(configPath);
         config.api.session.secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        await writeJSON("/srv/configuration/development-configuration.json", config);
+        await writeJSON(configPath, config);
         configuration = await loadConfiguration();
         try {
             let data = await verifyToken({ token, configuration });
@@ -78,8 +79,8 @@ describe("JWT tests", () => {
         }
 
         move(
-            "/srv/configuration/development-configuration-copy.json",
-            "/srv/configuration/development-configuration.json",
+          configPathCopy,
+          configPath,
             { overwrite: true }
         );
         await user.destroy();

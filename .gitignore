@@ -2,6 +2,7 @@ node_modules
 dist
 coverage
 .env
+.idea
 
 configuration.json
 development-configuration.json

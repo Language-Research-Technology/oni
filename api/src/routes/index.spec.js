@@ -16,7 +16,7 @@ describe("Test loading the configuration", () => {
         let response = await fetch(`${host}/configuration`);
         expect(response.status).toEqual(200);
         let configuration = await response.json();
-        expect(configuration).toHaveProperty("authentication");
+        expect(configuration).toHaveProperty("ui");
     });
 });
 

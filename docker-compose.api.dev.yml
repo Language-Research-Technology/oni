@@ -1,0 +1,40 @@
+version: "3.8"
+
+volumes:
+    api_node_modules:
+        driver: local
+    ui_node_modules:
+        driver: local
+
+services:
+    db:
+        image: postgres:13-alpine
+        hostname: db
+        tty: true
+        environment:
+            TERM: "xterm-256color"
+            NODE_ENV: "development"
+            POSTGRES_DB: "oni"
+            POSTGRES_USER: "root"
+            POSTGRES_PASSWORD: ""
+            POSTGRES_HOST_AUTH_METHOD: "trust"
+            PGDATA: /postgresql/data
+        # volumes:
+        #     - describo_online_db_test:/postgresql
+        ports:
+            - "5432:5432"
+
+    ui:
+        image: node:14-buster
+        hostname: ui
+        tty: true
+        environment:
+            TERM: "xterm-256color"
+            NODE_ENV: "development"
+        volumes:
+            - ui_node_modules:/srv/ui/node_modules:delegated
+            - ./ui:/srv/ui:delegated
+            - .git:/srv/ui/.git:delegated
+        working_dir: /srv/ui
+        command: [ "npm", "run", "develop" ]
+

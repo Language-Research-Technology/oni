@@ -45,7 +45,7 @@ services:
         working_dir: /srv/api
         command: ["/wait-for-it.sh", "db:5432", "--", "npm", "run", "develop"]
         ports:
-            - 8080:8080
+            - "8080:8080"
 
     ui:
         image: node:14-buster
@@ -72,4 +72,4 @@ services:
             - ./scripts/wait-for-it.sh:/wait-for-it.sh
         command: ["/wait-for-it.sh", "app:8080", "-t", "10", "--", "nginx", "-g", "daemon off;"]
         ports:
-            - 9000:9000
+            - "9000:9000"

@@ -10,7 +10,8 @@ export async function setupBeforeAll({ adminEmails = [] }) {
 
     let devConfiguration = cloneDeep(configuration);
     devConfiguration.api.administrators = adminEmails;
-    await writeJSON("/srv/configuration/development-configuration.json", devConfiguration, {
+    const configPath = process.env.ONI_CONFIG_PATH || "/srv/configuration/development-configuration.json";
+      await writeJSON(configPath, devConfiguration, {
         spaces: 4,
     });
     return configuration;
@@ -38,7 +39,8 @@ export async function teardownAfterEach({ users = [] }) {
 }
 
 export async function teardownAfterAll(configuration) {
-    await writeJSON("/srv/configuration/development-configuration.json", configuration, {
+  const configPath = process.env.ONI_CONFIG_PATH || "/srv/configuration/development-configuration.json";
+  await writeJSON(configPath, configuration, {
         spaces: 4,
     });
     models.sequelize.close();
