@@ -3,7 +3,7 @@
 import models from "../models";
 import { UnauthorizedError, ForbiddenError } from "restify-errors";
 import { route, loadConfiguration } from "../common";
-// import { setupRoutes as setupUserRoutes } from "./user";
+import { setupRoutes as setupRecordRoutes } from "./record";
 
 export function setupRoutes({ server }) {
     if (process.env.NODE_ENV === "development") {
@@ -39,5 +39,7 @@ export function setupRoutes({ server }) {
         }
         next(new UnauthorizedError());
     });
-    // setupUserRoutes({ server });
+
+    setupRecordRoutes({ server });
+
 }

@@ -3,6 +3,9 @@ dist
 coverage
 .env
 .idea
+.DS_Store
+api/.dev
+test-data/test_ocfl
 
 configuration.json
 development-configuration.json

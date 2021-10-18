@@ -32,8 +32,9 @@ let sequelize = new Sequelize(
 );
 
 let modules = [
-  require("./user.js"),
-  require("./session.js"),
+    require("./user.js"),
+    require("./session.js"),
+    require("./record")
 ];
 
 // Initialize models

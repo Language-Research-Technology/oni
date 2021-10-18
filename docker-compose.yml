@@ -31,6 +31,7 @@ services:
         environment:
             TERM: "xterm-256color"
             NODE_ENV: "development"
+            LOG_LEVEL: "debug"
             DB_HOST: "db"
             DB_PORT: "5432"
             DB_USER: "root"

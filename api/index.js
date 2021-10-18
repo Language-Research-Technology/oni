@@ -4,6 +4,7 @@ const server = restify.createServer();
 const models = require("./src/models");
 const { loadConfiguration, getLogger } = require("./src/common");
 const { setupRoutes } = require("./src/routes");
+const { initOCFL } = require("./src/common/bootstrap");
 const corsMiddleware = require("restify-cors-middleware");
 const fetch = require("node-fetch");
 const log = getLogger();
@@ -63,6 +64,7 @@ global.fetch = require("node-fetch");
         })
     );
     setupRoutes({ server });
+    //await initOCFL();
 
     server.listen("8080", function () {
         console.log("ready on %s", server.url);

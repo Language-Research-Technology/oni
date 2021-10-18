@@ -55,7 +55,7 @@ describe("User management tests", () => {
         expect(user).toBeNull;
     });
     it("should be able to set up a normal user account", async () => {
-        //  create stubb account
+        //  create stub account
         let email = chance.email();
         let users = await createAllowedUserStubAccounts({emails: [email]});
 
