@@ -31,6 +31,7 @@ export function setupRoutes({server, configuration}) {
             break;
           default:
             crate = await getUridCrate({
+	      host: configuration.api.host,
               arcpId: req.query.id,
               diskPath: record['diskPath'],
               catalogFilename: configuration.api.ocfl.catalogFilename
@@ -65,12 +66,14 @@ export function setupRoutes({server, configuration}) {
           itemId: req.query.file,
           catalogFilename: configuration.api.ocfl.catalogFilename
         });
-        res.setHeader('Content-disposition', 'attachment; filename=' + fileObj.filename);
-        res.setHeader('Content-type', fileObj.mimetype);
+        res.writeHead(200,{
+		'Content-Disposition': 'attachment; filename=' + fileObj.filename,
+		'Content-Type': fileObj.mimetype
+	});
 
         const filestream = fs.createReadStream(fileObj.filePath);
         filestream.pipe(res);
-
+	      
       } else {
         res.status(404).send({id: req.query.id, message: "Not Found"})
       }

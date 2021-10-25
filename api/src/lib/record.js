@@ -7,8 +7,6 @@ import {OcflObject} from "ocfl";
 import {ROCrate} from 'ro-crate';
 import path from "path";
 
-import {host} from "../common";
-
 const log = getLogger();
 
 export async function deleteRecords() {
@@ -97,7 +95,7 @@ export async function getRawCrate({diskPath, catalogFilename}) {
     return json;
 }
 
-export async function getUridCrate({arcpId, diskPath, catalogFilename}) {
+export async function getUridCrate({host, arcpId, diskPath, catalogFilename}) {
     const ocflObject = new OcflObject(diskPath);
     const json = await readCrate(ocflObject, catalogFilename);
     const crate = new ROCrate(json);
@@ -116,18 +114,23 @@ export async function getUridCrate({arcpId, diskPath, catalogFilename}) {
         if (item.hasOwnProperty('hasFile')) {
 
             ref.hasFile.forEach((i) => {
-                i['@id'] = `${host}/data?arcpId=${arcpId}&file=${i['@id']}`;
+                i['@id'] = `${host}/data/item?id=${arcpId}&file=${i['@id']}`;
             })
+        }
+        if (item.hasOwnProperty('hasPart')) {
+            ref.hasPart.forEach((i) => {
+                i['@id'] = `${host}/data/item?id=${arcpId}&file=${i['@id']}`;
+            });
         }
         if (item.hasOwnProperty('thumbnail')) {
             const ref = crate.referenceToItem(item)
-            ref.thumbnail['@id'] = `${host}/data?arcpId=${arcpId}&file=${ref.thumbnail['@id']}`;
+            ref.thumbnail['@id'] = `${host}/data/item?id=${arcpId}&file=${ref.thumbnail['@id']}`;
         }
     }
     updateItems.forEach((i) => {
         //log.debug(i['@id']);
         const ref = crate.referenceToItem(i)
-        ref['@id'] = `${host}/data?arcpId=${arcpId}&file=${ref['@id']}`;
+        ref['@id'] = `${host}/data/item?id=${arcpId}&file=${ref['@id']}`;
     });
     return json;
 }
@@ -137,11 +140,14 @@ export async function getFile({record, itemId, catalogFilename}) {
     const ocflObject = new OcflObject(record['diskPath']);
     const filePath = await getItem(ocflObject, catalogFilename,itemId);
 
-    console.log(filePath);
-
+    log.debug(filePath);
+	const index = filePath.lastIndexOf("/");
+	const fileName = filePath.substr(index)
+	const ext = filePath.lastIndexOf(".");
+	const extName = filePath.substr(ext)
     return {
-        filename: 'name',
+        filename: fileName,
         filePath: filePath,
-        mimetype: 'jpg'
+        mimetype: extName
     }
 }

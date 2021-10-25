@@ -16,7 +16,6 @@ export async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
     repoPath = workingPath(repoPath);
     log.debug(`Loading OCFL: ${repoPath}`);
     await repo.load(repoPath);
-
     const objects = await repo.objects();
     const records = [];
     for (let object of objects) {
@@ -70,10 +69,11 @@ export async function readCrate(object, catalogFilename) {
 export async function getItem(object, catalogFilename, itemId) {
   const inv = await object.getInventory();
   const headState = inv.versions[inv.head].state;
+	log.debug(headState);
   for (let hash of Object.keys(headState)) {
     if (headState[hash].includes(catalogFilename)) {
       try {
-        const filePath = path.join(object.path, itemId);
+        const filePath = path.join(object.path, inv.head, 'content', itemId);
         return filePath;
       } catch (e) {
         log.error(`Error reading ${filePath}`);

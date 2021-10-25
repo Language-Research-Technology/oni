@@ -22,7 +22,8 @@ let configuration;
   try {
     configuration = await loadConfiguration();
   } catch (error) {
-    console.error("configuration.json not found - stopping now");
+    console.error(error);
+    console.error("configuration.json error found - stopping now");
     process.exit();
   }
   await models.sequelize.sync();

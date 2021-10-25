@@ -3,7 +3,7 @@ import { writeJSON } from "fs-extra";
 import { cloneDeep } from "lodash";
 import models from "../models";
 
-export const host = `http://localhost:8080`;
+export const host = `http://localhost:8080` || process.env.API_HOST;
 export const testOCFLConf = {
     "ocflPath": "../test-data/test_ocfl",
     "catalogFilename": "ro-crate-metadata.json",
