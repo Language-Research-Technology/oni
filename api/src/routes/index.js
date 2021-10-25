@@ -5,7 +5,7 @@ import { UnauthorizedError, ForbiddenError } from "restify-errors";
 import { route, loadConfiguration } from "../common";
 import { setupRoutes as setupRecordRoutes } from "./record";
 
-export function setupRoutes({ server }) {
+export function setupRoutes({ server, configuration }) {
     if (process.env.NODE_ENV === "development") {
         server.get(
             "/test-middleware",
@@ -40,6 +40,6 @@ export function setupRoutes({ server }) {
         next(new UnauthorizedError());
     });
 
-    setupRecordRoutes({ server });
+    setupRecordRoutes({ server, configuration });
 
 }

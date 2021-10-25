@@ -7,11 +7,7 @@ import {ROCrate} from "ro-crate";
 let records;
 let crate;
 
-const ocfl = {
-    "ocflPath": "../test-data/test_ocfl",
-    "catalogFilename": "ro-crate-metadata.json",
-    "hashAlgorithm": "md5"
-}
+import {testOCFLConf as ocfl} from "../common";
 
 const testData = {
     roCrateDir: "../test-data/rocrates/farmstofreeways",
@@ -38,11 +34,11 @@ describe("Test loading the configuration", () => {
         const jsonld = fs.readJsonSync(testData.roCrateDir + "/" + testData.roCrate);
         const crate = new ROCrate(jsonld);
         crate.index();
-        await checkin(repo, 'domain', testData.roCrateDir, crate)
+        await checkin(repo, 'ATAP', testData.roCrateDir, crate, 'md5')
     })
     test("it should load the ocfl repo", async () => {
         records = await loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
-        expect(records.length).toBe(1);
+        expect(records.length).toBeGreaterThanOrEqual(1);
     });
     test("It should load ocflobjects", () => {
         expect(records[0]['ocflObject']).not.toBeNull()
@@ -51,10 +47,8 @@ describe("Test loading the configuration", () => {
         const jsonld = records[0]['jsonld'];
         crate = new ROCrate(jsonld);
         crate.index();
-        const root = crate.getRootDataset();
         //TODO: ask peter if this is useful?
-        const identifier = crate.getNamedIdentifier('domain');
-        identifier
-        expect(root).not.toBe("/uts.edu.au");
-    })
+        const root = crate.getRootDataset();
+        expect(root).not.toBe(undefined);
+    });
 });

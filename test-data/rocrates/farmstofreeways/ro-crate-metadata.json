@@ -38,6 +38,9 @@
         },
         {
           "@id": "_:local-id:/uts.edu.au:/uts.edu.au/data_repo/1b694bf5-bf70-4ea8-8bfc-b2864db65e97"
+        },
+        {
+          "@id": "_:local-id:ATAP:arcp://name,ATAP/uts.edu.au"
         }
       ],
       "name": "Farms to Freeways Example Dataset",
@@ -11304,6 +11307,12 @@
       "csvw:tableSchema": {
         "@id": "#$table_schema"
       }
+    },
+    {
+      "@id": "_:local-id:ATAP:arcp://name,ATAP/uts.edu.au",
+      "@type": "PropertyValue",
+      "value": "arcp://name,ATAP/uts.edu.au",
+      "name": "ATAP"
     }
   ]
 }

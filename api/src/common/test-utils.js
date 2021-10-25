@@ -4,6 +4,11 @@ import { cloneDeep } from "lodash";
 import models from "../models";
 
 export const host = `http://localhost:8080`;
+export const testOCFLConf = {
+    "ocflPath": "../test-data/test_ocfl",
+    "catalogFilename": "ro-crate-metadata.json",
+    "hashAlgorithm": "md5"
+}
 
 export async function setupBeforeAll({ adminEmails = [] }) {
     let configuration = await loadConfiguration();

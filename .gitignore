@@ -6,6 +6,7 @@ coverage
 .DS_Store
 api/.dev
 test-data/test_ocfl
+test-data/*.development.json
 
 configuration.json
 development-configuration.json

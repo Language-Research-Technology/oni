@@ -8,4 +8,5 @@ export {
     setupBeforeEach,
     teardownAfterAll,
     teardownAfterEach,
+    testOCFLConf
 } from "./test-utils";
