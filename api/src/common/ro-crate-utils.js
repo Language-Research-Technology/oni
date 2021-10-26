@@ -9,6 +9,7 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
   const json = await readCrate(ocflObject, catalogFilename);
   const crate = new ROCrate(json);
   crate.index();
+  crate.toGraph();
   for (const item of crate.json_ld["@graph"]) {
     const itemType = crate.utils.asArray(item['@type']);
     const updateItems = [];
@@ -18,12 +19,12 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
       }
     }
     updateItems.forEach((i) => {
-      const ref = crate.referenceToItem(i);
+      const ref = crate.getItem(i['@id']);
       if (ref) {
         log.silly(ref['@id']);
-        ref['@id'] = `${host}/data/item?id=${recordId}&file=${ref['@id']}`;
+        crate.changeGraphId(ref, `${host}/data/item?id=${recordId}&file=${ref['@id']}`);
       }
     });
   }
-  return crate;
+  return crate.serializeGraph();
 }

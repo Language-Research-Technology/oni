@@ -98,8 +98,14 @@ export async function getRawCrate({diskPath, catalogFilename}) {
 
 export async function getUridCrate({host, arcpId, diskPath, catalogFilename, typesTransform}) {
   const ocflObject = new OcflObject(diskPath);
-  const newCrate = await transformURIs({host, recordId: arcpId, ocflObject, uridTypes: typesTransform, catalogFilename});
-  return newCrate.json_ld;
+  const newCrate = await transformURIs({
+    host,
+    recordId: arcpId,
+    ocflObject,
+    uridTypes: typesTransform,
+    catalogFilename
+  });
+  return newCrate;
 }
 
 export async function getFile({record, itemId, catalogFilename}) {

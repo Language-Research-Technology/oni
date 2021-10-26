@@ -52,7 +52,7 @@
         "restify": "^8.5.1",
         "restify-cors-middleware": "^1.1.1",
         "restify-errors": "^8.0.2",
-        "ro-crate": "^2.0.3",
+        "ro-crate": "git+https://github.com/UTS-eResearch/ro-crate-js.git#graph-methods",
         "sequelize": "^6.6.5",
         "uuid": "^8.3.2",
         "winston": "^3.3.3"

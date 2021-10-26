@@ -1,18 +1,30 @@
 import "regenerator-runtime";
 import fetch from "node-fetch";
-import {host} from "../common";
 
-import {testOCFLConf as ocfl} from "../common";
-import {getRecord, getUridCrate} from "./record";
+import { testHost as host, testOCFLConf as ocfl } from "../common";
+import { getRecord, getUridCrate } from "./record";
+import { transformURIs } from "../common/ro-crate-utils";
+import { OcflObject } from "ocfl";
+import { ROCrate } from "ro-crate";
 
 jest.setTimeout(10000);
 
 describe("Test load records", () => {
   test("it should be able to retrieve records", async () => {
     const id = 'arcp://name,ATAP/uts.edu.au';
-    const record = await getRecord({recordId: id});
-    const crate = await getUridCrate({arcpId: id, diskPath: record['diskPath'], catalogFilename: ocfl.catalogFilename});
-    expect(crate).not.toBeNull();
+    const record = await getRecord({ recordId: id });
+    const ocflObject = new OcflObject(record['diskPath']);
+    const newCrate = await transformURIs({
+      host,
+      recordId: id,
+      ocflObject,
+      uridTypes: ['File'],
+      catalogFilename: ocfl.catalogFilename
+    });
+    const crate = new ROCrate(newCrate);
+    crate.index();
+    const item165 = crate.getItem('#165');
+    expect(item165['hasFile'][0].startsWith('http')).not.toBeNull;
   });
 
 });
