@@ -1,12 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
-import {Repository as OCFLRepository} from "ocfl";
-import {getLogger} from "./logger";
-import hasha from "hasha";
-import {loadConfiguration} from "./configuration";
-import {workingPath} from "./utils";
-import {v4 as uuidv4} from "uuid";
-import {createRecord} from "../lib/record";
+import { Repository as OCFLRepository } from "ocfl";
+import { getLogger } from "./logger";
+import hasha, { async } from "hasha";
+import { workingPath } from "./utils";
 
 const log = getLogger();
 
@@ -24,7 +21,7 @@ export async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
       if (json) {
         records.push({
           path: path.relative(repoPath, object.path),
-          hash_path: hasha(object.path, {algorithm: hashAlgorithm}),
+          hash_path: hasha(object.path, { algorithm: hashAlgorithm }),
           jsonld: json,
           ocflObject: object
         });
@@ -69,14 +66,13 @@ export async function readCrate(object, catalogFilename) {
 export async function getItem(object, catalogFilename, itemId) {
   const inv = await object.getInventory();
   const headState = inv.versions[inv.head].state;
-	log.debug(headState);
   for (let hash of Object.keys(headState)) {
     if (headState[hash].includes(catalogFilename)) {
       try {
         const filePath = path.join(object.path, inv.head, 'content', itemId);
         return filePath;
       } catch (e) {
-        log.error(`Error reading ${filePath}`);
+        log.error(`Error reading ${itemId}`);
         log.error(e);
         return undefined;
       }
@@ -108,17 +104,17 @@ export async function checkin(repo, repoName, rocrateDir, crate, hashAlgorithm) 
     log.debug(`repoName: ${repoName}, ${existingId}`);
     if (existingId) {
       log.debug(`Local identifier found ${repoName}/${existingId}`);
-      const hasDir = hasha(existingId, {algorithm: hashAlgorithm});
+      const hasDir = hasha(existingId, { algorithm: hashAlgorithm });
       const res = await repo.importNewObjectDir(hasDir, rocrateDir);
       log.debug(`Updated ${existingId}, ${res.path}`);
     } else {
-      const newId = arcpId({crate, identifier: repoName});
+      const newId = arcpId({ crate, identifier: repoName });
       log.debug(`Minting new local identifier ${repoName}/${newId}`);
       await repo.importNewObjectDir(newId, rocrateDir);
       log.debug(`Imported ${rocrateDir}  ${newId}`);
-      crate.addIdentifier({name: repoName, identifier: newId});
-      await fs.writeJson(rocrateFile, crate.getJson(), {spaces: 2});
-      const hasDir = hasha(newId, {algorithm: hashAlgorithm});
+      crate.addIdentifier({ name: repoName, identifier: newId });
+      await fs.writeJson(rocrateFile, crate.getJson(), { spaces: 2 });
+      const hasDir = hasha(newId, { algorithm: hashAlgorithm });
       const res = await repo.importNewObjectDir(hasDir, rocrateDir);
       log.debug(`Updated ${rocrateDir} ${newId} metadata with identifier - wrote to ${res}`);
     }
@@ -131,7 +127,7 @@ export async function checkin(repo, repoName, rocrateDir, crate, hashAlgorithm) 
 
 // TODO: Define a standard on what to do in case there is no Identifier.
 // Like `arcp://name,sydney-speaks/corpus/${type}${id}`;
-export function arcpId({crate, identifier}) {
+export function arcpId({ crate, identifier }) {
   try {
     const id = crate.getNamedIdentifier(identifier);
     if (!id) {
