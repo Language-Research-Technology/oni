@@ -26,5 +26,5 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
       }
     });
   }
-  return crate.serializeGraph();
+  return crate.getJson();
 }
