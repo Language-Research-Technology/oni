@@ -59,26 +59,46 @@ export function setupRoutes({server, configuration}) {
     next();
   });
   server.get("/data/item", async (req, res, next) => {
-    if (req.query.id && req.query.file) {
-      let record = await getRecord({recordId: req.query.id});
-      if (record) {
-        const fileObj = await getFile({
-          record: record,
-          itemId: req.query.file,
-          catalogFilename: configuration.api.ocfl.catalogFilename
-        });
-        res.writeHead(200, {
-          'Content-Disposition': 'attachment; filename=' + fileObj.filename,
-          'Content-Type': fileObj.mimetype
-        });
-        const filestream = fs.createReadStream(fileObj.filePath);
-        filestream.pipe(res);
-      } else {
-        res.status(404).send({id: req.query.id, message: "Not Found"})
+      try {
+        if (req.query.id && req.query.file) {
+          let record = await getRecord({recordId: req.query.id});
+          if (record) {
+            const fileObj = await getFile({
+              record: record,
+              itemId: req.query.file,
+              catalogFilename: configuration.api.ocfl.catalogFilename
+            });
+            if (fs.pathExistsSync(fileObj.filePath)) {
+              res.writeHead(200, {
+                'Content-Disposition': 'attachment; filename=' + fileObj.filename,
+                'Content-Type': fileObj.mimetype
+              });
+              const filestream = fs.createReadStream(fileObj.filePath);
+              filestream.on('error', function (err) {
+                log.error(err);
+                res.end();
+              });
+              filestream.on('end', function () {
+                log.debug('end')
+                res.end();
+                next();
+              });
+              filestream.pipe(res);
+            } else {
+              res.send({id: req.query.id, file: req.query.file, message: "Not Found"}).status(404);
+              next();
+            }
+          } else {
+            res.send({usage: 'file param required'}).status(400);
+            next();
+          }
+        }
+      } catch (e) {
+        log.error(e);
+        res.send({error: e['message']}).status(500);
+        next();
       }
-    } else {
-      res.send({usage: 'file param required'}).status(400);
     }
-    next();
-  });
+  )
+  ;
 }

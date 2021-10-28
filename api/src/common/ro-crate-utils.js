@@ -10,7 +10,7 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
   const crate = new ROCrate(json);
   crate.index();
   crate.toGraph();
-  log.debug('transformURIs');
+  log.silly ('transformURIs');
   for (const item of crate.getGraph()) {
     const itemType = crate.utils.asArray(item['@type']);
     const updateItems = [];

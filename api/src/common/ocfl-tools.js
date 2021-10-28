@@ -74,7 +74,7 @@ export async function getItem(object, catalogFilename, itemId) {
       } catch (e) {
         log.error(`Error reading ${itemId}`);
         log.error(e);
-        return undefined;
+        return new Error(e);
       }
     }
   }

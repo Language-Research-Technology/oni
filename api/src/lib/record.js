@@ -109,21 +109,27 @@ export async function getUridCrate({host, arcpId, diskPath, catalogFilename, typ
 }
 
 export async function getFile({record, itemId, catalogFilename}) {
+  try {
+    const ocflObject = new OcflObject(record['diskPath']);
+    const filePath = await getItem(ocflObject, catalogFilename, itemId);
 
-  const ocflObject = new OcflObject(record['diskPath']);
-  const filePath = await getItem(ocflObject, catalogFilename, itemId);
+    const index = filePath.lastIndexOf("/");
+    const fileName = filePath.substr(index);
+    const ext = filePath.lastIndexOf(".");
+    let extName;
+    if (ext) {
+      extName = filePath.substr(ext);
+    }
+    log.debug('getFile: record')
+    log.debug(filePath);
 
-  log.debug(filePath);
-  const index = filePath.lastIndexOf("/");
-  const fileName = filePath.substr(index);
-  const ext = filePath.lastIndexOf(".");
-  let extName;
-  if (ext) {
-    extName = filePath.substr(ext);
-  }
-  return {
-    filename: fileName,
-    filePath: filePath,
-    mimetype: extName || 'file'
+    return {
+      filename: fileName,
+      filePath: filePath,
+      mimetype: extName || 'file'
+    }
+  } catch (e) {
+    log.error('getFile');
+    return new Error(e);
   }
 }

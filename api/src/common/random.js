@@ -124,7 +124,7 @@ export function collection({sourceData, keywords, people, files}) {
   const name = placeName();
   const geo = geoPoint();
   const licenseElement = license(sourceData['licenses']);
-  const files = dataFile(sourceData['files'], FILES_TYPES);
+  const filesElement = dataFile(sourceData['files'], FILES_TYPES);
 
   const collectionElement = {
     keywords: k,
@@ -143,7 +143,7 @@ export function collection({sourceData, keywords, people, files}) {
       "@id": "files",
       "name": "Files",
       "description": text(),
-      "hasPart": files.map((f) => {
+      "hasPart": filesElement.map((f) => {
         return {"@id": f['@id']}
       })
     }
