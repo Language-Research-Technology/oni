@@ -22,9 +22,10 @@ describe('Test load records', () => {
       catalogFilename: ocfl.catalogFilename
     });
     const crate = new ROCrate(newCrate);
-    crate.index();
-    const item165 = crate.getItem('#165');
-    const anId = item165['hasFile'][0];
+    crate.toGraph();
+    const interview427 = crate.getItem('#interview-#427');
+    const hasFiles = interview427['hasFile'];
+    const anId = hasFiles[hasFiles.length - 1];
     expect(anId['@id'].startsWith('http')).toBe(true)
   });
 

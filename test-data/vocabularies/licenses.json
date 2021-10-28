@@ -1,0 +1,37 @@
+[
+  {
+    "@id": "https://creativecommons.org/licenses/by-nc-sa/3.0/au/",
+    "@type": "CreativeWork",
+    "description": "This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Australia License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/au/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.",
+    "identifier": "https://creativecommons.org/licenses/by-nc-sa/3.0/au/",
+    "name": "Attribution-NonCommercial-ShareAlike 3.0 Australia (CC BY-NC-SA 3.0 AU)"
+  },
+  {
+    "@id": "https://creativecommons.org/licenses/by/3.0/au/",
+    "@type": "CreativeWork",
+    "identifier": "https://creativecommons.org/licenses/by/3.0/au/",
+    "description": "You are free to: Share — copy and redistribute the material in any medium or format Adapt — remix, transform, and build upon the material for any purpose, even commercially.  This license is acceptable for Free Cultural Works. The licensor cannot revoke these freedoms as long as you follow the license terms. Under the following terms: Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.  No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits. Notices: You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation. No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.",
+    "name": "Attribution 3.0 Australia (CC BY 3.0 AU)"
+  },
+  {
+    "@id": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html",
+    "@type": "CreativeWork",
+    "identifier": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html",
+    "description": "Primarily used for software libraries, the GNU LGPL requires that derived works be licensed under the same license, but works that only link to it do not fall under this restriction. There are two commonly used versions of the GNU LGPL.",
+    "name": "GNU Lesser General Public License v2.1"
+  },
+  {
+    "@id": "https://www.gnu.org/licenses/lgpl-3.0.en.html",
+    "@type": "CreativeWork",
+    "identifier": "https://www.gnu.org/licenses/lgpl-3.0.en.html",
+    "description": "Permissions of this copyleft license are conditioned on making available complete source code of licensed works and modifications under the same license or the GNU GPLv3. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. However, a larger work using the licensed work through interfaces provided by the licensed work may be distributed under different terms and without source code for the larger work.",
+    "name": "GNU Lesser General Public License v3.0"
+  },
+  {
+    "@id": "https://opensource.org/licenses/MIT",
+    "@type": "CreativeWork",
+    "identifier": "https://opensource.org/licenses/MIT",
+    "description": "A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.",
+    "name": "MIT License"
+  }
+]

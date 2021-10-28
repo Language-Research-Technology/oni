@@ -1,7 +1,7 @@
 import {OcflObject} from "ocfl";
 import {ROCrate} from 'ro-crate';
 import {readCrate} from "./ocfl-tools";
-import {getLogger} from "../common/logger";
+import {getLogger} from "./logger";
 
 const log = getLogger();
 
@@ -10,7 +10,8 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
   const crate = new ROCrate(json);
   crate.index();
   crate.toGraph();
-  for (const item of crate.json_ld["@graph"]) {
+  log.debug('transformURIs');
+  for (const item of crate.getGraph()) {
     const itemType = crate.utils.asArray(item['@type']);
     const updateItems = [];
     for (let type of uridTypes) {
@@ -23,7 +24,7 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
       if (ref) {
         log.silly(ref['@id']);
         crate.changeGraphId(ref, `${host}/data/item?id=${recordId}&file=${ref['@id']}`);
-      }
+       } 
     });
   }
   return crate.getJson();

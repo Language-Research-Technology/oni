@@ -34,6 +34,7 @@
         "jest-fetch-mock": "^3.0.3",
         "mockdate": "^3.0.5",
         "nodemon": "^2.0.12",
+        "nonsense-license": "^1.1.0",
         "webpack": "^5.47.1",
         "webpack-cli": "^4.7.2",
         "webpack-node-externals": "^3.0.0"
@@ -50,6 +51,7 @@
         "pg": "^8.7.1",
         "pg-hstore": "^2.3.4",
         "random-date-generator": "^1.0.2",
+        "random-word": "^2.0.0",
         "regenerator-runtime": "^0.13.9",
         "restify": "^8.5.1",
         "restify-cors-middleware": "^1.1.1",
