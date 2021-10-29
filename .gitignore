@@ -7,7 +7,7 @@ coverage
 api/.dev
 test-data/test_ocfl
 test-data/*.development.json
-
+!test-data/perf/.gitkeep
 configuration.json
 development-configuration.json
 production-configuration.json

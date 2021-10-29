@@ -4,6 +4,7 @@ import { Repository as OCFLRepository } from "ocfl";
 import { getLogger } from "./logger";
 import hasha, { async } from "hasha";
 import { workingPath } from "./utils";
+import { ROCrate } from 'ro-crate';
 
 const log = getLogger();
 
@@ -145,5 +146,39 @@ export function arcpId({ crate, identifier }) {
   } catch (e) {
     log.error(`arcpId error`);
     log.error(e);
+  }
+}
+
+export async function loadCollection({repo, ocfl, col}) {
+  try {
+    const jsonld = fs.readJsonSync(col.roCrateDir + "/" + col.roCrate);
+    const crate = new ROCrate(jsonld);
+    crate.index();
+    console.log(`Check-in: ${col.title}`);
+    await checkin(repo, ocfl.create.repoName, col.roCrateDir, crate, ocfl.hashAlgorithm);
+  } catch (e) {
+    console.log('error: loadCollection');
+    throw new Error(e);
+  }
+}
+
+export async function createRepo({configuration}) {
+  try {
+    const ocfl = configuration.api.ocfl;
+    const ocflPath = workingPath(ocfl.ocflPath);
+    if (fs.pathExistsSync(ocflPath)) {
+      fs.removeSync(ocflPath);
+    }
+    const repo = await connectRepo(ocflPath);
+    const collections = await fs.readJson(ocfl.create.collections);
+    for (let col of collections) {
+      if (!col.skip) {
+        await loadCollection({repo, ocfl, col});
+      }
+    }
+    console.log("Finished loading collections");
+  } catch (e) {
+    console.log('error: createRepo');
+    throw new Error(e);
   }
 }

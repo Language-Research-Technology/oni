@@ -1,6 +1,6 @@
 import randomWord from 'random-word';
-import {camelCase, sample, sampleSize, startCase, clone, upperFirst} from 'lodash';
-import {v4 as uuidv4} from 'uuid';
+import { camelCase, sample, sampleSize, startCase, clone, upperFirst, concat } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import DateGenerator from 'random-date-generator';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -27,12 +27,14 @@ const N_PEOPLE_MAX = 5;
 const N_ORGS_MIN = 1;
 const N_ORGS_MAX = 5;
 
+const START_DATE = new Date(2010, 1, 1);
+const END_DATE = new Date(2020, 12, 31);
 
-function int(min, max) {
+export function int(min, max) {
   return Math.floor(float(min, max));
 }
 
-function float(min, max) {
+export function float(min, max) {
   return Math.random() * (max - min) + min;
 }
 
@@ -96,7 +98,6 @@ export function person(sourceData, orgs, honorifics) {
     'familyName': surname,
     'email': email,
     'affiliation': affiliation
-
   }
 }
 
@@ -114,9 +115,52 @@ export function dataFile(sourceData, types) {
   }
 }
 
-export function collection({sourceData, keywords, people, files}) {
-  const startDate = new Date(2010, 1, 1);
-  const endDate = new Date(2020, 12, 31);
+export function dataFiles(sourceData, type) {
+
+  const hasFileParts = arrayFill(int(1, 30), function dataFileGen() {
+    return dataFile(sourceData, type)
+  });
+
+  return {
+    "@id": fabulousId(),
+    "@type": "Dataset",
+    "name": "Files",
+    "description": text(),
+    "hasPart": hasFileParts
+  }
+}
+
+export function subMembers({ sourceData, orgs, honorifics, allFiles, memberIds }) {
+  return memberIds.map((m) => {
+    return {
+      "@id": m['@id'],
+      "@type": ["RepositoryObject", "TextDialogue"],
+      "name": sentence(),
+      "hasFile": allFiles,
+      "dateCreated": DateGenerator.getRandomDateInRange(START_DATE, END_DATE).toISOString().slice(0, 10),
+      "interviewer": person(sourceData, orgs, honorifics),
+      "publisher": orgs[int(1, orgs.length)],
+      "description": text()
+    }
+  });
+}
+
+export function members({ sourceData, orgs, honorifics, memberIds }) {
+
+  return {
+    member: {
+      "@id": fabulousId(),
+      "name": sentence(),
+      "description": text(),
+      hasMember: memberIds.map((m) => {
+        return { "@id": m['@id'] };
+      })
+    }, sub: subMembers({ sourceData, orgs, honorifics, memberIds })
+  }
+}
+
+export function collection({ sourceData, orgs, honorifics, keywords, people, files, fileTypes }) {
+
   const k = sampleSize(keywords, int(N_KEYWORD_MIN, N_KEYWORD_MAX));
   const title = startCase(camelCase(sentence()));
   const desc = text();
@@ -124,31 +168,38 @@ export function collection({sourceData, keywords, people, files}) {
   const name = placeName();
   const geo = geoPoint();
   const licenseElement = license(sourceData['licenses']);
-  const filesElement = dataFile(sourceData['files'], FILES_TYPES);
+  const filesElement = files;
+  const memberIds = arrayFill(int(5, 30), function memberIdgen() {
+    return { "@id": fabulousId() }
+  });
+  const memberElements = members({ sourceData, orgs, honorifics, allFiles: filesElement, memberIds });
 
   const collectionElement = {
+    "@id": "./",
     keywords: k,
     author: creators,
     name: title,
     description: desc,
-    datePublished: DateGenerator.getRandomDateInRange(startDate, endDate).toISOString().slice(0, 10),
+    datePublished: DateGenerator.getRandomDateInRange(START_DATE, END_DATE).toISOString().slice(0, 10),
     spatialCoverage: {
       "@id": "#spatialCoveragePlace",
       "name": name,
       "geo": geo
     },
     license: licenseElement,
-    files: {
-      "@type": "Dataset",
-      "@id": "files",
-      "name": "Files",
-      "description": text(),
-      "hasPart": filesElement.map((f) => {
-        return {"@id": f['@id']}
-      })
-    }
+    hasPart: {
+      "@id": filesElement['@id']
+    },
+    hasMember: [
+      { "@id": memberElements.member['@id'] }
+    ]
   }
-  return {collectionElement, ...files}
+
+  let c = [];
+
+  c = [collectionElement, filesElement, ...memberElements.sub]
+
+  return c;
 }
 
 
