@@ -1,19 +1,22 @@
-import {loadConfiguration} from "../common";
-import {writeJSON} from "fs-extra";
-import {cloneDeep} from "lodash";
-import models from "../models";
+const { loadConfiguration } = require("./configuration");
+const { writeJSON } = require("fs-extra");
+const { cloneDeep } = require("lodash");
+const models = require("../models");
 
-export const testOCFLConf = {
+const testOCFLConf = {
   "ocflPath": "../test-data/test_ocfl",
   "catalogFilename": "ro-crate-metadata.json",
   "hashAlgorithm": "md5"
 }
+const testCreate = {
+  "repoName": "ATAP",
+  "collections": "../test-data/ingest-crate-list.development.json"
+}
+const testHost = 'http://localhost:8080';
+const testLicense = { default: 'Public' };
+const testIdentifier = { main: 'ATAP' };
 
-export const testHost = 'http://localhost:8080';
-export const testLicense = {default: 'Public'};
-export const testIdentifier= {main: 'ATAP'};
-
-export async function setupBeforeAll({adminEmails = []}) {
+async function setupBeforeAll({ adminEmails = [] }) {
   let configuration = await loadConfiguration();
 
   let devConfiguration = cloneDeep(configuration);
@@ -25,7 +28,7 @@ export async function setupBeforeAll({adminEmails = []}) {
   return configuration;
 }
 
-export async function setupBeforeEach({emails}) {
+async function setupBeforeEach({ emails }) {
   let users = [];
   for (let email of emails) {
     let user = await models.user.create({
@@ -40,16 +43,29 @@ export async function setupBeforeEach({emails}) {
   return users;
 }
 
-export async function teardownAfterEach({users = []}) {
+async function teardownAfterEach({ users = [] }) {
   for (let user of users) {
     await user.destroy();
   }
 }
 
-export async function teardownAfterAll(configuration) {
+async function teardownAfterAll(configuration) {
   const configPath = process.env.ONI_CONFIG_PATH || "/srv/configuration/development-configuration.json";
   await writeJSON(configPath, configuration, {
     spaces: 4,
   });
   models.sequelize.close();
+}
+
+module.exports = {
+  testOCFLConf: testOCFLConf,
+  testCreate: testCreate,
+  testHost: testHost,
+  testLicense: testLicense,
+  testIdentifier: testIdentifier,
+  setupBeforeAll: setupBeforeAll,
+  cloneDeep: cloneDeep,
+  setupBeforeEach: setupBeforeEach,
+  teardownAfterEach: teardownAfterEach,
+  teardownAfterAll: teardownAfterAll
 }

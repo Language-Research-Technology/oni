@@ -1,16 +1,12 @@
-import models from "../models";
-import {loadConfiguration} from "../common";
-import {uniqBy} from "lodash";
-import {getLogger} from "../common/logger";
-import {getItem, readCrate} from "../common/ocfl-tools";
-import {OcflObject} from "ocfl";
-import {ROCrate} from 'ro-crate';
-import {transformURIs} from "../common/ro-crate-utils";
-import path from "path";
+const models = require("../models");
+const { getLogger } = require("../common");
+const { getItem, readCrate } = require("../common/ocfl-tools");
+const { OcflObject } = require("ocfl");
+const { transformURIs } = require("../common/ro-crate-utils");
 
 const log = getLogger();
 
-export async function deleteRecords() {
+async function deleteRecords() {
   // Ay nanita
   let records = await models.record.destroy({
     where: {}
@@ -18,7 +14,7 @@ export async function deleteRecords() {
   return records;
 }
 
-export async function getRecords({offset = 0, limit = 10}) {
+async function getRecords({ offset = 0, limit = 10 }) {
   let records = await models.record.findAndCountAll({
     offset,
     limit,
@@ -30,7 +26,7 @@ export async function getRecords({offset = 0, limit = 10}) {
   };
 }
 
-export async function getRecord({recordId}) {
+async function getRecord({ recordId }) {
   let where = {};
   if (recordId) where.arcpId = recordId;
   log.debug(recordId);
@@ -40,17 +36,17 @@ export async function getRecord({recordId}) {
   if (record) {
     return record;
   }
-  return {recordId: recordId, message: 'Not Found'}
+  return { recordId: recordId, message: 'Not Found' }
 }
 
-export async function createRecord(data) {
+async function createRecord(data) {
   try {
     log.debug(data.arcpId)
     if (!data.arcpId) {
-      throw new Error(`Id is a required property`);
+      return new Error(`Id is a required property`);
     }
     if (!data.path) {
-      throw new Error(`Path is a required property`);
+      return new Error(`Path is a required property`);
     }
     const rec = {}
     rec.locked = false;
@@ -71,32 +67,32 @@ export async function createRecord(data) {
   }
 }
 
-export async function findRecordByIdentifier({identifier, recordId}) {
+async function findRecordByIdentifier({ identifier, recordId }) {
   let clause = {
-    where: {identifier},
+    where: { identifier },
   };
   if (recordId) {
     clause.include = [
-      {model: models.record, where: {id: recordId}, attributes: ["id"], raw: true},
+      { model: models.record, where: { id: recordId }, attributes: [ "id" ], raw: true },
     ];
   }
   return await models.record.findOne(clause);
 }
 
-export async function decodeHash({id}) {
+async function decodeHash({ id }) {
 
   // With ARCPID like
   // arcp://name,
   // hash it and then find it by it.
 }
 
-export async function getRawCrate({diskPath, catalogFilename}) {
+async function getRawCrate({ diskPath, catalogFilename }) {
   const ocflObject = new OcflObject(diskPath);
   const json = await readCrate(ocflObject, catalogFilename);
   return json;
 }
 
-export async function getUridCrate({host, arcpId, diskPath, catalogFilename, typesTransform}) {
+async function getUridCrate({ host, arcpId, diskPath, catalogFilename, typesTransform }) {
   const ocflObject = new OcflObject(diskPath);
   const newCrate = await transformURIs({
     host,
@@ -108,7 +104,7 @@ export async function getUridCrate({host, arcpId, diskPath, catalogFilename, typ
   return newCrate;
 }
 
-export async function getFile({record, itemId, catalogFilename}) {
+async function getFile({ record, itemId, catalogFilename }) {
   try {
     const ocflObject = new OcflObject(record['diskPath']);
     const filePath = await getItem(ocflObject, catalogFilename, itemId);
@@ -132,4 +128,15 @@ export async function getFile({record, itemId, catalogFilename}) {
     log.error('getFile');
     return new Error(e);
   }
+}
+
+module.exports = {
+  deleteRecords: deleteRecords,
+  getRecords: getRecords,
+  getRecord: getRecord,
+  createRecord: createRecord,
+  findRecordByIdentifier: findRecordByIdentifier,
+  getRawCrate: getRawCrate,
+  getUridCrate: getUridCrate,
+  getFile: getFile
 }

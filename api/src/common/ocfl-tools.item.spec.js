@@ -1,13 +1,12 @@
-import "regenerator-runtime";
-import fs from "fs-extra";
+require("regenerator-runtime/runtime");
+const fs = require("fs-extra");
+const {ROCrate} = require("ro-crate");
 
-import {loadFromOcfl, checkin, connectRepo, getItem} from "./ocfl-tools";
-import {ROCrate} from "ro-crate";
-
-import {host, testOCFLConf as ocfl} from "../common";
-import {OcflObject} from "ocfl";
-import fetch from "node-fetch";
-import {getRecord, getUridCrate} from "../lib/record";
+const {loadFromOcfl, checkin, connectRepo, getItem} = require("./ocfl-tools");
+const {host, testOCFLConf} = require("../common");
+const {OcflObject} = require("ocfl");
+const fetch = require("node-fetch");
+const {getRecord, getUridCrate} = require("../lib/record");
 
 const testData = {
   roCrateDir: "../test-data/rocrates/farmstofreeways",
@@ -22,7 +21,7 @@ describe("Test request 1 item", () => {
 
     const record = await getRecord({recordId: id});
     const ocflObject = new OcflObject(record['diskPath']);
-    const filePath = await getItem(ocflObject, ocfl.catalogFilename, itemId);
+    const filePath = await getItem(ocflObject, testOCFLConf.catalogFilename, itemId);
     filePath;
 
   });

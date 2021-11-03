@@ -30,11 +30,11 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
             },
             name: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true,
             },
             description: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true,
             },
             locked: {

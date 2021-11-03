@@ -1,16 +1,15 @@
-import {OcflObject} from "ocfl";
-import {ROCrate} from 'ro-crate';
-import {readCrate} from "./ocfl-tools";
-import {getLogger} from "./logger";
+const { ROCrate } = require('ro-crate');
+const { readCrate } = require('./ocfl-tools');
+const { getLogger } = require("./index");
 
 const log = getLogger();
 
-export async function transformURIs({host, recordId, ocflObject, uridTypes, catalogFilename}) {
+async function transformURIs({ host, recordId, ocflObject, uridTypes, catalogFilename }) {
   const json = await readCrate(ocflObject, catalogFilename);
   const crate = new ROCrate(json);
   crate.index();
   crate.toGraph();
-  log.silly ('transformURIs');
+  log.silly('transformURIs');
   for (const item of crate.getGraph()) {
     const itemType = crate.utils.asArray(item['@type']);
     const updateItems = [];
@@ -23,9 +22,13 @@ export async function transformURIs({host, recordId, ocflObject, uridTypes, cata
       const ref = crate.getItem(i['@id']);
       if (ref) {
         log.silly(ref['@id']);
-        crate.changeGraphId(ref, `${host}/data/item?id=${recordId}&file=${ref['@id']}`);
-       } 
+        crate.changeGraphId(ref, `${ host }/data/item?id=${ recordId }&file=${ ref['@id'] }`);
+      }
     });
   }
   return crate.getJson();
+}
+
+module.exports = {
+  transformURIs: transformURIs
 }

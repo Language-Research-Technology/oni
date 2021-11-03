@@ -1,23 +1,23 @@
-import path from "path";
-import fs from "fs-extra";
-import { Repository as OCFLRepository } from "ocfl";
-import { getLogger } from "./logger";
-import hasha, { async } from "hasha";
-import { workingPath } from "./utils";
-import { ROCrate } from 'ro-crate';
+const path = require("path");
+const fs = require("fs-extra");
+const OCFLRepository = require("ocfl").Repository;
+const { getLogger } = require("./index");
+const hasha = require("hasha");
+const { workingPath } = require("./utils");
+const { ROCrate } = require('ro-crate');
 
 const log = getLogger();
 
-export async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
+async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
   try {
     const repo = new OCFLRepository();
     repoPath = workingPath(repoPath);
-    log.debug(`Loading OCFL: ${repoPath}`);
+    log.debug(`Loading OCFL: ${ repoPath }`);
     await repo.load(repoPath);
     const objects = await repo.objects();
     const records = [];
     for (let object of objects) {
-      log.debug(`Loading ocfl object at ${object.path}`);
+      log.debug(`Loading ocfl object at ${ object.path }`);
       const json = await readCrate(object, catalogFilename);
       if (json) {
         records.push({
@@ -27,10 +27,10 @@ export async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
           ocflObject: object
         });
       } else {
-        log.warn(`Couldn't find ${catalogFilename} in OCFL inventory for ${object.path}`);
+        log.warn(`Couldn't find ${ catalogFilename } in OCFL inventory for ${ object.path }`);
       }
     }
-    log.debug(`got ${records.length} records`);
+    log.debug(`got ${ records.length } records`);
 
     return records;
   } catch (e) {
@@ -43,7 +43,7 @@ export async function loadFromOcfl(repoPath, catalogFilename, hashAlgorithm) {
 // inventory, and if found, try to load and parse it.
 // if it's not found, returns undefined
 
-export async function readCrate(object, catalogFilename) {
+async function readCrate(object, catalogFilename) {
 
   const inv = await object.getInventory();
   const headState = inv.versions[inv.head].state;
@@ -55,7 +55,7 @@ export async function readCrate(object, catalogFilename) {
         const json = await fs.readJson(jsonfile);
         return json;
       } catch (e) {
-        log.error(`Error reading ${jsonfile}`);
+        log.error(`Error reading ${ jsonfile }`);
         log.error(e);
         return undefined;
       }
@@ -64,7 +64,7 @@ export async function readCrate(object, catalogFilename) {
   return undefined;
 }
 
-export async function getItem(object, catalogFilename, itemId) {
+async function getItem(object, catalogFilename, itemId) {
   const inv = await object.getInventory();
   const headState = inv.versions[inv.head].state;
   for (let hash of Object.keys(headState)) {
@@ -73,7 +73,7 @@ export async function getItem(object, catalogFilename, itemId) {
         const filePath = path.join(object.path, inv.head, 'content', itemId);
         return filePath;
       } catch (e) {
-        log.error(`Error reading ${itemId}`);
+        log.error(`Error reading ${ itemId }`);
         log.error(e);
         return new Error(e);
       }
@@ -81,7 +81,7 @@ export async function getItem(object, catalogFilename, itemId) {
   }
 }
 
-export async function connectRepo(repoPath) {
+async function connectRepo(repoPath) {
   const repo = new OCFLRepository();
   try {
     const stat = await fs.stat(repoPath);
@@ -89,7 +89,7 @@ export async function connectRepo(repoPath) {
       await repo.load(repoPath);
       return repo;
     } else {
-      console.error(`${repoPath} is not a directory`);
+      console.error(`${ repoPath } is not a directory`);
     }
   } catch (e) {
     await fs.mkdir(repoPath);
@@ -98,29 +98,29 @@ export async function connectRepo(repoPath) {
   }
 }
 
-export async function checkin(repo, repoName, rocrateDir, crate, hashAlgorithm) {
+async function checkin(repo, repoName, rocrateDir, crate, hashAlgorithm) {
   const rocrateFile = path.join(rocrateDir, "ro-crate-metadata.json");
   try {
     const existingId = crate.getNamedIdentifier(repoName);
-    log.debug(`repoName: ${repoName}, ${existingId}`);
+    log.debug(`repoName: ${ repoName }, ${ existingId }`);
     if (existingId) {
-      log.debug(`Local identifier found ${repoName}/${existingId}`);
+      log.debug(`Local identifier found ${ repoName }/${ existingId }`);
       const hasDir = hasha(existingId, { algorithm: hashAlgorithm });
       const res = await repo.importNewObjectDir(hasDir, rocrateDir);
-      log.debug(`Updated ${existingId}, ${res.path}`);
+      log.debug(`Updated ${ existingId }, ${ res.path }`);
     } else {
       const newId = arcpId({ crate, identifier: repoName });
-      log.debug(`Minting new local identifier ${repoName}/${newId}`);
+      log.debug(`Minting new local identifier ${ repoName }/${ newId }`);
       await repo.importNewObjectDir(newId, rocrateDir);
-      log.debug(`Imported ${rocrateDir}  ${newId}`);
+      log.debug(`Imported ${ rocrateDir }  ${ newId }`);
       crate.addIdentifier({ name: repoName, identifier: newId });
       await fs.writeJson(rocrateFile, crate.getJson(), { spaces: 2 });
       const hasDir = hasha(newId, { algorithm: hashAlgorithm });
       const res = await repo.importNewObjectDir(hasDir, rocrateDir);
-      log.debug(`Updated ${rocrateDir} ${newId} metadata with identifier - wrote to ${res}`);
+      log.debug(`Updated ${ rocrateDir } ${ newId } metadata with identifier - wrote to ${ res }`);
     }
   } catch (e) {
-    log.error(`Error importing ${rocrateDir}`);
+    log.error(`Error importing ${ rocrateDir }`);
     log.error(e);
   }
 
@@ -128,16 +128,16 @@ export async function checkin(repo, repoName, rocrateDir, crate, hashAlgorithm) 
 
 // TODO: Define a standard on what to do in case there is no Identifier.
 // Like `arcp://name,sydney-speaks/corpus/${type}${id}`;
-export function arcpId({ crate, identifier }) {
+function arcpId({ crate, identifier }) {
   try {
     const id = crate.getNamedIdentifier(identifier);
     if (!id) {
       const fallBackId = crate.getNamedIdentifier('domain');
       if (!fallBackId) {
-        log.warn(`No identifier found ${identifier}... skipping`);
+        log.warn(`No identifier found ${ identifier }... skipping`);
         return null;
       }
-      const url = new URL(fallBackId, `arcp://name,${identifier}`);
+      const url = new URL(fallBackId, `arcp://name,${ identifier }`);
       return url.href;
     } else {
       const url = new URL(id, `arcp://name,`);
@@ -149,12 +149,11 @@ export function arcpId({ crate, identifier }) {
   }
 }
 
-export async function loadCollection({repo, ocfl, col}) {
+async function loadCollection({ repo, ocfl, col }) {
   try {
     const jsonld = fs.readJsonSync(col.roCrateDir + "/" + col.roCrate);
     const crate = new ROCrate(jsonld);
     crate.index();
-    console.log(`Check-in: ${col.title}`);
     await checkin(repo, ocfl.create.repoName, col.roCrateDir, crate, ocfl.hashAlgorithm);
   } catch (e) {
     console.log('error: loadCollection');
@@ -162,7 +161,7 @@ export async function loadCollection({repo, ocfl, col}) {
   }
 }
 
-export async function createRepo({configuration}) {
+async function createRepo({ configuration }) {
   try {
     const ocfl = configuration.api.ocfl;
     const ocflPath = workingPath(ocfl.ocflPath);
@@ -173,7 +172,7 @@ export async function createRepo({configuration}) {
     const collections = await fs.readJson(ocfl.create.collections);
     for (let col of collections) {
       if (!col.skip) {
-        await loadCollection({repo, ocfl, col});
+        await loadCollection({ repo, ocfl, col });
       }
     }
     console.log("Finished loading collections");
@@ -181,4 +180,15 @@ export async function createRepo({configuration}) {
     console.log('error: createRepo');
     throw new Error(e);
   }
+}
+
+module.exports = {
+  loadFromOcfl: loadFromOcfl,
+  readCrate: readCrate,
+  getItem: getItem,
+  connectRepo: connectRepo,
+  checkin: checkin,
+  arcpId: arcpId,
+  loadCollection: loadCollection,
+  createRepo: createRepo
 }

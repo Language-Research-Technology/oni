@@ -1,24 +1,24 @@
-import {getRecords, getRecord, getRawCrate, getUridCrate, getFile} from "../lib/record";
-import {getLogger} from "../common/logger";
-import fs from 'fs-extra';
+const { getRecords, getRecord, getRawCrate, getUridCrate, getFile } = require('../lib/record');
+const { getLogger } = require('../common');
+const fs = require('fs-extra');
 
 const log = getLogger();
 
-export function setupRoutes({server, configuration}) {
+function setupRoutes({ server, configuration }) {
   server.get("/data", async (req, res, next) => {
     if (req.query.id && req.query.meta) {
-      log.debug(`get data ${req.query.id}`);
-      let record = await getRecord({recordId: req.query.id});
+      log.debug(`get data ${ req.query.id }`);
+      let record = await getRecord({ recordId: req.query.id });
       if (record) {
         delete record['dataValues']['path'];
         delete record['dataValues']['diskPath'];
         res.send(record);
       } else {
-        res.status(404).send({id: req.query.id, message: "Not Found"})
+        res.status(404).send({ id: req.query.id, message: "Not Found" })
       }
     } else if (req.query.id) {
-      log.debug(`get data ${req.query.id}`);
-      let record = await getRecord({recordId: req.query.id});
+      log.debug(`get data ${ req.query.id }`);
+      let record = await getRecord({ recordId: req.query.id });
       if (record) {
         let crate;
         switch (req.query.get) {
@@ -40,7 +40,7 @@ export function setupRoutes({server, configuration}) {
             res.json(crate);
         }
       } else {
-        res.status(404).send({id: req.query.id, message: "Not Found"})
+        res.status(404).send({ id: req.query.id, message: "Not Found" })
       }
     } else {
       let records = await getRecords({
@@ -59,46 +59,48 @@ export function setupRoutes({server, configuration}) {
     next();
   });
   server.get("/data/item", async (req, res, next) => {
-      try {
-        if (req.query.id && req.query.file) {
-          let record = await getRecord({recordId: req.query.id});
-          if (record) {
-            const fileObj = await getFile({
-              record: record,
-              itemId: req.query.file,
-              catalogFilename: configuration.api.ocfl.catalogFilename
+    try {
+      if (req.query.id && req.query.file) {
+        let record = await getRecord({ recordId: req.query.id });
+        if (record) {
+          const fileObj = await getFile({
+            record: record,
+            itemId: req.query.file,
+            catalogFilename: configuration.api.ocfl.catalogFilename
+          });
+          if (fs.pathExistsSync(fileObj.filePath)) {
+            res.writeHead(200, {
+              'Content-Disposition': 'attachment; filename=' + fileObj.filename,
+              'Content-Type': fileObj.mimetype
             });
-            if (fs.pathExistsSync(fileObj.filePath)) {
-              res.writeHead(200, {
-                'Content-Disposition': 'attachment; filename=' + fileObj.filename,
-                'Content-Type': fileObj.mimetype
-              });
-              const filestream = fs.createReadStream(fileObj.filePath);
-              filestream.on('error', function (err) {
-                log.error(err);
-                res.end();
-              });
-              filestream.on('end', function () {
-                log.debug('end')
-                res.end();
-                next();
-              });
-              filestream.pipe(res);
-            } else {
-              res.send({id: req.query.id, file: req.query.file, message: "Not Found"}).status(404);
+            const filestream = fs.createReadStream(fileObj.filePath);
+            filestream.on('error', function (err) {
+              log.error(err);
+              res.end();
+            });
+            filestream.on('end', function () {
+              log.debug('end')
+              res.end();
               next();
-            }
+            });
+            filestream.pipe(res);
           } else {
-            res.send({usage: 'file param required'}).status(400);
+            res.send({ id: req.query.id, file: req.query.file, message: "Not Found" }).status(404);
             next();
           }
+        } else {
+          res.send({ usage: 'file param required' }).status(400);
+          next();
         }
-      } catch (e) {
-        log.error(e);
-        res.send({error: e['message']}).status(500);
-        next();
       }
+    } catch (e) {
+      log.error(e);
+      res.send({ error: e['message'] }).status(500);
+      next();
     }
-  )
-  ;
+  });
+}
+
+module.exports = {
+  setupRoutes: setupRoutes
 }

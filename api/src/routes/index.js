@@ -1,11 +1,11 @@
 // these endpoints will only return data they are responsible for
 //
-import models from "../models";
-import {UnauthorizedError, ForbiddenError} from "restify-errors";
-import {route, loadConfiguration} from "../common";
-import {setupRoutes as setupRecordRoutes} from "./record";
+const models = require('../models');
+const { UnauthorizedError, ForbiddenError } = require('restify-errors');
+const { route, loadConfiguration } = require('../common');
+const setupRecordRoutes = require('./record').setupRoutes;
 
-export function setupRoutes({server, configuration}) {
+function setupRoutes({ server, configuration }) {
   if (process.env.NODE_ENV === "development") {
     server.get(
       "/test-middleware",
@@ -21,7 +21,7 @@ export function setupRoutes({server, configuration}) {
   });
   server.get("/configuration", async (req, res, next) => {
     let configuration = await loadConfiguration();
-    res.send({ui: configuration.ui});
+    res.send({ ui: configuration.ui });
     next();
   });
   server.get(
@@ -34,12 +34,16 @@ export function setupRoutes({server, configuration}) {
   server.get("/logout", async (req, res, next) => {
     let token = req.headers.authorization.split("Bearer ")[1];
     if (token) {
-      let session = await models.session.findOne({where: {token}});
+      let session = await models.session.findOne({ where: { token } });
       if (session) await session.destroy();
     }
     next(new UnauthorizedError());
   });
 
-  setupRecordRoutes({server, configuration});
+  setupRecordRoutes({ server, configuration });
 
+}
+
+module.exports = {
+  setupRoutes: setupRoutes
 }

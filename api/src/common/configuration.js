@@ -1,17 +1,8 @@
-// import path from "path";
-// import fetch from "node-fetch";
-import {readJSON, writeJSON} from "fs-extra";
-// import { cloneDeep } from "lodash";
-// import { Crate } from "../lib/crate";
-// const api = "http://localhost:8080";
-// import { getLogger } from "./logger";
-// const log = getLogger();
-// import Chance from "chance";
-// const chance = new Chance();
+const {readJSON} = require("fs-extra");
 
 const privateFields = ["clientSecret"];
 
-export async function loadConfiguration() {
+async function loadConfiguration() {
   let configuration;
   if (process.env.ONI_CONFIG_PATH) {
     configuration = process.env.ONI_CONFIG_PATH;
@@ -25,7 +16,7 @@ export async function loadConfiguration() {
   return configuration;
 }
 
-export function filterPrivateInformation({configuration}) {
+function filterPrivateInformation({configuration}) {
   let services = Object.keys(configuration.api.authentication).map((service) => {
     service = {
       ...configuration.api.authentication[service],
@@ -67,3 +58,8 @@ export function filterPrivateInformation({configuration}) {
 //     await writeJSON("/srv/configuration/development-configuration.json", origConfig);
 //     return { sessionId: response.sessionId, user };
 // }
+
+module.exports = {
+  loadConfiguration:loadConfiguration,
+  filterPrivateInformation:filterPrivateInformation
+}

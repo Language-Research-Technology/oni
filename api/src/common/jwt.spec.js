@@ -1,10 +1,10 @@
-require("regenerator-runtime");
-import { generateToken, verifyToken } from "./jwt";
-import { loadConfiguration } from "../common";
+require("regenerator-runtime/runtime");
+const { generateToken, verifyToken } = require("./jwt");
+const { loadConfiguration } = require("../common");
 const chance = require("chance").Chance();
-import MockDate from "mockdate";
-import { copy, move, readJSON, writeJSON } from "fs-extra";
-import { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } from "./";
+const MockDate = require("mockdate");
+const { copy, move, readJSON, writeJSON } = require("fs-extra");
+const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require("./");
 
 describe("JWT tests", () => {
     let users, configuration;

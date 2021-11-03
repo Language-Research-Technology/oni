@@ -1,19 +1,19 @@
-import "regenerator-runtime";
-import fetch from "node-fetch";
-import { createUser } from "../lib/user";
-import { loadConfiguration, generateToken } from "../common";
-const chance = require("chance").Chance();
-import {
-    host,
+require('regenerator-runtime/runtime');
+const fetch = require('node-fetch');
+
+const { loadConfiguration, generateToken } = require('../common');
+const chance = require('chance').Chance();
+const {
+    testHost,
     setupBeforeAll,
     setupBeforeEach,
     teardownAfterAll,
     teardownAfterEach,
-} from "../common";
+} = require('../common');
 
 describe("Test loading the configuration", () => {
     test("it should be able to load the default configuration for the environment", async () => {
-        let response = await fetch(`${host}/configuration`);
+        let response = await fetch(`${testHost}/configuration`);
         expect(response.status).toEqual(200);
         let configuration = await response.json();
         expect(configuration).toHaveProperty("ui");
@@ -41,13 +41,13 @@ describe("Test the /authenticated endpoint", () => {
         let user = users[0];
         let { token, expires } = await generateToken({ configuration, user });
 
-        let response = await fetch(`${host}/authenticated`, {
+        let response = await fetch(`${testHost}/authenticated`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         expect(response.status).toBe(200);
     });
     test("it should fail with unauthorised", async () => {
-        let response = await fetch(`${host}/authenticated`, {
+        let response = await fetch(`${testHost}/authenticated`, {
             headers: { Authorization: `Bearer xxx` },
         });
         expect(response.status).toBe(401);

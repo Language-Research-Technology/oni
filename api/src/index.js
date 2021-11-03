@@ -1,12 +1,12 @@
-require("regenerator-runtime");
-const restify = require("restify");
+require('regenerator-runtime');
+const restify = require('restify');
 const server = restify.createServer();
-const models = require("./models");
-const {loadConfiguration, getLogger} = require("./common");
-const {setupRoutes} = require("./routes");
-const {bootstrap} = require("./common/bootstrap");
-const corsMiddleware = require("restify-cors-middleware");
-const fetch = require("node-fetch");
+const models = require('./models');
+const { loadConfiguration, getLogger } = require('./common/index');
+const { setupRoutes } = require('./routes');
+const { bootstrap } = require('./common/bootstrap');
+const corsMiddleware = require('restify-cors-middleware');
+
 const log = getLogger();
 
 // DEVELOPER NOTE
@@ -15,7 +15,7 @@ const log = getLogger();
 //   instead.
 //
 //  This way, jest fetch mock will override fetch when you need it to.
-global.fetch = require("node-fetch");
+global.fetch = require('node-fetch');
 let configuration;
 
 (async () => {
@@ -30,7 +30,7 @@ let configuration;
 
   const cors = corsMiddleware({
     preflightMaxAge: 5, //Optional
-    origins: ["*"],
+    origins: [ "*" ],
     allowHeaders: [
       "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization",
     ],
@@ -42,7 +42,7 @@ let configuration;
   server.use(cors.actual);
   if (process.env.NODE_ENV === "development") {
     server.use((req, res, next) => {
-      log.debug(`${req.route.method}: ${req.route.path}`);
+      log.debug(`${ req.route.method }: ${ req.route.path }`);
       return next();
     });
   }
@@ -64,12 +64,12 @@ let configuration;
       maxFieldsSize: 2 * 1024 * 1024,
     })
   );
-  setupRoutes({server, configuration});
+  setupRoutes({ server, configuration });
 
   server.listen("8080", function () {
     console.log("ready on %s", server.url);
   });
 
-  await bootstrap({configuration});
+  await bootstrap({ configuration });
 
 })();

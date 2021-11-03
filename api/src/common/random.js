@@ -1,10 +1,10 @@
-import randomWord from 'random-word';
-import { camelCase, sample, sampleSize, startCase, clone, upperFirst, concat } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import DateGenerator from 'random-date-generator';
-import * as fs from 'fs-extra';
-import * as path from 'path';
-
+require('regenerator-runtime/runtime');
+const randomWord = require('random-word');
+const { camelCase, sample, sampleSize, startCase, clone, upperFirst, concat, flatten } = require('lodash');
+const uuidv4 = require('uuid').v4;
+const DateGenerator = require('random-date-generator');
+const fs = require('fs-extra');
+const path = require('path');
 
 const EMAIL_DOMAIN = 'examples.edu';
 
@@ -30,19 +30,26 @@ const N_ORGS_MAX = 5;
 const START_DATE = new Date(2010, 1, 1);
 const END_DATE = new Date(2020, 12, 31);
 
-export function int(min, max) {
+async function makedir(dest) {
+  let id = uuidv4();
+  id = id.replace(/-/g, '');
+  const createDir = await fs.ensureDir(path.join(dest, id));
+  return id;
+}
+
+function int(min, max) {
   return Math.floor(float(min, max));
 }
 
-export function float(min, max) {
+function float(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export function arrayFill(n, fn) {
+function arrayFill(n, fn) {
   return Array(n).fill(0).map(fn);
 }
 
-export function organization(sourceData, orgTypes) {
+function organization(sourceData, orgTypes) {
   const name = sample(sourceData['surnames']) + " " + sample(orgTypes);
   const id = `https:/ror.org/${uuidv4()}`;
   return {
@@ -52,22 +59,22 @@ export function organization(sourceData, orgTypes) {
   }
 }
 
-export function keyword() {
+function keyword() {
   return randomWord();
 }
 
-export function sentence() {
+function sentence() {
   const nwords = int(SENTENCE_MIN, SENTENCE_MAX);
   const s = arrayFill(nwords, randomWord).join(' ') + '.';
   return upperFirst(s);
 }
 
-export function text() {
+function text() {
   const nsentences = int(PARA_MIN, PARA_MAX);
   return arrayFill(nsentences, sentence).join(' ') + '\n';
 }
 
-export function geoPoint() {
+function geoPoint() {
   const lat = float(-90, 90);
   const long = float(-180, 180);
   return {
@@ -77,18 +84,18 @@ export function geoPoint() {
   }
 }
 
-export function placeName() {
+function placeName() {
   const nwords = int(1, 3);
   return upperFirst(arrayFill(nwords, keyword).join(''));
 }
 
-export function person(sourceData, orgs, honorifics) {
+function person(sourceData, orgs, honorifics) {
   const honorific = sample(honorifics);
   const surname = sample(sourceData['surnames']);
   const givenname = sample(sourceData['givennames']);
   const name = givenname + ' ' + surname;
   const email = givenname + '.' + surname + '@' + EMAIL_DOMAIN;
-  const id = `arcp://uuid,${uuidv4()}`;
+  const id = fabulousId();
   const affiliation = clone(sample(orgs, int(N_ORGS_MIN, N_ORGS_MAX)));
   return {
     '@id': id,
@@ -101,25 +108,23 @@ export function person(sourceData, orgs, honorifics) {
   }
 }
 
-export function license(licenses) {
+function license(licenses) {
   //TODO - add more licenses for access control testing
   const id = int(0, licenses.length);
   const newLicense = licenses[id];
   return newLicense;
 }
 
-export function dataFile(sourceData, types) {
+function dataFile(sourceData, types) {
 
   return {
     "@id": fabulousId()
   }
 }
 
-export function dataFiles(sourceData, type) {
+function dataFiles(sourceData, type) {
 
-  const hasFileParts = arrayFill(int(1, 30), function dataFileGen() {
-    return dataFile(sourceData, type)
-  });
+  const hasFileParts = this.arrayFill(int(1, 30), () => dataFile(sourceData, type));
 
   return {
     "@id": fabulousId(),
@@ -130,11 +135,11 @@ export function dataFiles(sourceData, type) {
   }
 }
 
-export function subMembers({ sourceData, orgs, honorifics, allFiles, memberIds }) {
+function subMembers({ sourceData, orgs, honorifics, allFiles, memberIds }) {
   return memberIds.map((m) => {
     return {
       "@id": m['@id'],
-      "@type": ["RepositoryObject", "TextDialogue"],
+      "@type": ['RepositoryObject', 'TextDialogue'],
       "name": sentence(),
       "hasFile": allFiles,
       "dateCreated": DateGenerator.getRandomDateInRange(START_DATE, END_DATE).toISOString().slice(0, 10),
@@ -145,7 +150,7 @@ export function subMembers({ sourceData, orgs, honorifics, allFiles, memberIds }
   });
 }
 
-export function members({ sourceData, orgs, honorifics, memberIds }) {
+function members({ sourceData, orgs, honorifics, memberIds }) {
 
   return {
     member: {
@@ -155,11 +160,12 @@ export function members({ sourceData, orgs, honorifics, memberIds }) {
       hasMember: memberIds.map((m) => {
         return { "@id": m['@id'] };
       })
-    }, sub: subMembers({ sourceData, orgs, honorifics, memberIds })
+    },
+    sub: subMembers({ sourceData, orgs, honorifics, memberIds })
   }
 }
 
-export function collection({ sourceData, orgs, honorifics, keywords, people, files, fileTypes }) {
+function collection({ sourceData, orgs, honorifics, keywords, people, files, fileTypes }) {
 
   const k = sampleSize(keywords, int(N_KEYWORD_MIN, N_KEYWORD_MAX));
   const title = startCase(camelCase(sentence()));
@@ -169,11 +175,14 @@ export function collection({ sourceData, orgs, honorifics, keywords, people, fil
   const geo = geoPoint();
   const licenseElement = license(sourceData['licenses']);
   const filesElement = files;
-  const memberIds = arrayFill(int(5, 30), function memberIdgen() {
-    return { "@id": fabulousId() }
-  });
-  const memberElements = members({ sourceData, orgs, honorifics, allFiles: filesElement, memberIds });
 
+  const memberGroups = arrayFill(int(5, 30), function memberGroupGen() {
+    const memberIds = arrayFill(int(5, 30), function memberIdgen() {
+      return { "@id": fabulousId() }
+    });
+    const memberObjects = members({ sourceData, orgs, honorifics, allFiles: filesElement, memberIds });
+    return memberObjects;
+  })
   const collectionElement = {
     "@id": "./",
     keywords: k,
@@ -187,18 +196,18 @@ export function collection({ sourceData, orgs, honorifics, keywords, people, fil
       "geo": geo
     },
     license: licenseElement,
-    hasPart: {
-      "@id": filesElement['@id']
-    },
-    hasMember: [
-      { "@id": memberElements.member['@id'] }
-    ]
+    hasMember: memberGroups.map((m) => {
+      return { "@id": m.member['@id'] };
+    })
   }
 
   let c = [];
 
-  c = [collectionElement, filesElement, ...memberElements.sub]
-
+  const subs = memberGroups.map((s) => {
+    return s.sub;
+  })
+  c.root = collectionElement;
+  c.elements = [filesElement, ...flatten(subs)]
   return c;
 }
 
@@ -206,4 +215,25 @@ export function collection({ sourceData, orgs, honorifics, keywords, people, fil
 function fabulousId() {
   const id = `arcp://uuid,${uuidv4()}`;
   return id;
+}
+
+
+module.exports = {
+  makedir: makedir,
+  int: int,
+  float: float,
+  arrayFill: arrayFill,
+  organization: organization,
+  keyword: keyword,
+  sentence: sentence,
+  text: text,
+  geoPoint: geoPoint,
+  placeName: placeName,
+  person: person,
+  license: license,
+  dataFile: dataFile,
+  dataFiles: dataFiles,
+  subMembers: subMembers,
+  members: members,
+  collection: collection
 }

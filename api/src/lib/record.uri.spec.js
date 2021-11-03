@@ -1,25 +1,25 @@
-import 'regenerator-runtime';
-import fetch from "node-fetch";
+require('regenerator-runtime/runtime');
+const fetch = require("node-fetch");
 
-import {testHost as host, testOCFLConf as ocfl} from '../common';
-import {getRecord, getUridCrate} from './record';
-import {transformURIs} from '../common/ro-crate-utils';
-import {OcflObject} from 'ocfl';
-import {ROCrate} from 'ro-crate';
+const { testHost, testOCFLConf } = require('../common');
+const { getRecord, getUridCrate } = require('./record');
+const { transformURIs } = require('../common/ro-crate-utils');
+const { OcflObject } = require('ocfl');
+const { ROCrate } = require('ro-crate');
 
 jest.setTimeout(10000);
 
 describe('Test load records', () => {
   test('it should be able to retrieve records', async () => {
     const id = 'arcp://name,ATAP/uts.edu.au';
-    const record = await getRecord({recordId: id});
+    const record = await getRecord({ recordId: id });
     const ocflObject = new OcflObject(record['diskPath']);
     const newCrate = await transformURIs({
-      host,
+      host: testHost,
       recordId: id,
       ocflObject,
-      uridTypes: ['File'],
-      catalogFilename: ocfl.catalogFilename
+      uridTypes: [ 'File' ],
+      catalogFilename: testOCFLConf.catalogFilename
     });
     const crate = new ROCrate(newCrate);
     crate.toGraph();
