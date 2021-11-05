@@ -1,4 +1,6 @@
 const { getRecords, getRecord, getRawCrate, getUridCrate, getFile } = require('../lib/record');
+const { getRecordMembers } = require('../lib/recordMember');
+const { getRecordTypes } = require('../lib/recordType');
 const { getLogger } = require('../common');
 const fs = require('fs-extra');
 
@@ -14,33 +16,49 @@ function setupRoutes({ server, configuration }) {
         delete record['dataValues']['diskPath'];
         res.send(record);
       } else {
-        res.status(404).send({ id: req.query.id, message: "Not Found" })
+        res.send({ id: req.query.id, message: 'Not Found' }).status(404);
       }
     } else if (req.query.id) {
-      log.debug(`get data ${ req.query.id }`);
-      let record = await getRecord({ recordId: req.query.id });
-      if (record) {
-        let crate;
-        switch (req.query.get) {
-          case 'raw':
-            crate = await getRawCrate({
-              diskPath: record['diskPath'],
-              catalogFilename: configuration.api.ocfl.catalogFilename
-            });
-            res.json(crate);
-            break;
-          default:
-            crate = await getUridCrate({
-              host: configuration.api.host,
-              arcpId: req.query.id,
-              diskPath: record['diskPath'],
-              catalogFilename: configuration.api.ocfl.catalogFilename,
-              typesTransform: configuration.api.rocrate.dataTransform.types
-            });
-            res.json(crate);
+      if (req.query.types) {
+        let recordTypes = await getRecordTypes({ recordId: req.query.id, types: req.query.types });
+        if (recordTypes) {
+          res.json(recordTypes);
+        } else {
+          res.send({ id: req.query.id, message: 'Not Found' }).status(404);
+        }
+      } else if (req.query.members) {
+        let recordMembers = await getRecordMembers({ recordId: req.query.id, types: req.query.members });
+        if (recordMembers) {
+          res.json(recordMembers);
+        } else {
+          res.send({ id: req.query.id, message: 'Not Found' }).status(404);
         }
       } else {
-        res.status(404).send({ id: req.query.id, message: "Not Found" })
+        log.debug(`get data ${ req.query.id }`);
+        let record = await getRecord({ recordId: req.query.id });
+        if (record) {
+          let crate;
+          switch (req.query.get) {
+            case 'raw':
+              crate = await getRawCrate({
+                diskPath: record['diskPath'],
+                catalogFilename: configuration.api.ocfl.catalogFilename
+              });
+              res.json(crate);
+              break;
+            default:
+              crate = await getUridCrate({
+                host: configuration.api.host,
+                arcpId: req.query.id,
+                diskPath: record['diskPath'],
+                catalogFilename: configuration.api.ocfl.catalogFilename,
+                typesTransform: configuration.api.rocrate.dataTransform.types
+              });
+              res.json(crate);
+          }
+        } else {
+          res.status(404).send({ id: req.query.id, message: 'Not Found' })
+        }
       }
     } else {
       let records = await getRecords({
@@ -85,11 +103,11 @@ function setupRoutes({ server, configuration }) {
             });
             filestream.pipe(res);
           } else {
-            res.send({ id: req.query.id, file: req.query.file, message: "Not Found" }).status(404);
+            res.send({ id: req.query.id, file: req.query.file, message: 'Not Found' }).status(404);
             next();
           }
         } else {
-          res.send({ usage: 'file param required' }).status(400);
+          res.send({ usage: 'file parameter required' }).status(400);
           next();
         }
       }

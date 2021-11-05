@@ -34,6 +34,8 @@ let sequelize = new Sequelize(
 let modules = [
   require("./user.js"),
   require("./session.js"),
+  require('./recordMember'),
+  require('./recordType'),
   require("./record")
 ];
 

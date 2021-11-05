@@ -1,7 +1,8 @@
-const { getLogger } = require("./index");
-const { createRecord, deleteRecords } = require("../lib/record");
-const { loadFromOcfl, arcpId } = require("./ocfl-tools");
-const { ROCrate } = require("ro-crate");
+const { getLogger } = require('./index');
+const { createRecord, deleteRecords } = require('../lib/record');
+const { createRecordMemberBulk } = require('../lib/recordMember');
+const { loadFromOcfl, arcpId } = require('./ocfl-tools');
+const { ROCrate } = require('ro-crate');
 
 const log = getLogger();
 
@@ -37,10 +38,13 @@ async function initOCFL({ configuration }) {
         name: root['name'],
         description: root['description']
       }
-      await createRecord(rec);
+      //index the types
+      //if it claims to be a memberOf !! think of sydney speaks
+      const recordCreate = await createRecord(rec, root['hasMember'], crate.__item_by_type);
     }
+    log.info('Finish Init');
   } catch (e) {
-    log.error(`initOCFL error`);
+    log.error('initOCFL error');
     log.error(e);
   }
 

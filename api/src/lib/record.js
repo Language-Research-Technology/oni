@@ -11,6 +11,12 @@ async function deleteRecords() {
   let records = await models.record.destroy({
     where: {}
   });
+  let recordType = await models.recordType.destroy({
+    where: {}
+  });
+  let recordMember = await models.recordMember.destroy({
+    where: {}
+  });
   return records;
 }
 
@@ -39,7 +45,7 @@ async function getRecord({ recordId }) {
   return { recordId: recordId, message: 'Not Found' }
 }
 
-async function createRecord(data) {
+async function createRecord(data, hasMembers, atTypes) {
   try {
     log.debug(data.arcpId)
     if (!data.arcpId) {
@@ -48,19 +54,32 @@ async function createRecord(data) {
     if (!data.path) {
       return new Error(`Path is a required property`);
     }
-    const rec = {}
-    rec.locked = false;
-    rec.arcpId = data.arcpId;
-    rec.path = data.path;
-    rec.diskPath = data.diskPath;
-    rec.license = data.license;
-    rec.name = data.name;
-    rec.description = data.description;
+    const r = await models.record.create({
+      locked: false,
+      arcpId: data.arcpId,
+      path: data.path,
+      diskPath: data.diskPath,
+      license: data.license,
+      name: data.name,
+      description: data.description
+    });
 
-    let record = models.record.build(rec);
+    for (const hM of hasMembers) {
+      const member = await models.recordMember.create({
+        hasMember: hM['@id']
+        });
+      await r.addRecordMember(member);
+    }
+    for (const key of Object.keys(atTypes)) {
+      for (const aT of atTypes[key]) {
+        const type = await models.recordType.create({
+          recordType: key,
+          crateId: aT['@id']
+        });
+        await r.addRecordType(type);
+      }
+    }
 
-    await record.save();
-    return record;
   } catch (e) {
     log.error('Creating Records');
     log.error(e);
