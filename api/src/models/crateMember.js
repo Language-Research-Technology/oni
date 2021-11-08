@@ -1,8 +1,7 @@
 "use strict";
 
 module.exports = function (sequelize, DataTypes) {
-  let RecordMember = sequelize.define(
-    "recordMember",
+  let RecordCrateMember = sequelize.define("recordCrateMember",
     {
       id: {
         primaryKey: true,
@@ -20,9 +19,9 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: true,
     }
   );
-  RecordMember.associate = function (models) {
-    RecordMember.belongsTo(models.record);
+  RecordCrateMember.associate = function (models) {
+    RecordCrateMember.belongsTo(models.record);
   };
 
-  return RecordMember;
+  return RecordCrateMember;
 };

@@ -1,6 +1,5 @@
 const { getLogger } = require('./index');
 const { createRecord, deleteRecords } = require('../lib/record');
-const { createRecordMemberBulk } = require('../lib/recordMember');
 const { loadFromOcfl, arcpId } = require('./ocfl-tools');
 const { ROCrate } = require('ro-crate');
 
@@ -25,8 +24,8 @@ async function initOCFL({ configuration }) {
       crate.index();
       const root = crate.getRootDataset();
       let lic;
-      if (root['license'] && root['license']['id']) {
-        lic = root['license']['id']
+      if (root['license'] && root['license']['@id']) {
+        lic = root['license']['@id']
       } else {
         lic = license['default'];
       }
@@ -40,7 +39,8 @@ async function initOCFL({ configuration }) {
       }
       //index the types
       //if it claims to be a memberOf !! think of sydney speaks
-      const recordCreate = await createRecord(rec, root['hasMember'], crate.__item_by_type);
+      //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
+      const recordCreate = await createRecord(rec, root['memberOf'] || [], root['@type'] || []);
     }
     log.info('Finish Init');
   } catch (e) {

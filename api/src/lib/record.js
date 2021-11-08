@@ -3,21 +3,16 @@ const { getLogger } = require("../common");
 const { getItem, readCrate } = require("../common/ocfl-tools");
 const { OcflObject } = require("ocfl");
 const { transformURIs } = require("../common/ro-crate-utils");
+const { castArray } = require('lodash');
 
 const log = getLogger();
 
 async function deleteRecords() {
   // Ay nanita
-  let records = await models.record.destroy({
-    where: {}
+  let record = await models.record.destroy({
+    truncate: true, cascade: true
   });
-  let recordType = await models.recordType.destroy({
-    where: {}
-  });
-  let recordMember = await models.recordMember.destroy({
-    where: {}
-  });
-  return records;
+  return record;
 }
 
 async function getRecords({ offset = 0, limit = 10 }) {
@@ -45,7 +40,46 @@ async function getRecord({ recordId }) {
   return { recordId: recordId, message: 'Not Found' }
 }
 
-async function createRecord(data, hasMembers, atTypes) {
+async function createRecord(data, memberOfs, atTypes) {
+  try {
+    log.debug(data.arcpId)
+    if (!data.arcpId) {
+      return new Error(`Id is a required property`);
+    }
+    if (!data.path) {
+      return new Error(`Path is a required property`);
+    }
+    const r = await models.record.create({
+      locked: false,
+      arcpId: data.arcpId,
+      path: data.path,
+      diskPath: data.diskPath,
+      license: data.license,
+      name: data.name,
+      description: data.description
+    });
+    atTypes = castArray(atTypes);
+    for (const key of atTypes) {
+      const type = await models.rootType.create({
+        recordType: key
+      });
+      await r.addRootType(type);
+    }
+    memberOfs = castArray(memberOfs);
+    for (const hM of memberOfs) {
+      const member = await models.rootMemberOf.create({
+        memberOf: hM['@id'],
+        crateId: data.arcpId
+      });
+      await r.addRootMemberOf(member);
+    }
+  } catch (e) {
+    log.error('createRecord');
+    log.error(e);
+  }
+}
+
+async function createRecordWithCrate(data, hasMembers, atTypes) {
   try {
     log.debug(data.arcpId)
     if (!data.arcpId) {
@@ -65,23 +99,23 @@ async function createRecord(data, hasMembers, atTypes) {
     });
 
     for (const hM of hasMembers) {
-      const member = await models.recordMember.create({
+      const member = await models.recordCrateMember.create({
         hasMember: hM['@id']
-        });
-      await r.addRecordMember(member);
+      });
+      await r.addRecordCrateMember(member);
     }
     for (const key of Object.keys(atTypes)) {
       for (const aT of atTypes[key]) {
-        const type = await models.recordType.create({
+        const type = await models.recordCrateType.create({
           recordType: key,
           crateId: aT['@id']
         });
-        await r.addRecordType(type);
+        await r.addRecordCrateType(type);
       }
     }
 
   } catch (e) {
-    log.error('Creating Records');
+    log.error('createRecordWithCrate');
     log.error(e);
   }
 }
@@ -154,6 +188,7 @@ module.exports = {
   getRecords: getRecords,
   getRecord: getRecord,
   createRecord: createRecord,
+  createRecordWithCrate: createRecordWithCrate,
   findRecordByIdentifier: findRecordByIdentifier,
   getRawCrate: getRawCrate,
   getUridCrate: getUridCrate,

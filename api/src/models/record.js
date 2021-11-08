@@ -45,8 +45,10 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: true,
     });
   Record.associate = function (models) {
-    Record.hasMany(models.recordType, { onDelete: "CASCADE" });
-    Record.hasMany(models.recordMember, { onDelete: "CASCADE" });
+    Record.hasMany(models.recordCrateType, { onDelete: "CASCADE" });
+    Record.hasMany(models.recordCrateMember, { onDelete: "CASCADE" });
+    Record.hasMany(models.rootType, { onDelete: "CASCADE" });
+    Record.hasMany(models.rootMemberOf, { onDelete: "CASCADE" });
   };
 
   return Record;

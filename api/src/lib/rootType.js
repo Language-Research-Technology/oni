@@ -1,18 +1,15 @@
 const { castArray } = require('lodash');
 const models = require("../models");
 const { getLogger } = require("../common");
-const { getItem, readCrate } = require("../common/ocfl-tools");
-const { OcflObject } = require("ocfl");
-const { transformURIs } = require("../common/ro-crate-utils");
 
 const log = getLogger();
 
-async function getRecordTypes({ recordId, types }) {
+async function getRootTypes({ recordId, types }) {
   types = types.split(',');
   types = castArray((types));
   const record = await models.record.findOne({ where: { arcpId: recordId } });
   if (record) {
-    const recordTypes = await models.recordType.findAll({
+    const recordRootTypes = await models.rootType.findAll({
       where: {
         recordId: record.dataValues.id,
         recordType: { [models.Sequelize.Op.in]: types }
@@ -22,7 +19,7 @@ async function getRecordTypes({ recordId, types }) {
         { model: models.record, attributes: [ 'arcpId' ] }
       ]
     });
-    return recordTypes;
+    return recordRootTypes;
   } else {
     return undefined;
   }
@@ -30,5 +27,5 @@ async function getRecordTypes({ recordId, types }) {
 }
 
 module.exports = {
-  getRecordTypes: getRecordTypes
+  getRootTypes: getRootTypes
 }

@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = function (sequelize, DataTypes) {
-  let RecordType = sequelize.define("recordType", {
+  let RecordCrateType = sequelize.define("recordCrateType", {
       id: {
         primaryKey: true,
         type: DataTypes.UUID,
@@ -20,9 +20,9 @@ module.exports = function (sequelize, DataTypes) {
     {
       timestamps: true,
     });
-  RecordType.associate = function (models) {
-    RecordType.belongsTo(models.record);
+  RecordCrateType.associate = function (models) {
+    RecordCrateType.belongsTo(models.record);
   };
 
-  return RecordType;
+  return RecordCrateType;
 };

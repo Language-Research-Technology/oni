@@ -11,12 +11,12 @@ async function getRecordMembers({ recordId }) {
 
   const record = await models.record.findOne({ where: { arcpId: recordId } });
   if (record) {
-    const recordMembers = models.recordMember.findAll({
+    const recordCrateMembers = models.recordCrateMember.findAll({
       where: {
         recordId: record.dataValues.id
       }
     });
-    return recordMembers;
+    return recordCrateMembers;
   }
 }
 

@@ -1,6 +1,8 @@
 const { getRecords, getRecord, getRawCrate, getUridCrate, getFile } = require('../lib/record');
-const { getRecordMembers } = require('../lib/recordMember');
-const { getRecordTypes } = require('../lib/recordType');
+const { getCrateMembers } = require('../lib/crateMember');
+const { getCrateTypes } = require('../lib/crateType');
+const { getRootMemberOfs } = require('../lib/rootMemberOf');
+const { getRootTypes } = require('../lib/rootType');
 const { getLogger } = require('../common');
 const fs = require('fs-extra');
 
@@ -20,16 +22,16 @@ function setupRoutes({ server, configuration }) {
       }
     } else if (req.query.id) {
       if (req.query.types) {
-        let recordTypes = await getRecordTypes({ recordId: req.query.id, types: req.query.types });
+        let recordTypes = await getRootTypes({ recordId: req.query.id, types: req.query.types });
         if (recordTypes) {
           res.json(recordTypes);
         } else {
           res.send({ id: req.query.id, message: 'Not Found' }).status(404);
         }
-      } else if (req.query.members) {
-        let recordMembers = await getRecordMembers({ recordId: req.query.id, types: req.query.members });
-        if (recordMembers) {
-          res.json(recordMembers);
+      } else if (req.query.memberOf) {
+        let memberOfs = await getRootMemberOfs({ recordId: req.query.id, types: req.query.members });
+        if (memberOfs) {
+          res.json(memberOfs);
         } else {
           res.send({ id: req.query.id, message: 'Not Found' }).status(404);
         }
