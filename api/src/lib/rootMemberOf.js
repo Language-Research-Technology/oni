@@ -1,4 +1,3 @@
-const { castArray } = require('lodash');
 const models = require("../models");
 const { getLogger } = require("../common");
 

@@ -2,7 +2,7 @@ require("regenerator-runtime/runtime");
 const fs = require("fs-extra");
 const {ROCrate} = require("ro-crate");
 
-const {loadFromOcfl, checkin, connectRepo, getItem} = require("./ocfl-tools");
+const {getItem} = require("oni-ocfl");
 const {host, testOCFLConf} = require("../common");
 const {OcflObject} = require("ocfl");
 const fetch = require("node-fetch");

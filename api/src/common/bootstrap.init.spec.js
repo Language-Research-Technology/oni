@@ -1,8 +1,7 @@
-import "regenerator-runtime";
-import fs from "fs-extra";
-
-import {loadFromOcfl, checkin, connectRepo} from "./ocfl-tools";
-import {ROCrate} from "ro-crate";
+require("regenerator-runtime/runtime");
+const fs = require("fs-extra");
+const {ROCrate} = require("ro-crate");
+const {loadFromOcfl, checkin, connectRepo} = require("oni-ocfl");
 
 let records;
 let crate;

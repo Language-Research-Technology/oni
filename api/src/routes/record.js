@@ -1,6 +1,6 @@
 const { getRecords, getRecord, getRawCrate, getUridCrate, getFile } = require('../lib/record');
-const { getCrateMembers } = require('../lib/crateMember');
-const { getCrateTypes } = require('../lib/crateType');
+const { getCrateMembers } = require('../lib/crateMember'); // Not used but might be interesting later
+const { getCrateTypes } = require('../lib/crateType'); // Not used but might be interesting later
 const { getRootMemberOfs } = require('../lib/rootMemberOf');
 const { getRootTypes } = require('../lib/rootType');
 const { getLogger } = require('../common');

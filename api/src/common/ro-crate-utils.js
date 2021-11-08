@@ -1,5 +1,5 @@
 const { ROCrate } = require('ro-crate');
-const { readCrate } = require('./ocfl-tools');
+const { readCrate } = require('oni-ocfl');
 const { getLogger } = require("./index");
 
 const log = getLogger();

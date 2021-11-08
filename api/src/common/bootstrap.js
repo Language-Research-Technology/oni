@@ -1,6 +1,6 @@
 const { getLogger } = require('./index');
 const { createRecord, deleteRecords } = require('../lib/record');
-const { loadFromOcfl, arcpId } = require('./ocfl-tools');
+const { loadFromOcfl, arcpId } = require('oni-ocfl');
 const { ROCrate } = require('ro-crate');
 
 const log = getLogger();

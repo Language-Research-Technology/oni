@@ -1,9 +1,6 @@
 const { castArray } = require('lodash');
 const models = require("../models");
 const { getLogger } = require("../common");
-const { getItem, readCrate } = require("../common/ocfl-tools");
-const { OcflObject } = require("ocfl");
-const { transformURIs } = require("../common/ro-crate-utils");
 
 const log = getLogger();
 
