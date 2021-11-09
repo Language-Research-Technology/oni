@@ -18,7 +18,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     },
     {
-      timestamps: true,
+      timestamps: false,
     });
   RecordCrateType.associate = function (models) {
     RecordCrateType.belongsTo(models.record);

@@ -4,24 +4,26 @@ const { getLogger } = require("../common");
 
 const log = getLogger();
 
-async function getRootTypes({ recordId, types }) {
-  types = types.split(',');
-  types = castArray((types));
+async function getRootTypes({ recordId }) {
   const record = await models.record.findOne({ where: { arcpId: recordId } });
   if (record) {
     const recordRootTypes = await models.rootType.findAll({
       where: {
-        recordId: record.dataValues.id,
-        recordType: { [models.Sequelize.Op.in]: types }
+        recordId: record.dataValues.id
       },
-      attributes: [ 'recordType', 'crateId' ],
       include: [
         { model: models.record, attributes: [ 'arcpId' ] }
       ]
     });
-    return recordRootTypes;
+    return {
+      total: recordRootTypes.length || 0,
+      data: recordRootTypes
+    };
   } else {
-    return undefined;
+     return {
+      total: 0,
+      data: []
+    }
   }
 
 }

@@ -3,22 +3,29 @@ const { getLogger } = require("../common");
 
 const log = getLogger();
 
-async function getRootMemberOfs({ recordId }) {
-  const memberOfs = await models.rootMemberOf.findAll({
-    where: {
-      memberOf: recordId
-    },
-    attributes: [ 'id', 'memberOf' ],
-    include: [
-      { model: models.record, attributes: [ 'id', 'arcpId', 'name', 'license', 'description' ] }
-    ]
-  });
-  return {
-    total: memberOfs.length || 0,
-    records: memberOfs
+async function getRootConformsTos({ recordId }) {
+  const record = await models.record.findOne({ where: { arcpId: recordId } });
+  if (record) {
+    const conformsTo = await models.rootConformsTo.findAll({
+      where: {
+        recordId: record.dataValues.id
+      },
+      include: [
+        { model: models.record, attributes: [ 'id', 'arcpId', 'name', 'license', 'description' ] }
+      ]
+    });
+    return {
+      total: conformsTo.length || 0,
+      data: conformsTo
+    }
+  } else {
+    return {
+      total: 0,
+      data: []
+    }
   }
 }
 
 module.exports = {
-  getRootMemberOfs: getRootMemberOfs
+  getRootConformsTos: getRootConformsTos
 }

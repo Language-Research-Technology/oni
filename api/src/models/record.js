@@ -49,6 +49,7 @@ module.exports = function (sequelize, DataTypes) {
     Record.hasMany(models.recordCrateMember, { onDelete: "CASCADE" });
     Record.hasMany(models.rootType, { onDelete: "CASCADE" });
     Record.hasMany(models.rootMemberOf, { onDelete: "CASCADE" });
+    Record.hasMany(models.rootConformsTo, { onDelete: "CASCADE" });
   };
 
   return Record;

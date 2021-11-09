@@ -7,6 +7,7 @@
     - [Frontend - VueJS and friends](#frontend---vuejs-and-friends)
     - [Backend - Restify and sequelize](#backend---restify-and-sequelize)
   - [Repo layout](#repo-layout)
+  - [Documentation](#documentation)
 
 Oni consists of a VueJS SPA (ui) and restify JS backend (api). This repo structure is shared with
 [Describo Online](https://github.com/Arkisto-Platform/describo-online) and the
@@ -72,3 +73,7 @@ test file) does not re-run the tests.
 -   production: production configuration - compose file and nginx code
 -   build-production-containers.sh: script to build the containers, tag and push to docker hub -
     REQUIRES WORK : COMMENTED OUT FOR NOW
+
+## Documentation
+
+[Documentation](./docs)

@@ -35,6 +35,7 @@ let modules = [
   require("./user.js"),
   require("./session.js"),
   require('./rootMemberOf'),
+  require('./rootConformsTo'),
   require('./rootType'),
   require('./crateMember'),
   require('./crateType'),

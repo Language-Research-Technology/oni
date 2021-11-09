@@ -17,8 +17,9 @@ async function initOCFL({ configuration }) {
   try {
     const records = await loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
     let i = 0;
+    log.info(`Loading records: ${ records.length }`);
     for (let record of records) {
-      log.debug(`Loading record: ${ ++i } : ${ record['path'] }`);
+      log.silly(`Loading record: ${ ++i } : ${ record['path'] }`);
       const ocflObject = record['ocflObject'];
       const crate = new ROCrate(record['jsonld']);
       crate.index();
@@ -29,6 +30,8 @@ async function initOCFL({ configuration }) {
       } else {
         lic = license['default'];
       }
+      //TODO: Is this the best way to get the conformsTo array?
+      const roCrateMetadata = crate.getItem('ro-crate-metadata.json');
       const rec = {
         arcpId: arcpId({ crate, identifier: identifier['main'] }),
         path: record['path'],
@@ -40,9 +43,14 @@ async function initOCFL({ configuration }) {
       //index the types
       //if it claims to be a memberOf !! think of sydney speaks
       //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
-      const recordCreate = await createRecord(rec, root['memberOf'] || [], root['@type'] || []);
+      const recordCreate = await createRecord({
+        data: rec,
+        memberOfs: root['memberOf'] || [],
+        atTypes: root['@type'] || [],
+        conformsTos: roCrateMetadata['conformsTo'] || []
+      });
     }
-    log.info('Finish Init');
+    log.info('Finish loading into database');
   } catch (e) {
     log.error('initOCFL error');
     log.error(e);

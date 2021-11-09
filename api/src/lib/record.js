@@ -9,6 +9,7 @@ const log = getLogger();
 
 async function deleteRecords() {
   // Ay nanita
+  //This will delete all records and cascade. If you are re-structuring the database do docker-compose down -v
   let record = await models.record.destroy({
     truncate: true, cascade: true
   });
@@ -35,14 +36,15 @@ async function getRecord({ recordId }) {
     where,
   });
   if (record) {
-    return record;
+    return { data: record.get() }
+  } else {
+    return { data: null }
   }
-  return { recordId: recordId, message: 'Not Found' }
 }
 
-async function createRecord(data, memberOfs, atTypes) {
+async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
   try {
-    log.debug(data.arcpId)
+    log.silly(data.arcpId)
     if (!data.arcpId) {
       return new Error(`Id is a required property`);
     }
@@ -59,19 +61,27 @@ async function createRecord(data, memberOfs, atTypes) {
       description: data.description
     });
     atTypes = castArray(atTypes);
-    for (const key of atTypes) {
+    for (const ele of atTypes) {
       const type = await models.rootType.create({
-        recordType: key
+        recordType: ele
       });
       await r.addRootType(type);
     }
     memberOfs = castArray(memberOfs);
-    for (const hM of memberOfs) {
+    for (const ele of memberOfs) {
       const member = await models.rootMemberOf.create({
-        memberOf: hM['@id'],
+        memberOf: ele['@id'],
         crateId: data.arcpId
       });
       await r.addRootMemberOf(member);
+    }
+    conformsTos = castArray(conformsTos);
+    for (const ele of conformsTos) {
+      const conformsTo = await models.rootConformsTo.create({
+        conformsTo: ele['@id'],
+        crateId: data.arcpId
+      });
+      await r.addRootConformsTo(conformsTo);
     }
   } catch (e) {
     log.error('createRecord');
