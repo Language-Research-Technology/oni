@@ -7,7 +7,7 @@ const log = getLogger();
 async function getRecordTypes({ recordId, types }) {
   types = types.split(',');
   types = castArray((types));
-  const record = await models.record.findOne({ where: { arcpId: recordId } });
+  const record = await models.record.findOne({ where: { crateId: recordId } });
   if (record) {
     const recordCrateTypes = await models.recordCrateType.findAll({
       where: {
@@ -16,7 +16,7 @@ async function getRecordTypes({ recordId, types }) {
       },
       attributes: [ 'recordType', 'crateId' ],
       include: [
-        { model: models.record, attributes: [ 'arcpId' ] }
+        { model: models.record, attributes: [ 'id' ] }
       ]
     });
     return recordCrateTypes;

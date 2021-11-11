@@ -4,7 +4,7 @@ const { getLogger } = require("./index");
 
 const log = getLogger();
 
-async function transformURIs({ host, recordId, ocflObject, uridTypes, catalogFilename }) {
+async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFilename }) {
   const json = await readCrate(ocflObject, catalogFilename);
   const crate = new ROCrate(json);
   crate.index();
@@ -22,7 +22,7 @@ async function transformURIs({ host, recordId, ocflObject, uridTypes, catalogFil
       const ref = crate.getItem(i['@id']);
       if (ref) {
         log.silly(ref['@id']);
-        crate.changeGraphId(ref, `${ host }/data/item?id=${ recordId }&file=${ ref['@id'] }`);
+        crate.changeGraphId(ref, `${ host }/data/item?id=${ crateId }&file=${ ref['@id'] }`);
       }
     });
   }

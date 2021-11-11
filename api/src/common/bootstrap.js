@@ -7,7 +7,7 @@ const log = getLogger();
 
 async function bootstrap({ configuration }) {
   await deleteRecords();
-  await initOCFL({ configuration })
+  await initOCFL({ configuration });
 }
 
 async function initOCFL({ configuration }) {
@@ -33,7 +33,7 @@ async function initOCFL({ configuration }) {
       //TODO: Is this the best way to get the conformsTo array?
       const roCrateMetadata = crate.getItem('ro-crate-metadata.json');
       const rec = {
-        arcpId: arcpId({ crate, identifier: identifier['main'] }),
+        crateId: arcpId({ crate, identifier: identifier['main'] }),
         path: record['path'],
         diskPath: ocflObject['path'],
         license: lic,

@@ -3,14 +3,14 @@ const { getLogger } = require("../common");
 
 const log = getLogger();
 
-async function getRootMemberOfs({ arcpId }) {
+async function getRootMemberOfs({ crateId }) {
 
     const memberOfs = await models.rootMemberOf.findAll({
       where: {
-        memberOf: arcpId
+        memberOf: crateId
       },
       include: [
-        { model: models.record, attributes: [ 'id', 'arcpId', 'name', 'license', 'description' ] }
+        { model: models.record, attributes: [ 'id', 'name', 'license', 'description' ] }
       ]
     });
     return {

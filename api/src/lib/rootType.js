@@ -4,15 +4,15 @@ const { getLogger } = require("../common");
 
 const log = getLogger();
 
-async function getRootTypes({ recordId }) {
-  const record = await models.record.findOne({ where: { arcpId: recordId } });
+async function getRootTypes({ crateId }) {
+  const record = await models.record.findOne({ where: { crateId: crateId } });
   if (record) {
     const recordRootTypes = await models.rootType.findAll({
       where: {
         recordId: record.dataValues.id
       },
       include: [
-        { model: models.record, attributes: [ 'arcpId' ] }
+        { model: models.record, attributes: [ 'crateId' ] }
       ]
     });
     return {

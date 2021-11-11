@@ -21,6 +21,7 @@ async function getRecords({ offset = 0, limit = 10 }) {
     offset,
     limit,
     order: [],
+    attributes: { exclude: ['id'] }
   });
   return {
     total: records.count,
@@ -28,10 +29,10 @@ async function getRecords({ offset = 0, limit = 10 }) {
   };
 }
 
-async function getRecord({ recordId }) {
+async function getRecord({ crateId }) {
   let where = {};
-  if (recordId) where.arcpId = recordId;
-  log.debug(recordId);
+  if (crateId) where.crateId = crateId;
+  log.debug(crateId);
   let record = await models.record.findOne({
     where,
   });
@@ -44,8 +45,8 @@ async function getRecord({ recordId }) {
 
 async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
   try {
-    log.silly(data.arcpId)
-    if (!data.arcpId) {
+    log.silly(data.crateId)
+    if (!data.crateId) {
       return new Error(`Id is a required property`);
     }
     if (!data.path) {
@@ -53,7 +54,7 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
     }
     const r = await models.record.create({
       locked: false,
-      arcpId: data.arcpId,
+      crateId: data.crateId,
       path: data.path,
       diskPath: data.diskPath,
       license: data.license,
@@ -71,7 +72,7 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
     for (const ele of memberOfs) {
       const member = await models.rootMemberOf.create({
         memberOf: ele['@id'],
-        crateId: data.arcpId
+        crateId: data.crateId
       });
       await r.addRootMemberOf(member);
     }
@@ -79,7 +80,7 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
     for (const ele of conformsTos) {
       const conformsTo = await models.rootConformsTo.create({
         conformsTo: ele['@id'],
-        crateId: data.arcpId
+        crateId: data.crateId
       });
       await r.addRootConformsTo(conformsTo);
     }
@@ -91,8 +92,8 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
 
 async function createRecordWithCrate(data, hasMembers, atTypes) {
   try {
-    log.debug(data.arcpId)
-    if (!data.arcpId) {
+    log.debug(data.crateId)
+    if (!data.crateId) {
       return new Error(`Id is a required property`);
     }
     if (!data.path) {
@@ -100,7 +101,7 @@ async function createRecordWithCrate(data, hasMembers, atTypes) {
     }
     const r = await models.record.create({
       locked: false,
-      arcpId: data.arcpId,
+      crateId: data.crateId,
       path: data.path,
       diskPath: data.diskPath,
       license: data.license,
@@ -136,7 +137,7 @@ async function findRecordByIdentifier({ identifier, recordId }) {
   };
   if (recordId) {
     clause.include = [
-      { model: models.record, where: { id: recordId }, attributes: [ "id" ], raw: true },
+      { model: models.record, where: { id: recordId }, attributes: [ 'id' ], raw: true },
     ];
   }
   return await models.record.findOne(clause);
@@ -144,7 +145,7 @@ async function findRecordByIdentifier({ identifier, recordId }) {
 
 async function decodeHash({ id }) {
 
-  // With ARCPID like
+  // With ARCP like
   // arcp://name,
   // hash it and then find it by it.
 }
@@ -155,11 +156,11 @@ async function getRawCrate({ diskPath, catalogFilename }) {
   return json;
 }
 
-async function getUridCrate({ host, arcpId, diskPath, catalogFilename, typesTransform }) {
+async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform }) {
   const ocflObject = new OcflObject(diskPath);
   const newCrate = await transformURIs({
     host,
-    recordId: arcpId,
+    crateId: crateId,
     ocflObject,
     uridTypes: typesTransform,
     catalogFilename

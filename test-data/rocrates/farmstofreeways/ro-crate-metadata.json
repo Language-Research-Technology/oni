@@ -5,42 +5,23 @@
       "@type": "CreativeWork",
       "@id": "ro-crate-metadata.json",
       "identifier": "ro-crate-metadata.json",
-      "conformsTo": {
-        "@id": "https://w3id.org/ro/crate/1.1"
-      },
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/ro/crate/1.1"
+        },
+        {
+          "@id": "https://github.com/Language-Research-Technology/ro-crate-profile#Collection"
+        }
+      ],
       "about": {
         "@id": "./"
       }
     },
     {
       "identifier": [
-        "https://dx.doi.org/10.4225/35/555d661071c76",
+        "arcp://name,farms-to-freeways/root/description",
         {
-          "@id": "_:local-id:domain:/uts.edu.au"
-        },
-        {
-          "@id": "_:local-id:collection:data_repo"
-        },
-        {
-          "@id": "_:local-id:hashId:54899b3d8101af17042860cf70afbce7b2397c74502a2f0a755a71f64b199a4c"
-        },
-        {
-          "@id": "_:local-id:/uts.edu.au:/uts.edu.au/data_repo/bda6cffe-f074-456b-9189-8b6839313b93"
-        },
-        {
-          "@id": "_:local-id:hashId:366834e75b6519609b3136d59f04e2f41cf4bcf14bba74886d860ce09c2941ae"
-        },
-        {
-          "@id": "_:local-id:/uts.edu.au:/uts.edu.au/data_repo/5edca3c9-e823-4f0e-9c04-955f6907048c"
-        },
-        {
-          "@id": "_:local-id:hashId:47d20da0b9e26a08af0202820202581c5133b7e91a82a65a01476fce3433b614"
-        },
-        {
-          "@id": "_:local-id:/uts.edu.au:/uts.edu.au/data_repo/1b694bf5-bf70-4ea8-8bfc-b2864db65e97"
-        },
-        {
-          "@id": "_:local-id:ATAP:arcp://name,ATAP/uts.edu.au"
+          "@id": "_:local-id:ATAP:arcp://name,farms-to-freeways/root/description"
         }
       ],
       "name": "Farms to Freeways Example Dataset",
@@ -54,7 +35,8 @@
       },
       "@type": [
         "Dataset",
-        "Corpus"
+        "Corpus",
+        "RepositoryCollection"
       ],
       "license": {
         "@id": "https://creativecommons.org/licenses/by/3.0/au/"
@@ -78,13 +60,7 @@
       ],
       "hasMember": [
         {
-          "@id": "http://omeka.uws.edu.au/farmstofreeways/api/collections/4"
-        },
-        {
-          "@id": "http://omeka.uws.edu.au/farmstofreeways/api/collections/5"
-        },
-        {
-          "@id": "http://omeka.uws.edu.au/farmstofreeways/api/collections/6"
+          "@id": "files"
         },
         {
           "@id": "#interviews"
@@ -10934,13 +10910,19 @@
       "@type": "csvw:Schema",
       "columns": [
         {
-          "@id": "#time"
+          "@id": "#start_time"
+        },
+        {
+          "@id": "#stop_time"
         },
         {
           "@id": "#speaker"
         },
         {
-          "@id": "#OrthographicTranscription"
+          "@id": "#Transcript"
+        },
+        {
+          "@id": "#count"
         }
       ],
       "name": "Table schema for Farms to Freeways Example Dataset "
@@ -11313,6 +11295,59 @@
       "@type": "PropertyValue",
       "value": "arcp://name,ATAP/uts.edu.au",
       "name": "ATAP"
+    },
+    {
+      "@id": "#start_time",
+      "@type": "csvw:Column",
+      "csvw:datatype": "",
+      "description": "Start time of the utterance.",
+      "name": "start_time",
+      "sameAs": {
+        "@id": "https://schema.org/startTime"
+      }
+    },
+    {
+      "@id": "#stop_time",
+      "@type": "csvw:Column",
+      "csvw:datatype": "",
+      "description": "End time of the utterance.",
+      "name": "stop_time",
+      "sameAs": {
+        "@id": "https://schema.org/endTime"
+      }
+    },
+    {
+      "@id": "#count",
+      "@type": "csvw:Column",
+      "csvw:datatype": "",
+      "description": "Utternance number",
+      "name": ""
+    },
+    {
+      "@id": "_:local-id:ATAP:arcp://name,farms-to-freeways/root/description",
+      "@type": "PropertyValue",
+      "value": "arcp://name,farms-to-freeways/root/description",
+      "name": "ATAP"
+    },
+    {
+      "@id": "git+https://github.com/Language-Research-Technology/corpus-tools-farms-to-freeways.git",
+      "@type": "SoftwareSourceCode",
+      "name": "git+https://github.com/Language-Research-Technology/corpus-tools-farms-to-freeways.git",
+      "description": "* remote origin\n  Fetch URL: git@github.com:Language-Research-Technology/corpus-tools-farms-to-freeways.git\n  Push  URL: git@github.com:Language-Research-Technology/corpus-tools-farms-to-freeways.git\n  HEAD branch: master\n  Remote branch:\n    master tracked\n  Local branch configured for 'git pull':\n    master merges with remote master\n  Local ref configured for 'git push':\n    master pushes to master (up to date)\n",
+      "programmingLanguage": {
+        "@id": "https://en.wikipedia.org/wiki/Node.js"
+      }
+    },
+    {
+      "@id": "#provenance",
+      "name": "Created RO-Crate using corpus-tools-farms-to-freeways",
+      "@type": "CreateAction",
+      "instrument": {
+        "@id": "git+https://github.com/Language-Research-Technology/corpus-tools-farms-to-freeways.git"
+      },
+      "result": {
+        "@id": "ro-crate-metadata.json"
+      }
     }
   ]
 }

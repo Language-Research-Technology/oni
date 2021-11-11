@@ -11,12 +11,12 @@ jest.setTimeout(10000);
 
 describe('Test load records', () => {
   test('it should be able to retrieve records', async () => {
-    const id = 'arcp://name,ATAP/uts.edu.au';
-    const record = await getRecord({ recordId: id });
+    const crateId = 'arcp://name,ATAP/uts.edu.au';
+    const record = await getRecord({ crateId: crateId });
     const ocflObject = new OcflObject(record['diskPath']);
     const newCrate = await transformURIs({
       host: testHost,
-      recordId: id,
+      recordId: crateId,
       ocflObject,
       uridTypes: [ 'File' ],
       catalogFilename: testOCFLConf.catalogFilename

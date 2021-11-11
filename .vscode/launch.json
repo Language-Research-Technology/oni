@@ -27,7 +27,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "API Jest Current File run all tests",
+      "name": "API Jest current file run all tests",
       "runtimeArgs": [
         "--require",
         "dotenv/config"

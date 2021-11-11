@@ -8,7 +8,7 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         defaultValue: DataTypes.UUIDV4,
       },
-      arcpId: {
+      crateId: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
