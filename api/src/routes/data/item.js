@@ -1,5 +1,7 @@
 const { getRecord, getFile } = require('../../lib/record');
 const fs = require('fs-extra');
+const { getLogger } = require('../../common');
+const log = getLogger();
 
 async function getDataItem({ req, res, next, configuration }) {
   log.debug(`Get data item: ${ req.query.id } : ${ req.query.file }`)
