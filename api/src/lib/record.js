@@ -35,6 +35,9 @@ async function getRecord({ crateId }) {
   log.debug(crateId);
   let record = await models.record.findOne({
     where,
+    include: [ {
+      model: models.rootConformsTo
+    } ]
   });
   if (record) {
     return { data: record.get() }

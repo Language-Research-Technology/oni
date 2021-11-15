@@ -6,8 +6,8 @@ const { ROCrate } = require('ro-crate');
 const log = getLogger();
 
 async function bootstrap({ configuration }) {
-  await deleteRecords();
-  await initOCFL({ configuration });
+  // await deleteRecords();
+  // await initOCFL({ configuration });
 }
 
 async function initOCFL({ configuration }) {
@@ -40,6 +40,7 @@ async function initOCFL({ configuration }) {
         name: root['name'],
         description: root['description']
       }
+      log.debug(`Loading ${rec.crateId}`);
       //index the types
       //if it claims to be a memberOf !! think of sydney speaks
       //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);

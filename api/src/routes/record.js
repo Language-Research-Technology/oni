@@ -1,4 +1,13 @@
-const { getDataConformsTo, getAllRecords, getDataSingleRecord, getDataRoCrate, getDataItem, getDataMembers, getDataTypes } = require('./data');
+const {
+  getDataConformsTo,
+  getAllRecords,
+  getDataSingleRecord,
+  getDataRoCrate,
+  getDataItem,
+  getDataMembers,
+  getDataTypes,
+  getResolveLinks
+} = require('./data');
 const { getLogger } = require('../common');
 const { isUndefined } = require('lodash');
 const log = getLogger();
@@ -11,9 +20,11 @@ function setupRoutes({ server, configuration }) {
       await getDataSingleRecord({ req, res });
     } else if (req.query.id) {
       if (!isUndefined(req.query.types)) {
-        await getDataTypes({req, res});
+        await getDataTypes({ req, res });
       } else if (!isUndefined(req.query.members)) {
-        await getDataMembers({req, res});
+        await getDataMembers({ req, res });
+      } else if (!isUndefined(req.query['resolve-links'])) {
+        await getResolveLinks({ req, res, next, configuration });
       } else {
         await getDataRoCrate({ req, res, next, configuration });
       }

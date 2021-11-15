@@ -10,7 +10,7 @@ async function getRootMemberOfs({ crateId }) {
         memberOf: crateId
       },
       include: [
-        { model: models.record, attributes: [ 'id', 'name', 'license', 'description' ] }
+        { model: models.record, attributes: [ 'id', 'name', 'license', 'diskPath', 'description' ] }
       ]
     });
     return {

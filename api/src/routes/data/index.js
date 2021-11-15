@@ -105,5 +105,7 @@ module.exports = {
   getDataConformsTo: getDataConformsTo,
   getDataMembers: getDataMembers,
   getDataTypes: getDataTypes,
-  getDataItem: require('./item').getDataItem
+  getDataRoCrate: require('./crate').getDataRoCrate,
+  getDataItem: require('./item').getDataItem,
+  getResolveLinks: require('./resolve').getResolveLinks,
 }

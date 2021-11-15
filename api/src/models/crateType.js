@@ -13,7 +13,7 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false
       },
       crateId: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
       }
     },
