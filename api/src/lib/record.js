@@ -32,7 +32,7 @@ async function getRecords({ offset = 0, limit = 10 }) {
 async function getRecord({ crateId }) {
   let where = {};
   if (crateId) where.crateId = crateId;
-  log.debug(crateId);
+  log.silly(crateId);
   let record = await models.record.findOne({
     where,
     include: [ {
