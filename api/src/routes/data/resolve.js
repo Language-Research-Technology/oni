@@ -1,9 +1,5 @@
-const { getRecord, getFile, getUridCrate } = require('../../lib/record');
-const fs = require('fs-extra');
-const { first, filter } = require('lodash');
+const { getRecord, getUridCrate } = require('../../lib/record');
 const { getLogger } = require('../../common');
-const { getDataRoCrate } = require('./crate');
-const { getRootConformsTos, getRootConformsToByCrateId } = require('../../lib/rootConformsTo');
 const { getRootMemberOfs } = require('../../lib/rootMemberOf');
 const { ROCrate } = require('ro-crate');
 const log = getLogger();
