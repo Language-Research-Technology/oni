@@ -9,7 +9,7 @@ const {
 } = require('./user');
 
 const chance = require("chance").Chance();
-const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require('../common');
+const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require('../services');
 
 describe("User management tests", () => {
   let users, configuration;

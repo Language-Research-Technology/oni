@@ -2,7 +2,7 @@
 //
 const models = require('../models');
 const { UnauthorizedError, ForbiddenError } = require('restify-errors');
-const { route, loadConfiguration } = require('../common');
+const { route, loadConfiguration } = require('../services');
 const setupRecordRoutes = require('./record').setupRoutes;
 
 function setupRoutes({ server, configuration }) {

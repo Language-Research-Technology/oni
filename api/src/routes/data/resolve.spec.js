@@ -1,6 +1,6 @@
 require('regenerator-runtime/runtime');
 const fetch = require('node-fetch');
-const { testHost, loadConfiguration } = require('../../common');
+const { testHost, loadConfiguration } = require('../../services');
 const { ROCrate } = require('ro-crate');
 
 jest.setTimeout(100000);

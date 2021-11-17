@@ -1,6 +1,6 @@
 const { castArray } = require('lodash');
 const models = require("../models");
-const { getLogger } = require("../common");
+const { getLogger } = require("../services");
 
 const log = getLogger();
 

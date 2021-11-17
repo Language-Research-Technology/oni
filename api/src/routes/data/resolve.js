@@ -1,6 +1,6 @@
-const { getRecord, getUridCrate } = require('../../lib/record');
-const { getLogger } = require('../../common');
-const { getRootMemberOfs } = require('../../lib/rootMemberOf');
+const { getRecord, getUridCrate } = require('../../controllers/record');
+const { getLogger } = require('../../services');
+const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
 const { ROCrate } = require('ro-crate');
 const log = getLogger();
 

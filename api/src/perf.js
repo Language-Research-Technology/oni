@@ -3,9 +3,9 @@ require('regenerator-runtime/runtime');
 const fs = require('fs-extra');
 const ROCrate = require('ro-crate').ROCrate;
 
-const random = require('./common/random');
+const random = require('./services/random');
 const path = require('path');
-const logger = require('./common');
+const logger = require('./services');
 
 const log = logger.getLogger();
 

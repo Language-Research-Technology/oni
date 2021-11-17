@@ -1,6 +1,6 @@
 require("regenerator-runtime/runtime");
 const { createRepo } = require("oni-ocfl");
-const { loadConfiguration } = require("./common");
+const { loadConfiguration } = require("./services");
 
 let configuration;
 

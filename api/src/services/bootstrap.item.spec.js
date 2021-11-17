@@ -3,10 +3,10 @@ const fs = require("fs-extra");
 const {ROCrate} = require("ro-crate");
 
 const {getItem} = require("oni-ocfl");
-const {host, testOCFLConf} = require("../common");
+const {host, testOCFLConf} = require("./");
 const {OcflObject} = require("ocfl");
 const fetch = require("node-fetch");
-const {getRecord, getUridCrate} = require("../lib/record");
+const {getRecord, getUridCrate} = require("../controllers/record");
 
 const testData = {
   roCrateDir: "../test-data/rocrates/farmstofreeways",

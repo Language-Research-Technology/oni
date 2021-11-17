@@ -1,5 +1,5 @@
 const models = require('../models');
-const { loadConfiguration } = require('../common');
+const { loadConfiguration } = require('../services');
 const { uniqBy } = require('lodash');
 
 async function getUsers({ offset = 0, limit = 10 }) {

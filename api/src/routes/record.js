@@ -8,7 +8,7 @@ const {
   getDataTypes,
   getResolveLinks
 } = require('./data');
-const { getLogger } = require('../common');
+const { getLogger } = require('../services');
 const { isUndefined } = require('lodash');
 const log = getLogger();
 

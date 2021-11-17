@@ -1,7 +1,7 @@
 require('regenerator-runtime/runtime');
 const fetch = require('node-fetch');
 
-const { loadConfiguration, generateToken } = require('../common');
+const { loadConfiguration, generateToken } = require('../services');
 const chance = require('chance').Chance();
 const {
     testHost,
@@ -9,7 +9,7 @@ const {
     setupBeforeEach,
     teardownAfterAll,
     teardownAfterEach,
-} = require('../common');
+} = require('../services');
 
 describe("Test loading the configuration", () => {
     test("it should be able to load the default configuration for the environment", async () => {

@@ -1,8 +1,8 @@
 const models = require("../models");
-const { getLogger } = require("../common");
+const { getLogger } = require("../services");
 const { getItem, readCrate } = require("oni-ocfl");
 const { OcflObject } = require("ocfl");
-const { transformURIs } = require("../common/ro-crate-utils");
+const { transformURIs } = require("../services/ro-crate-utils");
 const { castArray } = require('lodash');
 
 const log = getLogger();

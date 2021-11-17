@@ -1,5 +1,5 @@
-const { getRecord, getRawCrate, getUridCrate } = require('../../lib/record');
-const { getLogger } = require('../../common');
+const { getRecord, getRawCrate, getUridCrate } = require('../../controllers/record');
+const { getLogger } = require('../../services');
 
 const log = getLogger();
 

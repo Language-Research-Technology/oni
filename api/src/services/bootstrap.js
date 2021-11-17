@@ -1,5 +1,5 @@
 const { getLogger } = require('./index');
-const { createRecord, deleteRecords } = require('../lib/record');
+const { createRecord, deleteRecords } = require('../controllers/record');
 const { loadFromOcfl, arcpId } = require('oni-ocfl');
 const { ROCrate } = require('ro-crate');
 

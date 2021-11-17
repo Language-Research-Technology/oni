@@ -1,6 +1,6 @@
 require("regenerator-runtime/runtime");
 const { generateToken, verifyToken } = require("./jwt");
-const { loadConfiguration } = require("../common");
+const { loadConfiguration } = require("./");
 const chance = require("chance").Chance();
 const MockDate = require("mockdate");
 const { copy, move, readJSON, writeJSON } = require("fs-extra");

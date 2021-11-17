@@ -3,16 +3,16 @@ const fetch = require("node-fetch");
 const path = require('path');
 const fs = require('fs-extra');
 
-const { loadConfiguration, generateToken } = require("./common");
+const { loadConfiguration, generateToken } = require("./services");
 const perf = require('./perf');
-const host = require("./common").testHost;
-const testOCFLConf = require('./common').testOCFLConf;
-const testCreate = require('./common').testCreate;
+const host = require("./services").testHost;
+const testOCFLConf = require('./services').testOCFLConf;
+const testCreate = require('./services').testCreate;
 const ocflTools = require('oni-ocfl');
-const { makedir } = require('./common/random');
+const { makedir } = require('./services/random');
 const { it } = require('date-fns/locale');
 const { async } = require('hasha');
-const { workingPath } = require('./common/utils');
+const { workingPath } = require('./services/utils');
 const ocfl = require('ocfl');
 
 let configuration;

@@ -57,9 +57,9 @@ test file) does not re-run the tests.
 -   api: the api source code
     -   src:
         -   routes: route handlers - return responses, throw http exceptions here
-        -   lib: handlers that do things - interact with the db here
+        -   controllers: handlers that do things - interact with the db here
         -   models: the database models
-        -   common: commonly used code like loggers and config loaders
+        -   services: services used code like loggers and config loaders
 -   ui: the Vue SPA
     -   public: icons and other static things
     -   src

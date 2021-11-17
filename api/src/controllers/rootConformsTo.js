@@ -1,5 +1,5 @@
 const models = require("../models");
-const { getLogger } = require("../common");
+const { getLogger } = require("../services");
 const { isUndefined, flatten } = require('lodash');
 
 const log = getLogger();

@@ -6,7 +6,7 @@ const {loadFromOcfl, checkin, connectRepo} = require("oni-ocfl");
 let records;
 let crate;
 
-import {testOCFLConf as ocfl} from "../common";
+import {testOCFLConf as ocfl} from "./";
 
 const testData = {
     roCrateDir: "../test-data/rocrates/farmstofreeways",

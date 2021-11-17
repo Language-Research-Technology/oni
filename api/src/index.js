@@ -2,9 +2,9 @@ require('regenerator-runtime');
 const restify = require('restify');
 const server = restify.createServer();
 const models = require('./models');
-const { loadConfiguration, getLogger } = require('./common/index');
+const { loadConfiguration, getLogger } = require('./services/index');
 const { setupRoutes } = require('./routes');
-const { bootstrap } = require('./common/bootstrap');
+const { bootstrap } = require('./services/bootstrap');
 const corsMiddleware = require('restify-cors-middleware');
 
 const log = getLogger();

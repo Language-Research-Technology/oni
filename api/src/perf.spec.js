@@ -4,8 +4,8 @@ const path = require('path');
 const fs = require('fs-extra');
 
 const perf = require('./perf');
-const { testHost, testOCFLConf, testCreate } = require('../src/common');
-const { makedir } = require('./common/random');
+const { testHost, testOCFLConf, testCreate } = require('./services');
+const { makedir } = require('./services/random');
 
 let configuration;
 let perfDataDir = path.join(process.cwd(), '../test-data/perf');

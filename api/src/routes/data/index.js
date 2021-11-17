@@ -1,8 +1,8 @@
-const { getRootConformsTos } = require('../../lib/rootConformsTo');
-const { getRecord, getRawCrate, getUridCrate, getRecords, getFile } = require('../../lib/record');
-const { getLogger } = require('../../common');
-const { getRootMemberOfs } = require('../../lib/rootMemberOf');
-const { getRootTypes } = require('../../lib/rootType');
+const { getRootConformsTos } = require('../../controllers/rootConformsTo');
+const { getRecord, getRawCrate, getUridCrate, getRecords, getFile } = require('../../controllers/record');
+const { getLogger } = require('../../services');
+const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
+const { getRootTypes } = require('../../controllers/rootType');
 const log = getLogger();
 
 async function getDataRoCrate({ req, res, next, configuration }) {

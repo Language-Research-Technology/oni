@@ -1,6 +1,6 @@
-const { getRecord, getFile } = require('../../lib/record');
+const { getRecord, getFile } = require('../../controllers/record');
 const fs = require('fs-extra');
-const { getLogger } = require('../../common');
+const { getLogger } = require('../../services');
 const log = getLogger();
 
 async function getDataItem({ req, res, next, configuration }) {

@@ -1,9 +1,9 @@
 require('regenerator-runtime/runtime');
 const fetch = require("node-fetch");
 
-const { testHost, testOCFLConf } = require('../common');
+const { testHost, testOCFLConf } = require('../services');
 const { getRecord, getUridCrate } = require('./record');
-const { transformURIs } = require('../common/ro-crate-utils');
+const { transformURIs } = require('../services/ro-crate-utils');
 const { OcflObject } = require('ocfl');
 const { ROCrate } = require('ro-crate');
 
