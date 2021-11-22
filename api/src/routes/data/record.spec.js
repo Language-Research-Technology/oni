@@ -1,6 +1,6 @@
 require('regenerator-runtime/runtime');
 const fetch = require('node-fetch');
-const { testHost } = require('../services');
+const { testHost } = require('../../services');
 
 jest.setTimeout(10000);
 

@@ -23,9 +23,8 @@ import HTTPService from "./http.service";
 (async () => {
     let response = await fetch("/api/configuration");
     if (response.status === 200) {
-        let { ui, authentication } = await response.json();
-        // store.commit("saveConfiguration", { ui, authentication });
-
+        let configuration = await response.json();
+        store.commit("saveConfiguration",  {...configuration});
         // Vue.config.productionTip = false;
 
         const app = createApp(App);

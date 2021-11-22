@@ -1,5 +1,5 @@
-export const loginSessionKey = "nyingarn-login-session-data";
-export const tokenSessionKey = "nyingarn-user-token";
+export const loginSessionKey = "oni-login-session-data";
+export const tokenSessionKey = "oni-user-token";
 
 // local storage handlers
 export function putLocalStorage({ key, data }) {

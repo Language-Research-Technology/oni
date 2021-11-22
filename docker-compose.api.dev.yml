@@ -24,17 +24,17 @@ services:
         ports:
             - "5432:5432"
 
-    ui:
-        image: node:14-buster
-        hostname: ui
-        tty: true
-        environment:
-            TERM: "xterm-256color"
-            NODE_ENV: "development"
-        volumes:
-            - ui_node_modules:/srv/ui/node_modules:delegated
-            - ./ui:/srv/ui:delegated
-            - .git:/srv/ui/.git:delegated
-        working_dir: /srv/ui
-        command: [ "npm", "run", "develop" ]
+#    ui:
+#        image: node:14-buster
+#        hostname: ui
+#        tty: true
+#        environment:
+#            TERM: "xterm-256color"
+#            NODE_ENV: "development"
+#        volumes:
+#            - ui_node_modules:/srv/ui/node_modules:delegated
+#            - ./ui:/srv/ui:delegated
+#            - .git:/srv/ui/.git:delegated
+#        working_dir: /srv/ui
+#        command: [ "npm", "run", "develop" ]
 

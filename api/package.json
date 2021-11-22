@@ -26,6 +26,7 @@
         "nodemon": "^2.0.12"
     },
     "dependencies": {
+        "client-sessions": "^0.8.0",
         "date-fns": "^2.23.0",
         "fs-extra": "^10.0.0",
         "hasha": "^5.2.2",
@@ -34,7 +35,10 @@
         "lodash": "^4.17.20",
         "node-fetch": "^2.6.1",
         "ocfl": "^1.0.9",
+        "octokit": "^1.7.0",
         "oni-ocfl": "git+https://github.com/Language-Research-Technology/oni-ocfl.git",
+        "passport": "^0.5.0",
+        "passport-github2": "^0.1.12",
         "pg": "^8.7.1",
         "pg-hstore": "^2.3.4",
         "random-date-generator": "^1.0.2",

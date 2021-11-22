@@ -7,12 +7,12 @@ const {
   getDataMembers,
   getDataTypes,
   getResolveLinks
-} = require('./data');
-const { getLogger } = require('../services');
+} = require('./index');
+const { getLogger } = require('../../services');
 const { isUndefined } = require('lodash');
 const log = getLogger();
 
-function setupRoutes({ server, configuration }) {
+function setupRecordRoutes({ server, configuration }) {
   server.get("/data", async (req, res, next) => {
     if (req.query.conformsTo) {
       await getDataConformsTo({ req, res });
@@ -47,5 +47,5 @@ function setupRoutes({ server, configuration }) {
 }
 
 module.exports = {
-  setupRoutes: setupRoutes
+  setupRecordRoutes: setupRecordRoutes
 }

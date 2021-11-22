@@ -1,6 +1,5 @@
 const axios = require('axios');
 const {Octokit} = require("octokit");
-const utils = require('../services/utils');
 
 async function getFromURL(session) {
   try {

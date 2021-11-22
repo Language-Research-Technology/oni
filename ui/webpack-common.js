@@ -17,7 +17,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            title: "Nyingarn Workspace",
+            title: "Oni",
             template: "./public/index.html",
         }),
         new VueLoaderPlugin(),

@@ -64,6 +64,7 @@ let configuration;
       maxFieldsSize: 2 * 1024 * 1024,
     })
   );
+
   setupRoutes({ server, configuration });
 
   server.listen("8080", function () {

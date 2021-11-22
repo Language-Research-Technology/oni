@@ -14,10 +14,10 @@ async function getUsers({ offset = 0, limit = 10 }) {
   return { total: users.count, users: users.rows.map((u) => u.get()) };
 }
 
-async function getUser({ userId, email }) {
+async function getUser({ userId, providerId }) {
   let where = {};
-  if (userId) where.id = userId;
-  if (email) where.email = email;
+  if (userId) where.providerId = userId;
+  if (providerId) where.providerId = providerId;
   let user = await models.user.findOne({
     where,
   });
@@ -26,42 +26,46 @@ async function getUser({ userId, email }) {
 
 async function createUser(data) {
   const configuration = await loadConfiguration();
-  if (!data.email) {
-    throw new Error(`Email is a required property`);
-  }
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
 
-  // deny access if the user is not an admin and we don't
-  //  have an entry for them as a result of an admin invitation.
-  let user = await models.user.findOne({ where: { email: data.email } });
-  if (!user && !configuration.api.administrators.includes(data.email)) {
-    throw new Error(`Unauthorised`);
-  }
+  let user = await models.user.findOne({ where: { providerId: data.providerId } });
 
-  if (!user && configuration.api.administrators.includes(data.email)) {
+  if (!user) {
     // no user account found but email in admin list
     data.locked = false;
     data.upload = true;
     data.administrator = true;
+
     user = (
       await models.user.findOrCreate({
-        where: { email: data.email },
+        where: { providerId: data.providerId },
         defaults: data,
       })
     )[0];
-  } else if (user && !configuration.api.administrators.includes(data.email)) {
+  } else if (user && !configuration.api.administrators.includes(data.providerId)) {
     // user account found and not admin
     user.locked = false;
     user.upload = false;
     user.administrator = false;
     user.provider = data.provider;
-    user.givenName = data.givenName;
-    user.familyName = data.familyName;
+    user.name = data.name;
+    user.providerId = data.providerId;
+    user.providerUsername = data.providerUsername;
+    user.accessToken = data.accessToken;
+    user.email = data.email || null;
 
     await user.save();
   }
+  delete user['apiToken'];
+  return user;
+}
+
+async function updateUser({ userId, apiToken }) {
+  let user = await models.user.findOne({ where: { providerId: userId } });
+  user.apiToken = apiToken;
+  await user.save();
   return user;
 }
 
@@ -107,5 +111,6 @@ module.exports = {
   getUser: getUser,
   createUser: createUser,
   deleteUser: deleteUser,
+  updateUser: updateUser,
   createAllowedUserStubAccounts: createAllowedUserStubAccounts
 }
