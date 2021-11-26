@@ -72,6 +72,8 @@ let configuration;
     console.log("ready on %s", server.url);
   });
 
-  await bootstrap({ configuration });
+  if (configuration['api']['bootstrap']) {
+    await bootstrap({ configuration });
+  }
 
 })();

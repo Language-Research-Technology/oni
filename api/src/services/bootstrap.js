@@ -6,8 +6,8 @@ const { ROCrate } = require('ro-crate');
 const log = getLogger();
 
 async function bootstrap({ configuration }) {
-  // await deleteRecords();
-  // await initOCFL({ configuration });
+  await deleteRecords();
+  await initOCFL({ configuration });
 }
 
 async function initOCFL({ configuration }) {
