@@ -21,7 +21,9 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: true,
       },
       providerId: {
-        type: DataTypes.STRING
+        type: DataTypes.TEXT,
+        allowNull: true,
+        unique: true
       },
       providerUsername: {
         type: DataTypes.STRING
@@ -29,6 +31,9 @@ module.exports = function (sequelize, DataTypes) {
       provider: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      organization: {
+        type: DataTypes.STRING
       },
       accessToken: {
         type: DataTypes.STRING
@@ -58,6 +63,8 @@ module.exports = function (sequelize, DataTypes) {
   );
   User.associate = function (models) {
     User.hasOne(models.session, { onDelete: "CASCADE" });
+    User.hasMany(models.userMembership, { onDelete: "CASCADE" });
+
     // User.belongsToMany(models.group, {
     //     through: models.group_user,
     // });

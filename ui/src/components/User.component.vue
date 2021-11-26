@@ -1,6 +1,6 @@
 <template>
   <!-- component -->
-  <div class="min-h-screen p-6 bg-gray-100 flex justify-center">
+  <div class="min-h-screen p-6 bg-gray-200 flex justify-center">
     <div class="container max-w-screen-lg mx-auto">
       <div>
         <h2 class="font-semibold text-xl text-gray-600">Hi {{ this.user.name || this.user.email || this.user.id }}</h2>
@@ -63,7 +63,7 @@
                   <div class="h-10 flex rounded items-center mt-1">
                     <input type="button" value="Generate" id="key" name="key"
                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    @click="this.updateApiToken()"/>
+                           @click="this.updateApiToken()"/>
                   </div>
                 </div>
 
@@ -71,7 +71,7 @@
                   <p>API Key will ony be shown once</p>
                 </div>
 
-                <div class="md:col-span-5 text-right">
+                <div v-show="this.provider === 'local'" class="md:col-span-5 text-right">
                   <div class="inline-flex items-end">
                     <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
                   </div>
@@ -87,6 +87,7 @@
 </template>
 
 <script>
+
 export default {
   data() {
     return {
@@ -94,7 +95,8 @@ export default {
         email: null,
         name: null,
         id: null
-      }
+      },
+      provider: ''
     };
   },
   mounted() {
@@ -107,6 +109,7 @@ export default {
       const response = await this.$http.get({ route: "/user" });
       const { user } = await response.json();
       this.user = user;
+      this.provider = user['provider'];
     },
     async updateApiToken() {
       const response = await this.$http.get({ route: "/user/token" });
@@ -114,8 +117,7 @@ export default {
       this.user = user;
     }
   }
-}
-;
+};
 </script>
 
 <!--

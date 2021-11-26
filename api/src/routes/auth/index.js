@@ -1,13 +1,14 @@
 const { getLogger } = require("../../services");
 const { setupGithubRoutes } = require('./github');
-const passport = require('passport');
+const { getUser } = require('../../controllers/user');
 const sessions = require('client-sessions');
 const models = require('../../models');
 const { UnauthorizedError } = require('restify-errors');
-
+const { Strategy: BearerStrategy } = require('passport-http-bearer');
+const { getGithubMemberships } = require('../../controllers/github');
 const log = getLogger();
 
-function setupAuthRoutes({ server, configuration }) {
+function setupAuthRoutes({ server, passport, configuration }) {
 
   server.use(passport.initialize());
   //TODO: Make use of real sessions with postgres
@@ -16,7 +17,6 @@ function setupAuthRoutes({ server, configuration }) {
     cookieName: 'session'
   }))
   server.use(passport.session());
-  //The below is required for restify, TODO: check if is still needed.
 
   passport.serializeUser(function (user, done) {
     done(null, user);
@@ -24,17 +24,11 @@ function setupAuthRoutes({ server, configuration }) {
   passport.deserializeUser(function (user, done) {
     done(null, user);
   });
-  // server.use(function (req, res, next) {
-  //   res.redirect = function (addr) {
-  //     res.header('Location', addr);
-  //     res.send(302);
-  //   }
-  // });
+
   server.get('/authenticated', (req, res, next) => {
     if (req.isAuthenticated()) {
       log.debug('is authenticated');
-      log.debug(req.session['accessToken']);
-      res.json({authenticated: true});
+      res.json({ authenticated: true });
     } else {
       next(new UnauthorizedError());
     }
@@ -51,10 +45,35 @@ function setupAuthRoutes({ server, configuration }) {
 
     next(new UnauthorizedError());
   });
+
+  passport.use(new BearerStrategy(
+    async function (token, done) {
+      const user = await getUser({ where: { apiToken: token } });
+      if (!user) {
+        return done(null, false);
+      }
+      return done(null, user, { scope: 'all' });
+    }
+  ));
   /*
    * Setup your social login:
   */
   setupGithubRoutes({ server, passport, configuration });
+
+  server.get('/auth/memberships',
+    passport.authenticate('bearer', { session: false }),
+    async function (req, res, next) {
+      if (!req.isAuthenticated()) {
+        res.json({ accessDenied: true });
+        next(new UnauthorizedError());
+      } else {
+        //TODO: Design group configuration later
+        const group = configuration['api']['licenseGroup'];
+        //TODO: load dynamically the memberships functions
+        const memberships = await getGithubMemberships({ userId: req['user']['id'], group });
+        res.json({ memberships });
+      }
+    });
 }
 
 

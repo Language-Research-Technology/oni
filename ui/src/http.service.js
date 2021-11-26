@@ -1,7 +1,9 @@
 import { tokenSessionKey, getLocalStorage } from "@/components/storage";
 
 export default class HTTPService {
-  constructor() {
+  constructor({ router, loginPath = "/login" }) {
+    this.router = router;
+    this.loginPath = loginPath;
   }
 
   getHeaders() {
@@ -39,6 +41,7 @@ export default class HTTPService {
       headers,
       credentials: "include"
     });
+    //this.checkAuthorised({ status: response.status });
     return response;
   }
 
@@ -49,7 +52,9 @@ export default class HTTPService {
       method: "POST",
       headers,
       body: JSON.stringify(body),
+      credentials: "include"
     });
+    //this.checkAuthorised({ status: response.status });
     return response;
   }
 
@@ -60,6 +65,7 @@ export default class HTTPService {
       headers: this.getHeaders(),
       body: JSON.stringify(body),
     });
+    //this.checkAuthorised({ status: response.status });
     return response;
   }
 
@@ -69,6 +75,13 @@ export default class HTTPService {
       method: "delete",
       headers: this.getHeaders(),
     });
+    //this.checkAuthorised({ status: response.status });
     return response;
+  }
+
+  checkAuthorised({ status }) {
+    if (status === 401) {
+      this.router.push(this.loginPath);
+    }
   }
 }

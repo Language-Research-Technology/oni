@@ -33,6 +33,7 @@ let sequelize = new Sequelize(
 
 let modules = [
   require("./user.js"),
+  require("./userMembership.js"),
   require("./session.js"),
   require('./rootMemberOf'),
   require('./rootConformsTo'),

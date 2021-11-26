@@ -6,10 +6,11 @@ const { route, loadConfiguration } = require('../services');
 const { setupRecordRoutes } = require('./data/record');
 const { setupUserRoutes } = require('./user');
 const { setupAuthRoutes } = require('./auth');
+const passport = require('passport');
 
 function setupRoutes({ server, configuration }) {
 
-  setupAuthRoutes({ server, configuration });
+  setupAuthRoutes({ server, passport, configuration });
 
   if (process.env.NODE_ENV === 'development') {
     server.get('/test-middleware', route((req, res, next) => {
@@ -27,9 +28,8 @@ function setupRoutes({ server, configuration }) {
     next();
   });
 
-
-  setupRecordRoutes({ server, configuration });
-  setupUserRoutes({server, configuration});
+  setupRecordRoutes({ server, passport, configuration });
+  setupUserRoutes({ server, passport, configuration });
 }
 
 module.exports = {

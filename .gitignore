@@ -4,7 +4,7 @@ coverage
 .env
 .idea
 .DS_Store
-api/.dev
+api/.dev*
 test-data/test_ocfl
 test-data/*.development.json
 test-data/perf/

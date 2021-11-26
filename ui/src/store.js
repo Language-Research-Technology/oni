@@ -11,6 +11,9 @@ const mutations = {
   setUserData(state, payload) {
     state.user = { ...payload };
   },
+  setIsLoggedIn(state, payload) {
+    state.isLoggedIn = payload;
+  }
 };
 
 const actions = {};
@@ -27,5 +30,6 @@ function resetState() {
   return {
     configuration: undefined,
     user: {},
+    isLoggedIn: undefined
   };
 }

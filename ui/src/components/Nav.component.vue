@@ -18,23 +18,18 @@
       <!-- to bar right  -->
       <ul class="flex items-center">
         <li class="pr-6">
-          <router-link to="/login">
-            <button><h1 class="pl-8 lg:pl-0 text-gray-700">Analytics</h1></button>
-          </router-link>
-        </li>
-        <li class="pr-6">
           <button>
-            <router-link to="/login"><h1 class="pl-8 lg:pl-0 text-gray-700">Help Guides</h1></router-link>
+            <router-link to="/help"><h1 class="pl-8 lg:pl-0 text-gray-700">Help</h1></router-link>
           </button>
         </li>
         <li class="pr-6">
-          <span>
+          <span v-show="this.isLoggedIn">
             <button @click="this.logout()">
             <h1 class="pl-8 lg:pl-0 text-gray-700">Logout</h1>
           </button>
           </span>
           &nbsp;
-          <span>
+          <span v-show="!this.isLoggedIn">
             <button>
               <router-link to="/login">
                 <h1 class="pl-8 lg:pl-0 text-gray-700">Login</h1>
@@ -42,7 +37,7 @@
             </button>
           </span>
         </li>
-        <li class="h-5 w-5">
+        <li class="h-5 w-5" v-show="this.isLoggedIn">
           <button>
             <router-link to="/user">
               <i class="far fa-1x fa-user"></i>
@@ -67,8 +62,7 @@ export default {
   name: 'NavView',
   data() {
     return {
-      isLoggedIn: false,
-      isLoggedOf: false
+      isLoggedIn: false
     };
   },
   computed: {
@@ -77,13 +71,16 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$store.state.user)
+    let isLoggedIn = getLocalStorage({ key: 'isLoggedIn' });
+    this.isLoggedIn = isLoggedIn;
   },
   methods: {
     async logout() {
       console.log(`Logout: ${ this.$store.state.user }`);
       await this.$http.get({ route: "/logout" });
       removeLocalStorage({ key: tokenSessionKey });
+      removeLocalStorage({ key: 'isLoggedIn' });
+      this.isLoggedIn = false;
       await this.$router.push('/welcome');
     }
   }

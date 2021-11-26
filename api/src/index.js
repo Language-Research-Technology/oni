@@ -52,6 +52,7 @@ let configuration;
   server.use(restify.plugins.gzipResponse());
   server.use(
     restify.plugins.bodyParser({
+      params: true,
       maxBodySize: 0,
       mapParams: true,
       mapFiles: false,

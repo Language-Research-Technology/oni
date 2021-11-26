@@ -1,6 +1,7 @@
 const models = require('../models');
-const { loadConfiguration } = require('../services');
+const { getLogger, loadConfiguration } = require('../services');
 const { uniqBy } = require('lodash');
+const log = getLogger();
 
 async function getUsers({ offset = 0, limit = 10 }) {
   let users = await models.user.findAndCountAll({
@@ -14,10 +15,8 @@ async function getUsers({ offset = 0, limit = 10 }) {
   return { total: users.count, users: users.rows.map((u) => u.get()) };
 }
 
-async function getUser({ userId, providerId }) {
-  let where = {};
-  if (userId) where.providerId = userId;
-  if (providerId) where.providerId = providerId;
+async function getUser({ where }) {
+  //Usage: getUser({ where: { column: value })
   let user = await models.user.findOne({
     where,
   });
@@ -29,8 +28,10 @@ async function createUser(data) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
-
-  let user = await models.user.findOne({ where: { providerId: data.providerId } });
+  const providerId = data.providerId;
+  let user = await models.user.findOne({
+    where: { providerId: providerId.toString() }
+  });
 
   if (!user) {
     // no user account found but email in admin list
@@ -38,14 +39,16 @@ async function createUser(data) {
     data.upload = true;
     data.administrator = true;
 
-    user = (
-      await models.user.findOrCreate({
-        where: { providerId: data.providerId },
-        defaults: data,
-      })
-    )[0];
+    user = await models.user.findOrCreate({
+      where: { providerId: data.providerId.toString() },
+      defaults: data,
+    });
+
   } else if (user && !configuration.api.administrators.includes(data.providerId)) {
     // user account found and not admin
+
+    log.debug(`User Id : ${ user['id'] }`);
+
     user.locked = false;
     user.upload = false;
     user.administrator = false;
@@ -58,13 +61,12 @@ async function createUser(data) {
 
     await user.save();
   }
-  delete user['apiToken'];
   return user;
 }
 
-async function updateUser({ userId, apiToken }) {
-  let user = await models.user.findOne({ where: { providerId: userId } });
-  user.apiToken = apiToken;
+async function updateUser({ where, key, value }) {
+  let user = await models.user.findOne(where);
+  user[key] = value;
   await user.save();
   return user;
 }
@@ -107,10 +109,10 @@ async function createAllowedUserStubAccounts({ emails }) {
 }
 
 module.exports = {
-  getUsers: getUsers,
-  getUser: getUser,
-  createUser: createUser,
-  deleteUser: deleteUser,
-  updateUser: updateUser,
-  createAllowedUserStubAccounts: createAllowedUserStubAccounts
+  getUsers,
+  getUser,
+  createUser,
+  deleteUser,
+  updateUser,
+  createAllowedUserStubAccounts
 }

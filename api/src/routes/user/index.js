@@ -8,7 +8,7 @@ function setupUserRoutes({ server, configuration }) {
   server.get("/user", async (req, res, next) => {
     try {
       if (req['user']) {
-        const user = await getUser({ userId: req['user']['id'] });
+        const user = await getUser({ where: { id: req['user']['id'] } });
         user['apiToken'] = null;
         res.json({ user }).status(200);
       } else {
@@ -22,11 +22,12 @@ function setupUserRoutes({ server, configuration }) {
   });
   server.get("/user/token", async (req, res, next) => {
     try {
-      if (req['user']) {
-        const providerId = req['user']['id'] //TODO: fix this.
+      if (req.isAuthenticated() && req['user']) {
+        const id = req['user']['id'];
         const user = await updateUser({
-          userId: providerId,
-          apiToken: uuidv4()
+          where: { where: { id: id } },
+          key: 'apiToken',
+          value: uuidv4()
         });
         res.json({ user }).status(200);
       } else {
