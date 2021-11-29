@@ -28,7 +28,6 @@ export default {
   },
   data() {
     return {
-      configuration: this.$store.state.configuration.authentication[this.provider],
       scope: "openid profile email",
       loggingIn: false,
     };

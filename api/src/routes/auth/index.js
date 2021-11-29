@@ -47,12 +47,12 @@ function setupAuthRoutes({ server, passport, configuration }) {
   });
 
   passport.use(new BearerStrategy(
-    async function (token, done) {
+    async function (token, verified) {
       const user = await getUser({ where: { apiToken: token } });
       if (!user) {
-        return done(null, false);
+        return verified(null, false);
       }
-      return done(null, user, { scope: 'all' });
+      return verified(null, user, { scope: 'all' });
     }
   ));
   /*

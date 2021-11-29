@@ -39,16 +39,7 @@ export default {
     return {
       siteName: this.$store.state.configuration.ui.siteName,
       siteNameX: this.$store.state.configuration.ui.siteNameX || '',
-      loginProviders: [
-        { name: "google", buttonClass: 'bg-red-600 disabled:opacity-50', text: "Sign with Google", disabled: true },
-        {
-          name: "facebook",
-          buttonClass: 'bg-blue-600 disabled:opacity-50',
-          text: "Sign with Facebook",
-          disabled: true
-        },
-        { name: "github", buttonClass: 'bg-gray-800 hover:bg-gray-800', text: "Sign with Github", disabled: false },
-      ],
+      loginProviders: this.$store.state.configuration.ui.loginProviders,
       showAdmin: false
     };
   },
