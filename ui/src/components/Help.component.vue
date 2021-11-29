@@ -32,21 +32,23 @@ export default {
         {
           title: 'HTTP Get : /api/auth/memberships',
           head: `Get and set your membership access to collections.`,
-          boxHeader: 'Example: Show and set your access and memgerships',
+          boxHeader: 'Example: Show and set your access and memberships',
           boxTypes: [ 'python' ],
           box: [ {
             body: `
 import requests
+import json
 
 # Check your membership
-host = "${ location.protocol }${ location.host }"
+host = "${ location.protocol }//${ location.host }"
 headers = {
   'Content-Type': 'application/json',
   'Authorization': 'Bearer 12356'
 }
 
 response = requests.request("GET", host + '/api/auth/memberships', headers=headers, data=payload)
-print(response.text)
+result = json.loads(response.text)
+print(json.dumps(result, indent=2))
 `,
             selectType: 'python'
           }
@@ -64,7 +66,7 @@ file: ID of file from repository`,
 import requests
 
 # Download FILE_ID from RECORD_ID collection
-host = "${ location.protocol }${ location.host }"
+host = "${ location.protocol }//${ location.host }"
 url = host + "/api/data/item?id=RECORD_ID&file=FILE_ID"
 
 payload={}
