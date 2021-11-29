@@ -1,6 +1,6 @@
 const models = require('../models');
 const { getLogger, loadConfiguration } = require('../services');
-const { uniqBy } = require('lodash');
+const { uniqBy, first } = require('lodash');
 const log = getLogger();
 
 async function getUsers({ offset = 0, limit = 10 }) {
@@ -43,6 +43,7 @@ async function createUser(data) {
       where: { providerId: data.providerId.toString() },
       defaults: data,
     });
+    user = first(user);
 
   } else if (user && !configuration.api.administrators.includes(data.providerId)) {
     // user account found and not admin

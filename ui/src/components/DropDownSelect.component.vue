@@ -35,22 +35,10 @@
         <div>
           <!-- TODO: pass code as props -->
     <pre class="important-overflow-hidden w-full text-sm max-h-100 rounded-lg shadow-lg">
-                      <code class="language-python">
-import requests
-
-url = "http://localhost:8080/api/data/item?id=RECORD_ID&file=FILE_ID"
-
-payload={}
-headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer 123456'
-}
-
-response = requests.request("GET", url, headers=headers, data=payload)
-
-print(response.text)
-                      </code>
-                    </pre>
+      <code :class="'language-'+this.body[0].selectType">
+      {{ this.body[0].body }}
+      </code>
+    </pre>
         </div>
       </div>
 
@@ -77,7 +65,7 @@ export default {
       required: true
     },
     body: {
-      type: Object,
+      type: String,
       required: true,
     }
   },

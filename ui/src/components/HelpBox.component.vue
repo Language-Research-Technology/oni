@@ -1,10 +1,12 @@
 <template>
-  <div class="min-h-screen p-6 bg-gray-200 flex justify-center">
+  <div class="p-6 bg-gray-200 flex justify-center">
     <div class="container max-w-screen-lg mx-auto">
       <div class="md:col-span-5">
         <div class="relative">
-          <h2>{{ title }}</h2>
-          <p>{{ head }}</p>
+          <div>
+            <pre>{{ title }}</pre>
+            <pre>{{ head }}</pre>
+          </div>
         </div>
         <drop-down-select
             :head="boxHeader"

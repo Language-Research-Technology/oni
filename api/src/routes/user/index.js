@@ -10,6 +10,7 @@ function setupUserRoutes({ server, configuration }) {
       if (req['user']) {
         const user = await getUser({ where: { id: req['user']['id'] } });
         user['apiToken'] = null;
+        user['accessToken'] = '....removed';
         res.json({ user }).status(200);
       } else {
         res.json({ user: null }).status(200);
@@ -28,6 +29,25 @@ function setupUserRoutes({ server, configuration }) {
           where: { where: { id: id } },
           key: 'apiToken',
           value: uuidv4()
+        });
+        res.json({ user }).status(200);
+      } else {
+        res.json({ user: null }).status(200);
+      }
+    } catch (e) {
+      log.error(e);
+      res.send({ error: e['message'] }).status(500);
+      next();
+    }
+  });
+  server.del("/user/token", async (req, res, next) => {
+    try {
+      if (req.isAuthenticated() && req['user']) {
+        const id = req['user']['id'];
+        const user = await updateUser({
+          where: { where: { id: id } },
+          key: 'apiToken',
+          value: null
         });
         res.json({ user }).status(200);
       } else {

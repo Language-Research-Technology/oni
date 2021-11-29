@@ -24,7 +24,7 @@ function setupRoutes({ server, configuration }) {
   });
   server.get('/configuration', async (req, res, next) => {
     let configuration = await loadConfiguration();
-    res.send({ ui: configuration.ui, authentication: configuration.api.authentication });
+    res.send({ ui: configuration.ui});
     next();
   });
 
