@@ -17,5 +17,5 @@ async function getRecordMembers({ recordId }) {
 }
 
 module.exports = {
-  getRecordMembers: getRecordMembers
+  getRecordMembers
 }

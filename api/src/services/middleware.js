@@ -36,9 +36,9 @@ async function demandAdministrator(req, res, next) {
 }
 
 module.exports = {
-  route: route,
-  routeAdmin: routeAdmin,
-  demandAuthenticatedUser: demandAuthenticatedUser,
-  demandAdministrator: demandAdministrator
+  route,
+  routeAdmin,
+  demandAuthenticatedUser,
+  demandAdministrator
 }
 

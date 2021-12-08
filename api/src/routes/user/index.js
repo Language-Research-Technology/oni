@@ -62,5 +62,5 @@ function setupUserRoutes({ server, configuration }) {
 }
 
 module.exports = {
-  setupUserRoutes: setupUserRoutes
+  setupUserRoutes
 }

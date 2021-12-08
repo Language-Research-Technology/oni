@@ -78,5 +78,5 @@ function setupAuthRoutes({ server, passport, configuration }) {
 
 
 module.exports = {
-  setupAuthRoutes: setupAuthRoutes
+  setupAuthRoutes
 }

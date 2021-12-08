@@ -29,5 +29,5 @@ async function getRootTypes({ crateId }) {
 }
 
 module.exports = {
-  getRootTypes: getRootTypes
+  getRootTypes
 }

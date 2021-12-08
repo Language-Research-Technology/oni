@@ -97,5 +97,5 @@ function setupGithubRoutes({ server, passport, configuration }) {
 
 
 module.exports = {
-  setupGithubRoutes: setupGithubRoutes
+  setupGithubRoutes
 }

@@ -9,5 +9,5 @@ function workingPath(currentPath) {
 }
 
 module.exports = {
-  workingPath: workingPath
+  workingPath
 }

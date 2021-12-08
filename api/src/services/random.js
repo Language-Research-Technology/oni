@@ -219,21 +219,21 @@ function fabulousId() {
 
 
 module.exports = {
-  makedir: makedir,
-  int: int,
-  float: float,
-  arrayFill: arrayFill,
-  organization: organization,
-  keyword: keyword,
-  sentence: sentence,
-  text: text,
-  geoPoint: geoPoint,
-  placeName: placeName,
-  person: person,
-  license: license,
-  dataFile: dataFile,
-  dataFiles: dataFiles,
-  subMembers: subMembers,
-  members: members,
-  collection: collection
+  makedir,
+  int,
+  float,
+  arrayFill,
+  organization,
+  keyword,
+  sentence,
+  text,
+  geoPoint,
+  placeName,
+  person,
+  license,
+  dataFile,
+  dataFiles,
+  subMembers,
+  members,
+  collection
 }

@@ -91,7 +91,7 @@ async function createROCrate({ dest, collection, id, repoName }) {
 }
 
 module.exports = {
-  loadSourceData: loadSourceData,
-  randomCollections: randomCollections,
-  createROCrate: createROCrate
+  loadSourceData,
+  randomCollections,
+  createROCrate
 }

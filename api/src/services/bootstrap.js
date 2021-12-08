@@ -60,6 +60,6 @@ async function initOCFL({ configuration }) {
 }
 
 module.exports = {
-  bootstrap: bootstrap,
-  initOCFL: initOCFL
+  bootstrap,
+  initOCFL
 }

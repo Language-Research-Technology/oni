@@ -60,6 +60,6 @@ function filterPrivateInformation({configuration}) {
 // }
 
 module.exports = {
-  loadConfiguration:loadConfiguration,
-  filterPrivateInformation:filterPrivateInformation
+  loadConfiguration,
+  filterPrivateInformation
 }

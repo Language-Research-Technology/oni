@@ -58,14 +58,14 @@ async function teardownAfterAll(configuration) {
 }
 
 module.exports = {
-  testOCFLConf: testOCFLConf,
-  testCreate: testCreate,
-  testHost: testHost,
-  testLicense: testLicense,
-  testIdentifier: testIdentifier,
-  setupBeforeAll: setupBeforeAll,
-  cloneDeep: cloneDeep,
-  setupBeforeEach: setupBeforeEach,
-  teardownAfterEach: teardownAfterEach,
-  teardownAfterAll: teardownAfterAll
+  testOCFLConf,
+  testCreate,
+  testHost,
+  testLicense,
+  testIdentifier,
+  setupBeforeAll,
+  cloneDeep,
+  setupBeforeEach,
+  teardownAfterEach,
+  teardownAfterAll
 }

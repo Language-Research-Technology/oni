@@ -198,13 +198,13 @@ async function getFile({ record, itemId, catalogFilename }) {
 }
 
 module.exports = {
-  deleteRecords: deleteRecords,
-  getRecords: getRecords,
-  getRecord: getRecord,
-  createRecord: createRecord,
-  createRecordWithCrate: createRecordWithCrate,
-  findRecordByIdentifier: findRecordByIdentifier,
-  getRawCrate: getRawCrate,
-  getUridCrate: getUridCrate,
-  getFile: getFile
+  deleteRecords,
+  getRecords,
+  getRecord,
+  createRecord,
+  createRecordWithCrate,
+  findRecordByIdentifier,
+  getRawCrate,
+  getUridCrate,
+  getFile
 }

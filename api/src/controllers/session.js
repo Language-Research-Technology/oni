@@ -37,7 +37,7 @@ async function destroySession({ sessionId }) {
 }
 
 module.exports = {
-  getSession: getSession,
-  createSession: createSession,
-  destroySession: destroySession
+  getSession,
+  createSession,
+  destroySession
 }

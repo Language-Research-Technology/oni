@@ -30,5 +30,5 @@ async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFile
 }
 
 module.exports = {
-  transformURIs: transformURIs
+  transformURIs
 }

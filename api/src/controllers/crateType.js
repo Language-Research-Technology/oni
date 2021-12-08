@@ -27,5 +27,5 @@ async function getRecordTypes({ recordId, types }) {
 }
 
 module.exports = {
-  getRecordTypes: getRecordTypes
+  getRecordTypes
 }

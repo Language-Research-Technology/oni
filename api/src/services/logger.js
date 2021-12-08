@@ -15,5 +15,5 @@ function getLogger() {
 }
 
 module.exports = {
-  getLogger: getLogger
+  getLogger
 }

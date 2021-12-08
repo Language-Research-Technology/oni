@@ -33,6 +33,6 @@ async function verifyToken({ token, configuration }) {
 }
 
 module.exports = {
-  generateToken: generateToken,
-  verifyToken: verifyToken
+  generateToken,
+  verifyToken
 }
