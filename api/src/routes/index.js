@@ -3,7 +3,7 @@
 const models = require('../models');
 const { UnauthorizedError, ForbiddenError } = require('restify-errors');
 const { route, loadConfiguration } = require('../services');
-const { setupRecordRoutes } = require('./data/record');
+const { setupDataRoutes } = require('./data');
 const { setupUserRoutes } = require('./user');
 const { setupAuthRoutes } = require('./auth');
 const passport = require('passport');
@@ -28,10 +28,10 @@ function setupRoutes({ server, configuration }) {
     next();
   });
 
-  setupRecordRoutes({ server, passport, configuration });
+  setupDataRoutes({ server, passport, configuration });
   setupUserRoutes({ server, passport, configuration });
 }
 
 module.exports = {
-  setupRoutes: setupRoutes
+  setupRoutes
 }

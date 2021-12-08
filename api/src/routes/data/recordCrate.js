@@ -3,7 +3,7 @@ const { getLogger } = require('../../services');
 
 const log = getLogger();
 
-async function getDataRoCrate({ req, res, next, configuration }) {
+async function getRecordCrate({ req, res, next, configuration }) {
   log.debug(`get data ${ req.query.id }`);
   let record = await getRecord({ crateId: req.query.id });
   if (record.data) {
@@ -32,5 +32,5 @@ async function getDataRoCrate({ req, res, next, configuration }) {
 }
 
 module.exports = {
-  getDataRoCrate: getDataRoCrate
+  getRecordCrate
 }

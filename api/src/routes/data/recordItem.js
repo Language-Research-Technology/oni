@@ -5,7 +5,7 @@ const { licenseChecker, isAuthorized } = require('../../services/license');
 const { getUserMemberships } = require('../../controllers/userMembership');
 const log = getLogger();
 
-async function getDataItem({ req, res, next, configuration }) {
+async function getRecordItem({ req, res, next, configuration }) {
   log.debug(`Get data item: ${ req.query.id } : ${ req.query.file }`)
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
@@ -62,5 +62,5 @@ async function getDataItem({ req, res, next, configuration }) {
 }
 
 module.exports = {
-  getDataItem: getDataItem
+  getRecordItem
 }

@@ -4,7 +4,7 @@ const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
 const { ROCrate } = require('ro-crate');
 const log = getLogger();
 
-async function getResolveLinks({ req, res, next, configuration }) {
+async function getRecordResolveLinks({ req, res, next, configuration }) {
   try {
     log.debug(`Get resolve-links: ${ req.query.id }`);
     const response = [];
@@ -85,5 +85,5 @@ function findAndReplace(object, value, replacevalue) {
 }
 
 module.exports = {
-  getResolveLinks: getResolveLinks
+  getRecordResolveLinks
 }
