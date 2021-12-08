@@ -12,13 +12,14 @@ async function getDataItem({ req, res, next, configuration }) {
   let message = 'Not Found';
   if (record.data) {
     if (configuration['api']['licenses'] && record.data['license']) {
-      const memberships = await getUserMemberships({ where: { userId: req['user']['id'] } })
+      const user = req['user'];
+      const userId = user.id
+      const memberships = await getUserMemberships({ where: { userId: userId } })
       pass = isAuthorized({
         memberships,
         license: record.data['license'],
         licenseConfiguration: configuration['api']['licenses']
       });
-      message = 'Not Authorized';
     } else {
       pass = true;
     }
@@ -46,9 +47,11 @@ async function getDataItem({ req, res, next, configuration }) {
         });
         filestream.pipe(res);
       } else {
+        message = 'File not found';
         res.json({ id: req.query.id, file: req.query.file, message: message }).status(401);
       }
     } else {
+      message = 'Not authorized';
       res.json({ id: req.query.id, file: req.query.file, message: message }).status(404);
       next();
     }

@@ -28,7 +28,7 @@ async function getRootConformsTos({ conforms, members }) {
         attributes: { exclude: [ 'id', 'recordId'] },
         include: [ {
           model: models.record,
-          attributes: [ 'name', 'license', 'diskPath', 'description' ]
+          attributes: [ 'name', 'license', 'description' ]
         } ]
       });
       return conformsTo;
@@ -39,7 +39,7 @@ async function getRootConformsTos({ conforms, members }) {
                m."memberOf",
                r."license"     as "record.license",
                r."name"        as "record.name",
-               r."diskPath"    as "record.diskPath",
+               --r."diskPath"    as "record.diskPath",
                r."description" as "record.description"
         FROM public."records" as r,
              public."rootMemberOfs" as m,
@@ -67,6 +67,6 @@ async function getRootConformsTos({ conforms, members }) {
 }
 
 module.exports = {
-  getRootConformsToByCrateId:getRootConformsToByCrateId,
-  getRootConformsTos: getRootConformsTos
+  getRootConformsToByCrateId,
+  getRootConformsTos
 }

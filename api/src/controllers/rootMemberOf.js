@@ -10,7 +10,7 @@ async function getRootMemberOfs({ crateId }) {
         memberOf: crateId
       },
       include: [
-        { model: models.record, attributes: [ 'id', 'name', 'license', 'diskPath', 'description' ] }
+        { model: models.record, attributes: [ 'id', 'name', 'license', 'description' ] }
       ]
     });
     return {
@@ -20,5 +20,5 @@ async function getRootMemberOfs({ crateId }) {
 }
 
 module.exports = {
-  getRootMemberOfs: getRootMemberOfs
+  getRootMemberOfs
 }

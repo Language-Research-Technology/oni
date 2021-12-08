@@ -99,12 +99,12 @@ async function getDataTypes({ req, res }) {
 
 
 module.exports = {
-  getDataRoCrate: getDataRoCrate,
-  getAllRecords: getAllRecords,
-  getDataSingleRecord: getDataSingleRecord,
-  getDataConformsTo: getDataConformsTo,
-  getDataMembers: getDataMembers,
-  getDataTypes: getDataTypes,
+  getDataRoCrate,
+  getAllRecords,
+  getDataSingleRecord,
+  getDataConformsTo,
+  getDataMembers,
+  getDataTypes,
   getDataRoCrate: require('./crate').getDataRoCrate,
   getDataItem: require('./item').getDataItem,
   getResolveLinks: require('./resolve').getResolveLinks,
