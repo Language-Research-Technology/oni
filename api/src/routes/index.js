@@ -3,7 +3,7 @@
 const models = require('../models');
 const { UnauthorizedError, ForbiddenError } = require('restify-errors');
 const { route, loadConfiguration } = require('../services');
-const { setupDataRoutes } = require('./data');
+const { setupDataRoutes } = require('./object');
 const { setupUserRoutes } = require('./user');
 const { setupAuthRoutes } = require('./auth');
 const passport = require('passport');

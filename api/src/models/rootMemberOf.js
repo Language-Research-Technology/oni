@@ -10,7 +10,7 @@ module.exports = function (sequelize, DataTypes) {
       },
       memberOf: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: true
       },
       crateId: {
         type: DataTypes.TEXT,

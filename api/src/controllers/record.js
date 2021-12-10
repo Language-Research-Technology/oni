@@ -79,6 +79,14 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
       });
       await r.addRootMemberOf(member);
     }
+    // If there is no memberOf it means its an oprhan?
+    if(memberOfs.length < 1){
+      const member = await models.rootMemberOf.create({
+        memberOf: null,
+        crateId: data.crateId
+      });
+      await r.addRootMemberOf(member);
+    }
     conformsTos = castArray(conformsTos);
     for (const ele of conformsTos) {
       const conformsTo = await models.rootConformsTo.create({
@@ -153,13 +161,15 @@ async function decodeHash({ id }) {
   // hash it and then find it by it.
 }
 
-async function getRawCrate({ diskPath, catalogFilename }) {
+async function getRawCrate({ diskPath, catalogFilename, version }) {
+  // TODO: return a specific version
   const ocflObject = new OcflObject(diskPath);
   const json = await readCrate(ocflObject, catalogFilename);
   return json;
 }
 
-async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform }) {
+async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform, version }) {
+  // TODO: return a specific version
   const ocflObject = new OcflObject(diskPath);
   const newCrate = await transformURIs({
     host,

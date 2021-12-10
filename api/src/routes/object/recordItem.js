@@ -6,7 +6,7 @@ const { getUserMemberships } = require('../../controllers/userMembership');
 const log = getLogger();
 
 async function getRecordItem({ req, res, next, configuration }) {
-  log.debug(`Get data item: ${ req.query.id } : ${ req.query.file }`)
+  log.debug(`Get data item: ${ req.query.id } : ${ req.query.path }`)
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
   let message = 'Not Found';
@@ -27,7 +27,7 @@ async function getRecordItem({ req, res, next, configuration }) {
     if (pass) {
       const fileObj = await getFile({
         record: record.data,
-        itemId: req.query.file,
+        itemId: req.query.path,
         catalogFilename: configuration.api.ocfl.catalogFilename
       });
       if (fs.pathExistsSync(fileObj.filePath)) {
@@ -47,16 +47,16 @@ async function getRecordItem({ req, res, next, configuration }) {
         });
         filestream.pipe(res);
       } else {
-        message = 'File not found';
-        res.json({ id: req.query.id, file: req.query.file, message: message }).status(401);
+        message = 'Path not found';
+        res.json({ id: req.query.id, path: req.query.path, message: message }).status(401);
       }
     } else {
       message = 'Not authorized';
-      res.json({ id: req.query.id, file: req.query.file, message: message }).status(404);
+      res.json({ id: req.query.id, path: req.query.path, message: message }).status(404);
       next();
     }
   } else {
-    res.send({ message: `File: ${ req.query.file } not found` }).status(404);
+    res.send({ message: `Path: ${ req.query.path } of ${ req.query.id } not found` }).status(404);
     next();
   }
 }

@@ -1,20 +1,20 @@
-const { getRecord, getUridCrate } = require('../../controllers/record');
-const { getLogger } = require('../../services');
-const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
 const { ROCrate } = require('ro-crate');
+const { getRecord, getUridCrate } = require('./record');
+const { getRootMemberOfs } = require('./rootMemberOf');
+const { getLogger } = require('../services');
 const log = getLogger();
 
-async function getRecordResolveLinks({ req, res, next, configuration }) {
+async function recordResolve({ id, configuration }) {
   try {
-    log.debug(`Get resolve-links: ${ req.query.id }`);
+    log.debug(`Get resolve-parts: ${ id }`);
     const response = [];
     await resolveProfile({
-      crateId: req.query.id,
+      crateId: id,
       response: response,
       configuration: configuration
     });
     if (response.length < 1) {
-      res.send({ id: req.query.id, message: 'Not Found' }).status(404);
+      return null;
     } else {
       const rocrate = new ROCrate();
       rocrate.index();
@@ -36,14 +36,14 @@ async function getRecordResolveLinks({ req, res, next, configuration }) {
       const index = rocrate.json_ld['@graph'].findIndex((o) => o['@id'] === './');
       if (index > -1) rocrate.json_ld['@graph'].splice(index, 1);
       //Deleted and then replaced with the req.query.id
-      findAndReplace(rocrate.json_ld['@graph'], req.query.id, './');
+      findAndReplace(rocrate.json_ld['@graph'], id, './');
       log.debug('Deleted root "./"');
-      res.send(rocrate.json_ld).status(200);
-      next();
+      return rocrate.json_ld;
     }
   } catch (e) {
     log.error(e);
-    res.send({ error: 'Error trying to resolve links', message: e.message }).status(500);
+    log.error('Error trying to resolve links');
+    throw new Error(e);
   }
 }
 
@@ -84,6 +84,7 @@ function findAndReplace(object, value, replacevalue) {
   }
 }
 
+
 module.exports = {
-  getRecordResolveLinks
+  recordResolve
 }
