@@ -1,9 +1,9 @@
 require("regenerator-runtime/runtime");
-const fs = require("fs-extra");
+import fs from "fs-extra";
 
-const { getRecords } = require("../controllers/record");
-const { bootstrap } = require("./bootstrap");
-const { testLicense, testIdentifier, testOCFLConf } = require("./");
+import { getRecords } from "../controllers/record";
+import { bootstrap } from "./bootstrap";
+import { testLicense, testIdentifier, testOCFLConf } from "./";
 
 jest.setTimeout(10000);
 

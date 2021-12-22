@@ -1,10 +1,10 @@
-const { getRecord, getRecords } = require('../../controllers/record');
-const { getRootConformsTos } = require('../../controllers/rootConformsTo');
-const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
-const { getRootTypes } = require('../../controllers/rootType');
-const { merge } = require('lodash');
-const { getLogger } = require('../../services');
-const { recordResolve } = require('../../controllers/recordResolve');
+import { getRecord, getRecords } from '../../controllers/record';
+import { getRootConformsTos } from '../../controllers/rootConformsTo';
+import { getRootMemberOfs } from '../../controllers/rootMemberOf';
+import { getRootTypes } from '../../controllers/rootType';
+import { merge } from 'lodash';
+import { getLogger } from '../../services';
+import { recordResolve } from '../../controllers/recordResolve';
 
 const log = getLogger();
 

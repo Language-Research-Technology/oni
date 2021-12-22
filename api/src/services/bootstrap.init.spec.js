@@ -1,12 +1,11 @@
 require("regenerator-runtime/runtime");
-const fs = require("fs-extra");
-const {ROCrate} = require("ro-crate");
-const {loadFromOcfl, checkin, connectRepo} = require("oni-ocfl");
+import fs from  "fs-extra";
+import {ROCrate} from "ro-crate";
+import {loadFromOcfl, checkin, connectRepo} from  "oni-ocfl";
+import {testOCFLConf as ocfl} from "./";
 
 let records;
 let crate;
-
-import {testOCFLConf as ocfl} from "./";
 
 const testData = {
     roCrateDir: "../test-data/rocrates/farmstofreeways",

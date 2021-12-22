@@ -1,5 +1,5 @@
-const { UnauthorizedError, ForbiddenError } = require('restify-errors');
-const { loadConfiguration, verifyToken } = require('./configuration');
+import { UnauthorizedError, ForbiddenError } from 'restify-errors';
+import { loadConfiguration, verifyToken } from './configuration';
 
 function route(handler) {
   return [ demandAuthenticatedUser, handler ];

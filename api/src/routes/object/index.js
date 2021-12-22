@@ -1,18 +1,19 @@
-const { getLogger } = require('../../services');
-const log = getLogger();
-const { isUndefined } = require('lodash');
-const {
+import { getLogger } from '../../services';
+import { isUndefined } from 'lodash';
+import {
   getRecordConformsTo,
   getAllRecords,
   getRecordSingle,
   getRecordMembers,
   getRecordTypes,
   getResolveParts
-} = require('./record');
-const { getRecordCrate } = require('./recordCrate');
-const { getRecordItem } = require('./recordItem');
-const { getRecordResolveLinks } = require('./recordResolve');
-const { routeBearer } = require('../../middleware/auth');
+} from './record';
+import { getRecordCrate } from './recordCrate';
+import { getRecordItem } from './recordItem';
+import { getRecordResolveLinks } from './recordResolve';
+import { routeBearer } from '../../middleware/auth';
+
+const log = getLogger();
 
 function setupObjectRoutes({ server, configuration }) {
 

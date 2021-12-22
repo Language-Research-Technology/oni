@@ -1,6 +1,6 @@
-const models = require('../models');
-const { getLogger } = require('../services/logger');
-const { uniqBy, first } = require('lodash');
+import models from "../models";
+import { getLogger } from '../services/logger';
+import { uniqBy, first } from 'lodash';
 const log = getLogger();
 
 async function getUsers({ offset = 0, limit = 10 }) {

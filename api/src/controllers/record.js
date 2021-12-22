@@ -1,9 +1,9 @@
-const models = require("../models");
-const { getLogger } = require("../services");
-const { getItem, readCrate } = require("oni-ocfl");
-const { OcflObject } = require("ocfl");
-const { transformURIs } = require("../services/ro-crate-utils");
-const { castArray } = require('lodash');
+import models from "../models";
+import { getLogger } from "../services";
+import { getItem, readCrate } from "oni-ocfl";
+import { OcflObject } from "ocfl";
+import { transformURIs } from "../services/ro-crate-utils";
+import { castArray } from 'lodash';
 
 const log = getLogger();
 

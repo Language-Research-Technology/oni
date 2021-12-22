@@ -1,7 +1,8 @@
 import { Octokit } from "@octokit/core";
-const { getLogger } = require("../services");
+import { getLogger } from "../services";
+import { filter } from 'lodash';
+
 const log = getLogger();
-const { filter } = require('lodash');
 
 async function getGroupMembership(user, org) {
   try {

@@ -1,7 +1,7 @@
-const { getLogger } = require('./index');
-const { createRecord, deleteRecords } = require('../controllers/record');
-const { loadFromOcfl, arcpId } = require('oni-ocfl');
-const { ROCrate } = require('ro-crate');
+import { getLogger } from './index';
+import { createRecord, deleteRecords } from '../controllers/record';
+import { loadFromOcfl, arcpId } from 'oni-ocfl';
+import { ROCrate } from 'ro-crate';
 
 const log = getLogger();
 

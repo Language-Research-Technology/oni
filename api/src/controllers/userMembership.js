@@ -1,6 +1,6 @@
-const models = require('../models');
-const { loadConfiguration } = require('../services');
-const { uniqBy } = require('lodash');
+import models from "../models";
+import { loadConfiguration } from '../services';
+import { uniqBy } from 'lodash';
 
 async function createUserMemberships({ memberships, user }) {
 

@@ -1,6 +1,6 @@
-const models = require("../models");
-const { getLogger } = require("../services");
-const { isUndefined, flatten } = require('lodash');
+import models from "../models";
+import { getLogger } from "../services";
+import { isUndefined } from 'lodash';
 
 const log = getLogger();
 

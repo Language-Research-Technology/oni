@@ -1,6 +1,6 @@
-const { castArray } = require('lodash');
-const models = require("../models");
-const { getLogger } = require("../services");
+import { castArray } from "lodash";
+import models from "../models";
+import { getLogger } from "../services";
 
 const log = getLogger();
 

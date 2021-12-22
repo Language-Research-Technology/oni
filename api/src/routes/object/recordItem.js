@@ -1,8 +1,9 @@
-const { getRecord, getFile } = require('../../controllers/record');
-const fs = require('fs-extra');
-const { getLogger } = require('../../services');
-const { licenseChecker, isAuthorized } = require('../../services/license');
-const { getUserMemberships } = require('../../controllers/userMembership');
+import { getRecord, getFile } from '../../controllers/record';
+import fs from 'fs-extra';
+import { getLogger } from '../../services';
+import { licenseChecker, isAuthorized } from '../../services/license';
+import { getUserMemberships } from '../../controllers/userMembership';
+
 const log = getLogger();
 
 async function getRecordItem({ req, res, next, configuration }) {

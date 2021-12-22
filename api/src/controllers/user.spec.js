@@ -1,15 +1,15 @@
 require("regenerator-runtime/runtime");
-const {
+import {
   getUsers,
   getUser,
   createUser,
   deleteUser,
   toggleUserCapability,
   createAllowedUserStubAccounts,
-} = require('./user');
+} from './user';
 
 const chance = require("chance").Chance();
-const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require('../services');
+import { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } from '../services';
 
 describe("User management tests", () => {
   let users, configuration;

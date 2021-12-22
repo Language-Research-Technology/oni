@@ -1,9 +1,10 @@
-const { getLogger } = require('../../services');
-const { isUndefined } = require('lodash');
-const { getUser, updateUser } = require('../../controllers/user');
+import { getLogger } from '../../services';
+import { isUndefined } from 'lodash';
+import { getUser, updateUser } from '../../controllers/user';
+import { v4 as uuidv4 } from 'uuid';
+import { routeUser } from '../../middleware/auth';
+
 const log = getLogger();
-const { v4: uuidv4 } = require('uuid');
-const { routeUser } = require('../../middleware/auth');
 
 function setupUserRoutes({ server, configuration }) {
   server.get("/user", routeUser(async (req, res, next) => {

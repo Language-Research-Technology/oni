@@ -2,10 +2,11 @@
 //
 import models from '../models';
 import { UnauthorizedError, ForbiddenError } from 'restify-errors';
-const { route, loadConfiguration } = require('../services');
-const { setupObjectRoutes } = require('./object');
-const { setupUserRoutes } = require('./user');
-const { setupAuthRoutes } = require('./auth');
+import { route, loadConfiguration } from '../services';
+import { setupObjectRoutes } from './object';
+import { setupUserRoutes } from './user';
+import { setupAuthRoutes } from './auth';
+
 const version = require('../../package.json')['version'];
 
 function setupRoutes({ server, configuration }) {

@@ -1,6 +1,6 @@
-const models = require("../models");
-const { getLogger } = require("../services");
-const { isEmpty } = require('lodash');
+import models from "../models";
+import { getLogger } from "../services";
+import { isEmpty } from 'lodash';
 
 const log = getLogger();
 

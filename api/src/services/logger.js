@@ -1,5 +1,5 @@
-const { createLogger, format, transports } = require("winston");
-const models = require('../models');
+import { createLogger, format, transports } from "winston";
+import models from'../models';
 const { combine, timestamp, printf } = format;
 
 function getLogger() {

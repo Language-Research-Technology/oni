@@ -26,16 +26,13 @@ async function generateToken({ configuration, user }) {
 
 async function verifyToken({ token, configuration }) {
   //try bearer token
-  console.log(token)
   const user = await getUser({ where: { apiToken: token } });
-  console.log(`trying bearer: ${user?.id}`)
   if (user?.id) {
     return user;
   } else {
     //try JWT token
     const key = createSecretKey(Buffer.from(configuration.api.session.secret, "utf-8"));
     let { payload } = await jwtVerify(token, key, {});
-    console.log(`trying JWT: ${payload?.id}`)
     if (isAfter(new Date(), parseISO(payload.expires))) {
       // token expired
       throw new Error(`token expired`);

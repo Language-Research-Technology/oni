@@ -1,4 +1,4 @@
-const {readJSON} = require("fs-extra");
+import {readJSON} from "fs-extra";
 
 const privateFields = ["clientSecret"];
 

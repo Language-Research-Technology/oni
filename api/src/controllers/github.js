@@ -1,6 +1,6 @@
-const { getUser } = require('../controllers/user');
-const { getTeamMembership, filterMemberships } = require('../services/github');
-const { createUserMemberships } = require('../controllers/userMembership');
+import { getUser } from './user';
+import { getTeamMembership, filterMemberships } from '../services/github';
+import { createUserMemberships } from './userMembership';
 
 async function getGithubMemberships({ userId, group }) {
 

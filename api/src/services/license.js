@@ -1,4 +1,4 @@
-const { getLogger } = require('../services');
+import { getLogger } from '../services';
 const log = getLogger();
 
 function isAuthorized({ memberships, license, licenseConfiguration }) {

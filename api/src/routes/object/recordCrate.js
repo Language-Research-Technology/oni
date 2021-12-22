@@ -1,6 +1,6 @@
-const { getRecord, getRawCrate, getUridCrate } = require('../../controllers/record');
-const { getLogger } = require('../../services');
-const { isUndefined } = require('lodash');
+import { getRecord, getRawCrate, getUridCrate } from '../../controllers/record';
+import { getLogger } from '../../services';
+import { isUndefined } from 'lodash';
 
 const log = getLogger();
 

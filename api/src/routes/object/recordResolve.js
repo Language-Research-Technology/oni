@@ -1,8 +1,8 @@
-const { getRecord, getUridCrate } = require('../../controllers/record');
-const { getLogger } = require('../../services');
-const { getRootMemberOfs } = require('../../controllers/rootMemberOf');
+import { getRecord, getUridCrate }from '../../controllers/record';
+import { getLogger }from '../../services';
+import { getRootMemberOfs }from '../../controllers/rootMemberOf';
+import { ROCrate }from 'ro-crate';
 
-const { ROCrate } = require('ro-crate');
 const log = getLogger();
 
 async function getRecordResolveLinks({ req, res, next, configuration }) {

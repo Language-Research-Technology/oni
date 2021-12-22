@@ -1,7 +1,7 @@
-const { ROCrate } = require('ro-crate');
-const { getRecord, getUridCrate } = require('./record');
-const { getRootMemberOfs } = require('./rootMemberOf');
-const { getLogger } = require('../services');
+import { ROCrate } from 'ro-crate';
+import { getRecord, getUridCrate } from './record';
+import { getRootMemberOfs } from './rootMemberOf';
+import { getLogger } from '../services';
 const log = getLogger();
 
 async function recordResolve({ id, configuration }) {

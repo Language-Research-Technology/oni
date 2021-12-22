@@ -1,5 +1,5 @@
-const models = require("../models");
-const { generateToken } = require("../services");
+import models from "../models";
+import { generateToken } from "../services";
 
 async function getSession({ userId, sessionId }) {
   let where = {};

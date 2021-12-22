@@ -1,11 +1,10 @@
 require('regenerator-runtime/runtime');
-const fetch = require("node-fetch");
 
-const { testHost, testOCFLConf } = require('../services');
-const { getRecord, getUridCrate } = require('./record');
-const { transformURIs } = require('../services/ro-crate-utils');
-const { OcflObject } = require('ocfl');
-const { ROCrate } = require('ro-crate');
+import { testHost, testOCFLConf } from '../services';
+import { getRecord, getUridCrate } from './record';
+import { transformURIs } from '../services/ro-crate-utils';
+import { OcflObject } from 'ocfl';
+import { ROCrate } from 'ro-crate';
 
 jest.setTimeout(10000);
 

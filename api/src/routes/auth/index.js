@@ -1,12 +1,12 @@
-const { getLogger } = require("../../services");
-const { setupGithubRoutes } = require('./github');
-const { getUser } = require('../../controllers/user');
-const sessions = require('client-sessions');
-const models = require('../../models');
-const { UnauthorizedError } = require('restify-errors');
-const { getGithubMemberships } = require('../../controllers/github');
-const { setupLoginRoutes } = require('./openid-auth');
-const { setupOauthRoutes } = require('./oauth2-auth');
+import { getLogger } from "../../services";
+import { setupGithubRoutes } from './github';
+import { getUser } from '../../controllers/user';
+import sessions from 'client-sessions';
+import models from '../../models';
+import { UnauthorizedError } from 'restify-errors';
+import { getGithubMemberships } from '../../controllers/github';
+import { setupLoginRoutes } from './openid-auth';
+import { setupOauthRoutes } from './oauth2-auth';
 import { routeUser, routeAdmin, routeBearer } from '../../middleware/auth';
 
 const log = getLogger();
