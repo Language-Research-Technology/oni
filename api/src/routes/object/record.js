@@ -78,7 +78,7 @@ async function getAllRecords({ req, res, next }) {
 }
 
 async function getResolveParts({ req, res, next, configuration, select }) {
-  const data = await recordResolve({ id: req.query.id, configuration })
+  const data = await recordResolve({ id: req.query.id, configuration });
   if (select && select.includes('parts')) {
     let parts = [];
     for (let graph of data['@graph']) {

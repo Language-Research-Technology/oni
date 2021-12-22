@@ -1,4 +1,5 @@
 const { createLogger, format, transports } = require("winston");
+const models = require('../models');
 const { combine, timestamp, printf } = format;
 
 function getLogger() {
@@ -14,6 +15,23 @@ function getLogger() {
   return logger;
 }
 
+
+async function logEvent({ level, owner, text, data }) {
+  const levels = ["info", "warn", "error"];
+  if (!level || !levels.includes(level)) {
+    throw new Error(`'level' is required and must be one of '${levels}'`);
+  }
+  if (!text) {
+    throw new Error(`'text' is required`);
+  }
+  try {
+    await models.log.create({ level, owner, text, data });
+  } catch (error) {
+    log.error(`Couldn't update logs table: ${level}: ${text}`);
+  }
+}
+
 module.exports = {
-  getLogger
+  getLogger,
+  logEvent
 }

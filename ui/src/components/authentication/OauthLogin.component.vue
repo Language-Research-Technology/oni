@@ -1,7 +1,7 @@
 <template>
-  <button class="w-full h-12 rounded-lg text-gray-200 uppercase font-semibold text-gray-100 transition mb-4"
+  <button class="w-full h-12 rounded-lg text-gray-200 uppercase font-semibold text-gray-100 transition mb-4 bg-gray-800 hover:bg-gray-800"
           :class="this.buttonClass" :disabled="this.disabled" @click="login()">
-    {{ this.buttonText }}<span class="text-xs">{{ this.disabled ? '(coming soon)' : '' }}</span>
+    {{ this.buttonText }}
   </button>
 </template>
 
@@ -24,10 +24,14 @@ export default {
     },
     buttonClass: {
       type: String
+    },
+    loginRoute: {
+      type: String
     }
   },
   data() {
     return {
+      configuration: this.$store.state.configuration.ui.loginProviders[this.provider],
       scope: "openid profile email",
       loggingIn: false,
     };
@@ -37,9 +41,10 @@ export default {
   methods: {
     async login() {
       this.loggingIn = true;
-      const code_verifier = '12345';
+      let response = await this.$http.get({ route: this.loginRoute });
+      let { url, code_verifier } = await response.json();
       putLocalStorage({ key: loginSessionKey, data: { code_verifier } });
-      window.location.href = `/api/auth/${ this.provider }/login`;
+      window.location.href = url;
     }
   }
 };

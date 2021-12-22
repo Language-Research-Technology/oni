@@ -10,6 +10,7 @@
           :provider="provider.name"
           :buttonClass="provider.buttonClass"
           :button-text="provider.text"
+          :loginRoute="provider.loginRoute"
       />
       <button class="text-gray-800 mb-4 pointer" @click="toggleAdmin()">Admin login</button>
       <div :class="this.showAdmin ? 'block': 'hidden'">

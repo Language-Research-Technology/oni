@@ -1,10 +1,10 @@
 require("regenerator-runtime/runtime");
 const { generateToken, verifyToken } = require("./jwt");
-const { loadConfiguration } = require("./");
+const { loadConfiguration } = require("../services");
 const chance = require("chance").Chance();
 const MockDate = require("mockdate");
 const { copy, move, readJSON, writeJSON } = require("fs-extra");
-const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require("./");
+const { setupBeforeAll, setupBeforeEach, teardownAfterAll, teardownAfterEach } = require("../services");
 
 describe("JWT tests", () => {
     let users, configuration;

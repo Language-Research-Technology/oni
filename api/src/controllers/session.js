@@ -1,5 +1,5 @@
-const { models } = require("../models");
-const { loadConfiguration, generateToken } = require("../services");
+const models = require("../models");
+const { generateToken } = require("../services");
 
 async function getSession({ userId, sessionId }) {
   let where = {};
@@ -11,8 +11,7 @@ async function getSession({ userId, sessionId }) {
   return session;
 }
 
-async function createSession({ user }) {
-  let configuration = await loadConfiguration();
+async function createSession({ user, configuration }) {
   if (!user) {
     throw new Error(`A user object is required`);
   }

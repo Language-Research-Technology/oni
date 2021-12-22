@@ -1,4 +1,4 @@
-const { Octokit } = require("octokit");
+import { Octokit } from "@octokit/core";
 const { getLogger } = require("../services");
 const log = getLogger();
 const { filter } = require('lodash');
@@ -49,17 +49,14 @@ async function getTeamsMembership(user, org, team) {
 }
 
 async function getTeamMembership({ user, group }) {
-
-  // Group is not used right now, because the app can only handle its own groups.
-
-  const octokit = new Octokit({ username: user.username, auth: user.accessToken });
+  console.log(user.accessToken)
+  const octokit = new Octokit({ auth: user.accessToken });
   const data = { teams: [], error: null };
   try {
-    const res = await octokit.request('GET /user/teams', {
+    const res = await octokit.request('GET /orgs/{org}/teams', {
       org: group,
       per_page: 100
     });
-
     //TODO: It may have pagination!
     if (Array.isArray(res.data)) {
       res.data.forEach(function (t) {
@@ -107,20 +104,18 @@ async function getGithubToken({ authGithub, code, verifier }) {
   return token;
 }
 
-function filterMembeshipsByGroup({ teamMembership, group }) {
+function filterMemberships({ teamMembership }) {
   //TODO: what if you have multiple groups
   const teams = [];
-  for (const { team } of teamMembership['teams']) {
-    if (team['organization']['login'] === group) {
-      teams.push({ group: team['slug'], description: team['description'] });
-    }
+  for (const { team } of teamMembership?.teams) {
+    teams.push({ group: team['slug'], description: team['description'] });
   }
   return teams;
 }
 
 module.exports = {
   getGithubToken,
-  filterMembeshipsByGroup,
+  filterMemberships,
   getGroupMembership,
   getGroupsMembership,
   getTeamsMembership,

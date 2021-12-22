@@ -1,5 +1,5 @@
 const models = require('../models');
-const { getLogger, loadConfiguration } = require('../services');
+const { getLogger } = require('../services/logger');
 const { uniqBy, first } = require('lodash');
 const log = getLogger();
 
@@ -20,19 +20,16 @@ async function getUser({ where }) {
   let user = await models.user.findOne({
     where,
   });
-  return user;
+  return user?.dataValues;
 }
 
-async function createUser(data) {
-  const configuration = await loadConfiguration();
+async function createUser({ data, configuration }) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
-  const providerId = data.providerId;
   let user = await models.user.findOne({
-    where: { providerId: providerId.toString() }
+    where: { provider: data.provider, providerId: data.providerId.toString() }
   });
-
   if (!user) {
     // no user account found but email in admin list
     data.locked = false;
@@ -45,7 +42,7 @@ async function createUser(data) {
     });
     user = first(user);
 
-  } else if (user && !configuration.api.administrators.includes(data.providerId)) {
+  } else if (user && !configuration.api.administrators.includes(data?.email)) {
     // user account found and not admin
 
     log.debug(`User Id : ${ user['id'] }`);
@@ -54,11 +51,11 @@ async function createUser(data) {
     user.upload = false;
     user.administrator = false;
     user.provider = data.provider;
-    user.name = data.name;
-    user.providerId = data.providerId;
-    user.providerUsername = data.providerUsername;
+    user.name = data?.name;
+    user.providerId = data.id;
+    user.providerUsername = data?.providerUsername;
     user.accessToken = data.accessToken;
-    user.email = data.email || null;
+    user.email = data?.email;
 
     await user.save();
   }

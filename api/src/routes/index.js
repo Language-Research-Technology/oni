@@ -1,16 +1,16 @@
 // these endpoints will only return data they are responsible for
 //
-const models = require('../models');
-const { UnauthorizedError, ForbiddenError } = require('restify-errors');
+import models from '../models';
+import { UnauthorizedError, ForbiddenError } from 'restify-errors';
 const { route, loadConfiguration } = require('../services');
-const { setupDataRoutes } = require('./object');
+const { setupObjectRoutes } = require('./object');
 const { setupUserRoutes } = require('./user');
 const { setupAuthRoutes } = require('./auth');
-const passport = require('passport');
+const version = require('../../package.json')['version'];
 
 function setupRoutes({ server, configuration }) {
 
-  setupAuthRoutes({ server, passport, configuration });
+  setupAuthRoutes({ server, configuration });
 
   if (process.env.NODE_ENV === 'development') {
     server.get('/test-middleware', route((req, res, next) => {
@@ -18,18 +18,24 @@ function setupRoutes({ server, configuration }) {
       next();
     }));
   }
+
   server.get('/', (req, res, next) => {
     res.send({});
     next();
   });
+
   server.get('/configuration', async (req, res, next) => {
     let configuration = await loadConfiguration();
-    res.send({ ui: configuration.ui});
+    res.send({ ui: configuration.ui });
     next();
   });
 
-  setupDataRoutes({ server, passport, configuration });
-  setupUserRoutes({ server, passport, configuration });
+  server.get('/version', (req, res, next) => {
+    res.send({ version: version });
+  });
+
+  setupObjectRoutes({ server, configuration });
+  setupUserRoutes({ server, configuration });
 }
 
 module.exports = {

@@ -24,10 +24,9 @@ export default {
     async login() {
       let { code_verifier } = getLocalStorage({ key: loginSessionKey });
       removeLocalStorage({ key: loginSessionKey });
-      console.log(this.$route);
       let response = await this.$http.post({
-        route: `${ this.$route.path }`,
-        body: { code: this.$route.query.code, user: this.user, code_verifier },
+        route: `/oauth/${this.$route.query.state}/code`,
+        body: { code: this.$route.query.code, state: this.$route.query.state, code_verifier },
       });
       if (response.status !== 200) {
         this.error = true;
@@ -35,9 +34,8 @@ export default {
         await this.$router.push("/login");
       } else {
         try {
-          let { user, token } = await response.json();
-          console.log(user)
-          console.log(token)
+          let { token } = await response.json();
+          let user = JSON.parse(atob(token.split(".")[1]));
           this.$store.commit("setUserData", user);
           putLocalStorage({ key: tokenSessionKey, data: { token } });
           await this.$router.push("/");
