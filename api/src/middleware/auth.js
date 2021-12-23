@@ -1,5 +1,5 @@
 import { UnauthorizedError, ForbiddenError } from "restify-errors";
-import { verifyToken } from "../controllers/jwt";
+import { verifyToken } from "../services/jwt";
 import { getLogger } from "../services/logger";
 import { loadConfiguration } from "../services/configuration"
 import { getUser } from '../controllers/user';

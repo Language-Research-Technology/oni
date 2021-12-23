@@ -2,7 +2,7 @@ import { getUser } from './user';
 import { getTeamMembership, filterMemberships } from '../services/github';
 import { createUserMemberships } from './userMembership';
 
-async function getGithubMemberships({ userId, group }) {
+export async function getGithubMemberships({ userId, group }) {
 
   const user = await getUser({ where: { id: userId } });
   const teamMembership = await getTeamMembership({
@@ -17,6 +17,3 @@ async function getGithubMemberships({ userId, group }) {
   return memberships;
 }
 
-module.exports = {
-  getGithubMemberships
-}

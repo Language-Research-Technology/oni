@@ -8,7 +8,7 @@ import models from '../../models';
 
 const log = getLogger();
 
-function setupLoginRoutes({ server, configuration }) {
+export function setupLoginRoutes({ server, configuration }) {
   server.get("/auth/:provider/login", async function (req, res, next) {
     const provider = req.params.provider;
     configuration = configuration.api.authentication[provider];
@@ -114,7 +114,7 @@ async function getOauthToken({ provider, code, code_verifier, configuration }) {
   return { token, jwks: issuer.jwks_uri };
 }
 
-async function extractUserDataFromIdToken({ configuration, provider, jwks, token }) {
+export async function extractUserDataFromIdToken({ configuration, provider, jwks, token }) {
   configuration = configuration.api.authentication[provider];
   const JWKS = createRemoteJWKSet(new URL(jwks));
   let tokenData = await jwtVerify(token.id_token, JWKS, {
@@ -124,8 +124,3 @@ async function extractUserDataFromIdToken({ configuration, provider, jwks, token
   return { provider, email, givenName: given_name, familyName: family_name };
 }
 
-
-module.exports = {
-  setupLoginRoutes,
-  extractUserDataFromIdToken
-}

@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 const log = getLogger();
 
-async function getRecordCrate({ req, res, next, configuration }) {
+export async function getRecordCrate({ req, res, next, configuration }) {
   log.debug(`get data ${ req.query.id }`);
   let record = await getRecord({ crateId: req.query.id });
   if (record.data) {
@@ -42,6 +42,3 @@ async function getRecordCrate({ req, res, next, configuration }) {
   }
 }
 
-module.exports = {
-  getRecordCrate
-}

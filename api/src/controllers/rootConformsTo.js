@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 const log = getLogger();
 
-async function getRootConformsToByCrateId({crateId}){
+export async function getRootConformsToByCrateId({crateId}){
   const conformsTo = await models.rootConformsTo.findAll({
     where: {
       crateId: crateId
@@ -17,7 +17,7 @@ async function getRootConformsToByCrateId({crateId}){
   });
   return conformsTo;
 }
-async function getRootConformsTos({ conforms, members }) {
+export async function getRootConformsTos({ conforms, members }) {
 
   try {
     if (members == 'false' || isUndefined(members) || members === '') {
@@ -64,9 +64,4 @@ async function getRootConformsTos({ conforms, members }) {
       error: e.message
     }
   }
-}
-
-module.exports = {
-  getRootConformsToByCrateId,
-  getRootConformsTos
 }

@@ -4,7 +4,7 @@ import { filter } from 'lodash';
 
 const log = getLogger();
 
-async function getGroupMembership(user, org) {
+export async function getGroupMembership(user, org) {
   try {
     const octokit = new Octokit({ auth: user.accessToken });
     const res = await octokit.request('GET /user/memberships/orgs/{org}', {
@@ -18,7 +18,7 @@ async function getGroupMembership(user, org) {
   }
 }
 
-async function getGroupsMembership({ user, org }) {
+export async function getGroupsMembership({ user, org }) {
   try {
     const octokit = new Octokit({ auth: user.accessToken });
     const res = await octokit.request('GET /user/orgs', {
@@ -33,7 +33,7 @@ async function getGroupsMembership({ user, org }) {
   }
 }
 
-async function getTeamsMembership(user, org, team) {
+export async function getTeamsMembership(user, org, team) {
   try {
     const octokit = new Octokit({ auth: user.accessToken });
     const res = await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
@@ -49,7 +49,7 @@ async function getTeamsMembership(user, org, team) {
   }
 }
 
-async function getTeamMembership({ user, group }) {
+export async function getTeamMembership({ user, group }) {
   console.log(user.accessToken)
   const octokit = new Octokit({ auth: user.accessToken });
   const data = { teams: [], error: null };
@@ -71,7 +71,7 @@ async function getTeamMembership({ user, group }) {
 
 }
 
-async function getGithubUser({ user }) {
+export async function getGithubUser({ user }) {
   try {
     const octokit = new Octokit({ auth: user.accessToken });
     const res = await octokit.request('GET /user');
@@ -84,7 +84,7 @@ async function getGithubUser({ user }) {
   }
 }
 
-async function getGithubToken({ authGithub, code, verifier }) {
+export async function getGithubToken({ authGithub, code, verifier }) {
   //Github Auth Flow: https://github.com/github/developer.github.com/blob/master/content/v3/oauth.md
 
   const response = await fetch(`${ authGithub['discover'] }/login/oauth/access_token`, {
@@ -105,21 +105,11 @@ async function getGithubToken({ authGithub, code, verifier }) {
   return token;
 }
 
-function filterMemberships({ teamMembership }) {
+export function filterMemberships({ teamMembership }) {
   //TODO: what if you have multiple groups
   const teams = [];
   for (const { team } of teamMembership?.teams) {
     teams.push({ group: team['slug'], description: team['description'] });
   }
   return teams;
-}
-
-module.exports = {
-  getGithubToken,
-  filterMemberships,
-  getGroupMembership,
-  getGroupsMembership,
-  getTeamsMembership,
-  getTeamMembership,
-  getGithubUser
 }

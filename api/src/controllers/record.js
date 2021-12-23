@@ -7,7 +7,7 @@ import { castArray } from 'lodash';
 
 const log = getLogger();
 
-async function deleteRecords() {
+export async function deleteRecords() {
   // Ay nanita
   //This will delete all records and cascade. If you are re-structuring the database do docker-compose down -v
   let record = await models.record.destroy({
@@ -16,7 +16,7 @@ async function deleteRecords() {
   return record;
 }
 
-async function getRecords({ offset = 0, limit = 10 }) {
+export async function getRecords({ offset = 0, limit = 10 }) {
   let records = await models.record.findAndCountAll({
     offset,
     limit,
@@ -29,7 +29,7 @@ async function getRecords({ offset = 0, limit = 10 }) {
   };
 }
 
-async function getRecord({ crateId }) {
+export async function getRecord({ crateId }) {
   let where = {};
   if (crateId) where.crateId = crateId;
   log.silly(crateId);
@@ -46,7 +46,7 @@ async function getRecord({ crateId }) {
   }
 }
 
-async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
+export async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
   try {
     log.silly(data.crateId)
     if (!data.crateId) {
@@ -101,7 +101,7 @@ async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
   }
 }
 
-async function createRecordWithCrate(data, hasMembers, atTypes) {
+export async function createRecordWithCrate(data, hasMembers, atTypes) {
   try {
     log.debug(data.crateId)
     if (!data.crateId) {
@@ -142,7 +142,7 @@ async function createRecordWithCrate(data, hasMembers, atTypes) {
   }
 }
 
-async function findRecordByIdentifier({ identifier, recordId }) {
+export async function findRecordByIdentifier({ identifier, recordId }) {
   let clause = {
     where: { identifier },
   };
@@ -154,21 +154,21 @@ async function findRecordByIdentifier({ identifier, recordId }) {
   return await models.record.findOne(clause);
 }
 
-async function decodeHash({ id }) {
+export async function decodeHash({ id }) {
 
   // With ARCP like
   // arcp://name,
   // hash it and then find it by it.
 }
 
-async function getRawCrate({ diskPath, catalogFilename, version }) {
+export async function getRawCrate({ diskPath, catalogFilename, version }) {
   // TODO: return a specific version
   const ocflObject = new OcflObject(diskPath);
   const json = await readCrate(ocflObject, catalogFilename);
   return json;
 }
 
-async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform, version }) {
+export async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform, version }) {
   // TODO: return a specific version
   const ocflObject = new OcflObject(diskPath);
   const newCrate = await transformURIs({
@@ -181,7 +181,7 @@ async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTra
   return newCrate;
 }
 
-async function getFile({ record, itemId, catalogFilename }) {
+export async function getFile({ record, itemId, catalogFilename }) {
   try {
     const ocflObject = new OcflObject(record['diskPath']);
     const filePath = await getItem(ocflObject, catalogFilename, itemId);
@@ -205,16 +205,4 @@ async function getFile({ record, itemId, catalogFilename }) {
     log.error('getFile');
     return new Error(e);
   }
-}
-
-module.exports = {
-  deleteRecords,
-  getRecords,
-  getRecord,
-  createRecord,
-  createRecordWithCrate,
-  findRecordByIdentifier,
-  getRawCrate,
-  getUridCrate,
-  getFile
 }

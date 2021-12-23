@@ -5,7 +5,7 @@ import { ROCrate }from 'ro-crate';
 
 const log = getLogger();
 
-async function getRecordResolveLinks({ req, res, next, configuration }) {
+export async function getRecordResolveLinks({ req, res, next, configuration }) {
   try {
     log.debug(`Get resolve-parts: ${ req.query.id }`);
     const response = [];
@@ -83,8 +83,4 @@ function findAndReplace(object, value, replacevalue) {
       break;
     }
   }
-}
-
-module.exports = {
-  getRecordResolveLinks
 }

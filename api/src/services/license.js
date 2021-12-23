@@ -1,7 +1,7 @@
 import { getLogger } from '../services';
 const log = getLogger();
 
-function isAuthorized({ memberships, license, licenseConfiguration }) {
+export function isAuthorized({ memberships, license, licenseConfiguration }) {
   const needsLicense = licenseConfiguration.find(l => l['license'] === license);
   if (needsLicense) {
     const foundAuthorization = memberships.find(membership => {
@@ -21,6 +21,3 @@ function isAuthorized({ memberships, license, licenseConfiguration }) {
   }
 }
 
-module.exports = {
-  isAuthorized
-}

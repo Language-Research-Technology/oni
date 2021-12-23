@@ -2,7 +2,7 @@ import { createLogger, format, transports } from "winston";
 import models from'../models';
 const { combine, timestamp, printf } = format;
 
-function getLogger() {
+export function getLogger() {
   const myFormat = printf(({ level, message, timestamp }) => {
     return `${ timestamp } ${ level.toUpperCase() }: ${ message }`;
   });
@@ -16,7 +16,7 @@ function getLogger() {
 }
 
 
-async function logEvent({ level, owner, text, data }) {
+export async function logEvent({ level, owner, text, data }) {
   const levels = ["info", "warn", "error"];
   if (!level || !levels.includes(level)) {
     throw new Error(`'level' is required and must be one of '${levels}'`);
@@ -29,9 +29,4 @@ async function logEvent({ level, owner, text, data }) {
   } catch (error) {
     log.error(`Couldn't update logs table: ${level}: ${text}`);
   }
-}
-
-module.exports = {
-  getLogger,
-  logEvent
 }

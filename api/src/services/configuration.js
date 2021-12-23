@@ -2,7 +2,7 @@ import {readJSON} from "fs-extra";
 
 const privateFields = ["clientSecret"];
 
-async function loadConfiguration() {
+export async function loadConfiguration() {
   let configuration;
   if (process.env.ONI_CONFIG_PATH) {
     configuration = process.env.ONI_CONFIG_PATH;
@@ -16,7 +16,7 @@ async function loadConfiguration() {
   return configuration;
 }
 
-function filterPrivateInformation({configuration}) {
+export function filterPrivateInformation({configuration}) {
   let services = Object.keys(configuration.api.authentication).map((service) => {
     service = {
       ...configuration.api.authentication[service],
@@ -58,8 +58,3 @@ function filterPrivateInformation({configuration}) {
 //     await writeJSON("/srv/configuration/development-configuration.json", origConfig);
 //     return { sessionId: response.sessionId, user };
 // }
-
-module.exports = {
-  loadConfiguration,
-  filterPrivateInformation
-}

@@ -6,7 +6,7 @@ import { routeUser } from '../../middleware/auth';
 
 const log = getLogger();
 
-function setupUserRoutes({ server, configuration }) {
+export function setupUserRoutes({ server, configuration }) {
   server.get("/user", routeUser(async (req, res, next) => {
       try {
         if (req.session.user) {
@@ -66,8 +66,4 @@ function setupUserRoutes({ server, configuration }) {
       }
     })
   );
-}
-
-module.exports = {
-  setupUserRoutes
 }

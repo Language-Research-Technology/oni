@@ -3,7 +3,7 @@ import { getLogger } from "../services";
 
 const log = getLogger();
 
-async function getRootTypes({ crateId }) {
+export async function getRootTypes({ crateId }) {
   const record = await models.record.findOne({ where: { crateId: crateId } });
   if (record) {
     const recordRootTypes = await models.rootType.findAll({
@@ -25,8 +25,4 @@ async function getRootTypes({ crateId }) {
     }
   }
 
-}
-
-module.exports = {
-  getRootTypes
 }

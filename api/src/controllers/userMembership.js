@@ -2,7 +2,7 @@ import models from "../models";
 import { loadConfiguration } from '../services';
 import { uniqBy } from 'lodash';
 
-async function createUserMemberships({ memberships, user }) {
+export async function createUserMemberships({ memberships, user }) {
 
   const destroyMemberships = await models.userMembership.destroy({ where: { userId: user['id'] } });
 
@@ -14,14 +14,9 @@ async function createUserMemberships({ memberships, user }) {
   }
 }
 
-async function getUserMemberships({ where }) {
+export async function getUserMemberships({ where }) {
   let userMembership = await models.userMembership.findAll({
     where,
   });
   return userMembership;
-}
-
-module.exports = {
-  createUserMemberships,
-  getUserMemberships
 }

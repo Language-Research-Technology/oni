@@ -1,7 +1,7 @@
 import models from "../models";
 import { generateToken } from "../services";
 
-async function getSession({ userId, sessionId }) {
+export async function getSession({ userId, sessionId }) {
   let where = {};
   if (userId) where.userId = userId;
   if (sessionId) where.id = sessionId;
@@ -11,7 +11,7 @@ async function getSession({ userId, sessionId }) {
   return session;
 }
 
-async function createSession({ user, configuration }) {
+export async function createSession({ user, configuration }) {
   if (!user) {
     throw new Error(`A user object is required`);
   }
@@ -30,13 +30,7 @@ async function createSession({ user, configuration }) {
   return session;
 }
 
-async function destroySession({ sessionId }) {
+export async function destroySession({ sessionId }) {
   let session = await models.session.findOne({ where: { id: sessionId } });
   await session.destroy();
-}
-
-module.exports = {
-  getSession,
-  createSession,
-  destroySession
 }

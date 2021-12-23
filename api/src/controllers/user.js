@@ -3,7 +3,7 @@ import { getLogger } from '../services/logger';
 import { uniqBy, first } from 'lodash';
 const log = getLogger();
 
-async function getUsers({ offset = 0, limit = 10 }) {
+export async function getUsers({ offset = 0, limit = 10 }) {
   let users = await models.user.findAndCountAll({
     offset,
     limit,
@@ -15,7 +15,7 @@ async function getUsers({ offset = 0, limit = 10 }) {
   return { total: users.count, users: users.rows.map((u) => u.get()) };
 }
 
-async function getUser({ where }) {
+export async function getUser({ where }) {
   //Usage: getUser({ where: { column: value })
   let user = await models.user.findOne({
     where,
@@ -23,7 +23,7 @@ async function getUser({ where }) {
   return user?.dataValues;
 }
 
-async function createUser({ data, configuration }) {
+export async function createUser({ data, configuration }) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
@@ -62,19 +62,19 @@ async function createUser({ data, configuration }) {
   return user;
 }
 
-async function updateUser({ where, key, value }) {
+export async function updateUser({ where, key, value }) {
   let user = await models.user.findOne(where);
   user[key] = value;
   await user.save();
   return user;
 }
 
-async function deleteUser({ userId }) {
+export async function deleteUser({ userId }) {
   let user = await models.user.findOne({ where: { id: userId } });
   await user.destroy();
 }
 
-async function toggleUserCapability({ userId, capability }) {
+export async function toggleUserCapability({ userId, capability }) {
   let user = await models.user.findOne({ where: { id: userId } });
   switch (capability) {
     case "lock":
@@ -91,7 +91,7 @@ async function toggleUserCapability({ userId, capability }) {
   return user;
 }
 
-async function createAllowedUserStubAccounts({ emails }) {
+export async function createAllowedUserStubAccounts({ emails }) {
   let users = emails.map((email) => {
     return {
       email,
@@ -104,13 +104,4 @@ async function createAllowedUserStubAccounts({ emails }) {
   users = await models.user.bulkCreate(users, { ignoreDuplicates: true });
 
   return uniqBy(users, "email");
-}
-
-module.exports = {
-  getUsers,
-  getUser,
-  createUser,
-  deleteUser,
-  updateUser,
-  createAllowedUserStubAccounts
 }

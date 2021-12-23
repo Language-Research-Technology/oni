@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 
 const log = getLogger();
 
-async function getRootMemberOfs({ crateId }) {
+export async function getRootMemberOfs({ crateId }) {
   if (isEmpty(crateId) || crateId == "null" || crateId == "undefined") {
     crateId = null;
   }
@@ -22,6 +22,3 @@ async function getRootMemberOfs({ crateId }) {
   }
 }
 
-module.exports = {
-  getRootMemberOfs
-}

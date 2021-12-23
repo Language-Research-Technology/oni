@@ -15,7 +15,7 @@ import { routeBearer } from '../../middleware/auth';
 
 const log = getLogger();
 
-function setupObjectRoutes({ server, configuration }) {
+export function setupObjectRoutes({ server, configuration }) {
 
   server.get("/object", async (req, res, next) => {
     if (!isUndefined(req.query.memberOf) && !isUndefined(req.query.conformsTo)) {
@@ -87,11 +87,6 @@ function setupObjectRoutes({ server, configuration }) {
         }
       })
   )
-}
-
-
-module.exports = {
-  setupObjectRoutes
 }
 
 

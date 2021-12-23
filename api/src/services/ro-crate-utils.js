@@ -4,7 +4,7 @@ const { getLogger } = require("./index");
 
 const log = getLogger();
 
-async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFilename }) {
+export async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFilename }) {
   const json = await readCrate(ocflObject, catalogFilename);
   const crate = new ROCrate(json);
   crate.index();
@@ -27,8 +27,4 @@ async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFile
     });
   }
   return crate.getJson();
-}
-
-module.exports = {
-  transformURIs
 }

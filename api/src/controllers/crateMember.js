@@ -3,7 +3,7 @@ import { getLogger } from "../services";
 
 const log = getLogger();
 
-async function getRecordMembers({ recordId }) {
+export async function getRecordMembers({ recordId }) {
 
   const record = await models.record.findOne({ where: { crateId: recordId } });
   if (record) {
@@ -14,8 +14,4 @@ async function getRecordMembers({ recordId }) {
     });
     return recordCrateMembers;
   }
-}
-
-module.exports = {
-  getRecordMembers
 }

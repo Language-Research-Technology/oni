@@ -11,7 +11,7 @@ import { getGithubUser } from '../../services/github';
 
 const log = getLogger();
 
-function setupOauthRoutes({ server, configuration }) {
+export function setupOauthRoutes({ server, configuration }) {
 
   server.get("/oauth/:provider/login", async function (req, res, next) {
     const provider = req.params.provider;
@@ -170,8 +170,4 @@ async function getUserToken({ configuration, provider, token }) {
     providerUsername: user?.username || user?.login,
     accessToken: token['access_token']
   };
-}
-
-module.exports = {
-  setupOauthRoutes
 }

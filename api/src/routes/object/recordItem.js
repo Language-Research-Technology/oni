@@ -6,7 +6,7 @@ import { getUserMemberships } from '../../controllers/userMembership';
 
 const log = getLogger();
 
-async function getRecordItem({ req, res, next, configuration }) {
+export async function getRecordItem({ req, res, next, configuration }) {
   log.debug(`Get data item: ${ req.query.id } : ${ req.query.path }`)
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
@@ -60,8 +60,4 @@ async function getRecordItem({ req, res, next, configuration }) {
     res.send({ message: `Path: ${ req.query.path } of ${ req.query.id } not found` }).status(404);
     next();
   }
-}
-
-module.exports = {
-  getRecordItem
 }

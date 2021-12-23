@@ -11,7 +11,7 @@ import { routeUser, routeAdmin, routeBearer } from '../../middleware/auth';
 
 const log = getLogger();
 
-function setupAuthRoutes({ server, configuration }) {
+export function setupAuthRoutes({ server, configuration }) {
 
   server.get('/authenticated',
     routeUser(async (req, res, next) => {
@@ -53,8 +53,4 @@ function setupAuthRoutes({ server, configuration }) {
       }
     })
   )
-}
-
-module.exports = {
-  setupAuthRoutes
 }

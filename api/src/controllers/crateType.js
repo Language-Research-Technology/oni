@@ -4,7 +4,7 @@ import { getLogger } from "../services";
 
 const log = getLogger();
 
-async function getRecordTypes({ recordId, types }) {
+export async function getRecordTypes({ recordId, types }) {
   types = types.split(',');
   types = castArray((types));
   const record = await models.record.findOne({ where: { crateId: recordId } });
@@ -24,8 +24,4 @@ async function getRecordTypes({ recordId, types }) {
     return undefined;
   }
 
-}
-
-module.exports = {
-  getRecordTypes
 }

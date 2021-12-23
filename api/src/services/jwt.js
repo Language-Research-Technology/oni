@@ -3,10 +3,10 @@ import { createSecretKey } from "crypto";
 import add from "date-fns/add";
 import isAfter from "date-fns/isAfter";
 import parseISO from "date-fns/parseISO";
-import { getUser } from './user';
+import { getUser } from '../controllers/user';
 import { UnauthorizedError } from 'restify-errors';
 
-async function generateToken({ configuration, user }) {
+export async function generateToken({ configuration, user }) {
   const key = createSecretKey(Buffer.from(configuration.api.session.secret, "utf-8"));
   const expires = add(new Date(), configuration.api.session.lifetime);
   const token = await new SignJWT({
@@ -24,7 +24,7 @@ async function generateToken({ configuration, user }) {
   return { token, expires };
 }
 
-async function verifyToken({ token, configuration }) {
+export async function verifyToken({ token, configuration }) {
   //try bearer token
   const user = await getUser({ where: { apiToken: token } });
   if (user?.id) {
@@ -39,9 +39,4 @@ async function verifyToken({ token, configuration }) {
     }
     return payload;
   }
-}
-
-module.exports = {
-  generateToken,
-  verifyToken
 }

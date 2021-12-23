@@ -2,19 +2,19 @@
 //
 import models from '../models';
 import { UnauthorizedError, ForbiddenError } from 'restify-errors';
-import { route, loadConfiguration } from '../services';
+import { routeUser, loadConfiguration } from '../services';
 import { setupObjectRoutes } from './object';
 import { setupUserRoutes } from './user';
 import { setupAuthRoutes } from './auth';
 
 const version = require('../../package.json')['version'];
 
-function setupRoutes({ server, configuration }) {
+export function setupRoutes({ server, configuration }) {
 
   setupAuthRoutes({ server, configuration });
 
   if (process.env.NODE_ENV === 'development') {
-    server.get('/test-middleware', route((req, res, next) => {
+    server.get('/test-middleware', routeUser((req, res, next) => {
       res.send({});
       next();
     }));
@@ -37,8 +37,4 @@ function setupRoutes({ server, configuration }) {
 
   setupObjectRoutes({ server, configuration });
   setupUserRoutes({ server, configuration });
-}
-
-module.exports = {
-  setupRoutes
 }

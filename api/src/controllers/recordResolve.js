@@ -4,7 +4,7 @@ import { getRootMemberOfs } from './rootMemberOf';
 import { getLogger } from '../services';
 const log = getLogger();
 
-async function recordResolve({ id, configuration }) {
+export async function recordResolve({ id, configuration }) {
   try {
     log.debug(`Get resolve-parts: ${ id }`);
     const response = [];
@@ -82,9 +82,4 @@ function findAndReplace(object, value, replacevalue) {
       break;
     }
   }
-}
-
-
-module.exports = {
-  recordResolve
 }

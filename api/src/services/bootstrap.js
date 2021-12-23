@@ -5,12 +5,12 @@ import { ROCrate } from 'ro-crate';
 
 const log = getLogger();
 
-async function bootstrap({ configuration }) {
+export async function bootstrap({ configuration }) {
   await deleteRecords();
   await initOCFL({ configuration });
 }
 
-async function initOCFL({ configuration }) {
+export async function initOCFL({ configuration }) {
   const ocfl = configuration.api.ocfl;
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
@@ -57,9 +57,4 @@ async function initOCFL({ configuration }) {
     log.error(e);
   }
 
-}
-
-module.exports = {
-  bootstrap,
-  initOCFL
 }
