@@ -6,6 +6,7 @@ import { routeUser, loadConfiguration } from '../services';
 import { setupObjectRoutes } from './object';
 import { setupUserRoutes } from './user';
 import { setupAuthRoutes } from './auth';
+import { setupSearchRoutes } from './search';
 
 const version = require('../../package.json')['version'];
 
@@ -37,4 +38,5 @@ export function setupRoutes({ server, configuration }) {
 
   setupObjectRoutes({ server, configuration });
   setupUserRoutes({ server, configuration });
+  setupSearchRoutes({ server, configuration });
 }

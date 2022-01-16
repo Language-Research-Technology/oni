@@ -4,6 +4,7 @@ import models from './models';
 import { loadConfiguration, getLogger } from './services/index';
 import { setupRoutes } from './routes';
 import { bootstrap } from './services/bootstrap';
+import { elasticInit, elasticBootstrap, elasticIndex } from './indexer/elastic';
 import corsMiddleware from 'restify-cors-middleware';
 
 const log = getLogger();
@@ -76,4 +77,9 @@ let configuration;
     await bootstrap({ configuration });
   }
 
+  await elasticInit({ configuration });
+  if (configuration['api']['elastic']?.bootstrap) {
+    await elasticBootstrap({ configuration });
+    await elasticIndex({ configuration });
+  }
 })();
