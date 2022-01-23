@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-screen">
+  <div class="w-full h-screen bg-gray-200">
     <div class="flex justify-center bg-gray-200">
       <div class="h-auto rounded-lg pt-8 pb-8 px-8 flex flex-col items-center">
         <p class="font-light text-4xl mb-4">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></p>
@@ -8,7 +8,8 @@
     </div>
     <div class="flex items-center justify-center bg-gray-200">
       <div class="flex border-2 rounded">
-        <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80" placeholder="Search..." v-model="searchInput">
+        <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80" placeholder="Search..."
+               v-model="searchInput">
         <button @click="this.search()" class="flex items-center justify-center px-4 border-l">
           <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24">
@@ -18,20 +19,44 @@
         </button>
       </div>
     </div>
-    <div v-for="item of this.items" class="flex justify-center bg-gray-200">
-      <div class="h-auto rounded-lg pt-8 pb-8 px-8 flex flex-col items-center">
-        <a href="#"
-           class="block p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-          <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ item.name }}</h5>
-          <p class="font-normal text-gray-700 dark:text-gray-400">{{ item.conformsTo }}</p>
-        </a>
+    <div class="flex bg-gray-200">
+      <div class="w-1/5"></div>
+      <div class="w-3/4">
+        <div v-for="item of this.items" class="flex">
+          <div class="w-full h-auto rounded-lg pt-4 pb-4 px-4 flex flex-col items-center">
+            <a :href="'/view?id=' + encodeURIComponent(item['@id'])"
+               class="w-full block p-5 max-w-screen-md bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+              <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                {{ first(item.name)?.['@value'] || first(first(item.identifier)?.value)?.['@value'] }}
+              </h5>
+              <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">{{ item.conformsTo }}</p>
+              <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+                <span v-if="item._contains?.['@type'].length > 0">Contains:&nbsp;</span>
+                <span v-for="type of item._contains?.['@type']">{{ type }}</span>
+              </p>
+              <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+                <span v-if="item._contains?.['language'].length > 0">Languages:&nbsp;</span>
+                <span v-for="language of item._contains?.['language']">{{
+                    first(language.name)?.['@value']
+                  }} &nbsp;</span>
+              </p>
+              <p v-if="item?.memberOf"> Related: {{ first(item?.memberOf)?.['@id'] }}</p>
+            </a>
+          </div>
+        </div>
+        <div v-if="this.scrollId" class="flex items-center justify-center">
+          <button class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" @click="getNext()">Next</button>
+        </div>
+        <div class="p-3 m-3"></div>
       </div>
+      <div class="w-1/5"></div>
     </div>
   </div>
 </template>
 
 <script>
 import 'element-plus/theme-chalk/display.css'
+import { first } from 'lodash';
 
 export default {
   data() {
@@ -46,28 +71,36 @@ export default {
     if (this.$route.path === "/") this.$router.push("/welcome");
     let response = await this.$http.get({ route: '/search/items' });
     const items = await response.json();
+    console.log(items)
     this.populate(items);
   },
   methods: {
+    first,
     async search() {
-      console.log(this.searchInput);
-      const input = encodeURIComponent(this.searchInput);
-      let response = await this.$http.get({ route: `/search/items?name=${input}` });
+      const input = this.searchInput;
+      let response = await this.$http.get({ route: `/search/items?multi=${ input }` });
       const items = await response.json();
       this.items = [];
+      this.scrollId = null;
       this.populate(items);
     },
-    populate(items){
+    populate(items) {
+      if (items['_scroll_id']) {
+        this.scrollId = items['_scroll_id'];
+      }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
         for (let item of thisItems) {
-          const theItem = {
-            conformsTo: item['_source']['conformsTo'],
-            name: item['_source']['name']
-          }
-          this.items.push(theItem);
+          this.items.push(item['_source']);
         }
       }
+    },
+    async getNext() {
+      let response = await this.$http.get({ route: `/search/items?scroll=${this.scrollId}` });
+      const items = await response.json();
+      this.items = [];
+      this.scrollId = null;
+      this.populate(items);
     }
   }
 };

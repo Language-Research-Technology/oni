@@ -16,38 +16,37 @@ const { workingPath } = require('./services/utils');
 const ocfl = require('ocfl');
 
 let configuration;
-let perfDataDir = path.join(process.cwd(), '../test-data/perf');
+let perfDataDir = path.join(process.cwd(), './test-data/perf');
 
-jest.setTimeout(10000);
+const MAX_SAFE_TIMEOUT = Math.pow(2, 31) - 1;
+jest.setTimeout(MAX_SAFE_TIMEOUT);
 
 function cleanup(perfDataDir) {
   if (fs.pathExistsSync(perfDataDir)) {
     fs.removeSync(perfDataDir);
   }
 }
-  
 
 describe("Load test", () => {
   test('Should push all ro-crates to the database', async () => {
     //Read all perfDataDir
     const crates = await fs.readdir(perfDataDir);
-    const collections = [];
-    //Each load the ro-crate
+    const ocflPath = workingPath('/opt/storage/oni/ocfl');
+    testOCFLConf.create = testCreate;
+    const repo = await ocflTools.connectRepo(ocflPath);
+    console.log(`Trying to load: ${ crates.length } objects`);
+    let i = 0;
     for (const ro of crates) {
-      const json = await fs.readJSON(path.join(perfDataDir, ro, 'ro-crate-metadata.json'));
-      collections.push({
+      i++;
+      const col = {
         "title": ro,
         "skip": false,
         "roCrateDir": path.join(perfDataDir, ro),
         "roCrate": "ro-crate-metadata.json"
-      });
-    }
-    const ocflPath = workingPath('./.dev/ocfl');
-    testOCFLConf.create = testCreate;
-    const repo = await ocflTools.connectRepo(ocflPath);
-    for (const col of collections) {
+      };
+      console.log(`${ i } : ${ col.roCrateDir + "/" + col.roCrate }`);
       await ocflTools.loadCollection({ repo, ocfl: testOCFLConf, col });
     }
-    expect(collections.length).toBe(100);
+    expect(crates.length).toBe(100);
   });
 });

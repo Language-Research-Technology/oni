@@ -2,6 +2,8 @@ import ShellComponent from "@/components/Shell.component.vue";
 import UserComponent from "@/components/User.component.vue";
 import LoginComponent from "@/components/Login.component.vue";
 import WelcomeComponent from "@/components/Welcome.component.vue";
+import ViewComponent from "@/components/View.component.vue";
+import OpenComponent from "@/components/Open.component.vue";
 import HelpComponent from "@/components/Help.component.vue";
 import CallbackOauthLogin from "@/components/authentication/OauthCallback.component.vue";
 
@@ -24,6 +26,14 @@ const routes = [
       path: "welcome",
       name: "welcome",
       component: WelcomeComponent
+    }, {
+      path: "view",
+      name: "view",
+      component: ViewComponent
+    }, {
+      path: "open",
+      name: "open",
+      component: OpenComponent
     }, {
       path: "help",
       name: "help",
@@ -61,7 +71,7 @@ const router = createRouter({
 router.beforeEach(onAuthRequired);
 
 async function onAuthRequired(to, from, next) {
-  const httpService = new HTTPService({router, loginPath: '/login'});
+  const httpService = new HTTPService({ router, loginPath: '/login' });
   let isAuthed = await httpService.get({ route: "/authenticated" });
   if (isAuthed.status === 200) {
     putLocalStorage({ key: 'isLoggedIn', data: true });

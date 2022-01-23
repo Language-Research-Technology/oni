@@ -4,10 +4,11 @@ const { cloneDeep } = require("lodash");
 const models = require("../models");
 
 const testOCFLConf = {
-  "ocflPath": "../test-data/test_ocfl",
+  "ocflPath": "/opt/storage/oni/ocfl",
   "catalogFilename": "ro-crate-metadata.json",
   "hashAlgorithm": "md5"
 }
+
 const testCreate = {
   "repoName": "ATAP",
   "collections": "../test-data/ingest-crate-list.development.json"

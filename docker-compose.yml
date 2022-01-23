@@ -25,7 +25,8 @@ services:
           - "5432:5432"
 
     api:
-        image: node:14-buster
+        #image: node:14-buster
+        build: api
         hostname: api
         tty: true
         environment:

@@ -86,6 +86,28 @@ export function setupObjectRoutes({ server, configuration }) {
           next();
         }
       })
+  );
+
+  server.get('/object/open',
+      async function (req, res, next) {
+        try {
+          if (req.query.id && req.query.path) {
+            req.query.id = decodeURIComponent(req.query.id);
+            req.query.path = decodeURIComponent(req.query.path);
+            await getRecordItem({ req, res, next, configuration, passthrough: true });
+          } else if (req.query.id) {
+            await getResolveParts({ req, res, next, configuration, select: [ 'parts' ] });
+          } else {
+            res.json({ message: 'id parameter value is required' }).status(400);
+            next();
+          }
+        } catch
+          (e) {
+          log.error(e);
+          res.json({ error: e['message'] }).status(500);
+          next();
+        }
+      }
   )
 }
 

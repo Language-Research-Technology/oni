@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const webpack = require('webpack');
 
 require('dotenv').config({ path: '../.env' });
 
@@ -29,6 +30,9 @@ module.exports = {
     publicPath: config['ui']['publicPath'] || "http://localhost:9000/",
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {}
+    }),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: config['ui']['title'] || "Oni",

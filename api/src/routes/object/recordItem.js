@@ -6,13 +6,13 @@ import { getUserMemberships } from '../../controllers/userMembership';
 
 const log = getLogger();
 
-export async function getRecordItem({ req, res, next, configuration }) {
+export async function getRecordItem({ req, res, next, configuration, passthrough }) {
   log.debug(`Get data item: ${ req.query.id } : ${ req.query.path }`)
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
   let message = 'Not Found';
   if (record.data) {
-    if (configuration['api']['licenses'] && record.data['license']) {
+    if (configuration['api']['licenses'] && record.data['license'] && !passthrough) {
       const user = req['user'];
       const userId = user.id
       const memberships = await getUserMemberships({ where: { userId: userId } })
@@ -31,6 +31,7 @@ export async function getRecordItem({ req, res, next, configuration }) {
         itemId: req.query.path,
         catalogFilename: configuration.api.ocfl.catalogFilename
       });
+      //TODO: send the correct mimeType
       if (fs.pathExistsSync(fileObj.filePath)) {
         res.writeHead(200, {
           'Content-Disposition': 'attachment; filename=' + fileObj.filename,

@@ -8,7 +8,7 @@ const { testHost, testOCFLConf, testCreate } = require('./services');
 const { makedir } = require('./services/random');
 
 let configuration;
-let perfDataDir = path.join(process.cwd(), '../test-data/perf');
+let perfDataDir = path.join(process.cwd(), './test-data/perf');
 
 jest.setTimeout(100000);
 
@@ -32,13 +32,13 @@ describe("create ro-crates", () => {
   });
 
   test("Should create random collections", async () => {
-    const sourceData = await perf.loadSourceData(path.join(process.cwd(), '../test-data/vocabularies'));
+    const sourceData = await perf.loadSourceData(path.join(process.cwd(), './test-data/vocabularies'));
     const collections = await perf.randomCollections(1, sourceData);
     expect(collections.length).toBeGreaterThan(0);
   });
 
   test("Should create random ro-crates and store them", async () => {
-    const sourceData = await perf.loadSourceData(path.join(process.cwd(), '../test-data/vocabularies'));
+    const sourceData = await perf.loadSourceData(path.join(process.cwd(), './test-data/vocabularies'));
     const n = 1000;
     const collections = await perf.randomCollections(n, sourceData);
 

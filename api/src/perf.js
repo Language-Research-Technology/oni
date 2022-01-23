@@ -1,10 +1,11 @@
 require('regenerator-runtime/runtime');
+const path = require('path');
+const {languageProfileURI} = require("language-data-node-tools");
 
 const fs = require('fs-extra');
 const ROCrate = require('ro-crate').ROCrate;
 
 const random = require('./services/random');
-const path = require('path');
 const logger = require('./services');
 
 const log = logger.getLogger();
@@ -74,6 +75,11 @@ async function createROCrate({ dest, collection, id, repoName }) {
       "value": `arcp://name,${repoName}/${id}`,
       "name": repoName
     });
+
+    const metadataDescriptor = crate.getItem("ro-crate-metadata.json");
+    metadataDescriptor.conformsTo = crate.utils.asArray(metadataDescriptor.conformsTo)
+    metadataDescriptor.conformsTo.push({"@id": languageProfileURI("Collection")});
+
     for (const item of collection.elements) {
       crate.addItem(item);
     }

@@ -1,6 +1,6 @@
 import { getLogger } from '../services';
 import { Client } from '@elastic/elasticsearch';
-import { indexCollections } from './indexCollections';
+import { indexCollections, putCollectionMappings } from './indexCollections';
 
 const log = getLogger();
 let client;
@@ -22,6 +22,7 @@ export async function elasticBootstrap({ configuration }) {
     await client.indices.delete({
       index: '*'
     });
+    await putCollectionMappings({configuration, client});
   } catch (e) {
     log.error(e.message);
   }
@@ -39,11 +40,26 @@ export async function elasticIndex({ configuration }) {
 
 export async function search({ index, query }) {
   try {
+    console.log(query);
     const { body } = await client.search({
       index: index,
+      scroll: '1m',
       body: {
         query: query
       }
+    });
+    return body;
+  } catch (e) {
+    log.error(e.message);
+    return { error: e.message }
+  }
+}
+
+export async function scroll({ scrollId }) {
+  try {
+    const { body } = await client.scroll({
+      scrollId: scrollId,
+      scroll: '1m'
     });
     return body;
   } catch (e) {

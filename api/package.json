@@ -45,6 +45,7 @@
         "hasha": "^5.2.2",
         "jose": "^4.3.7",
         "jsonld": "^5.2.0",
+        "language-data-node-tools": "git+https://github.com/Language-Research-Technology/language-data-node-tools.git",
         "lodash": "^4.17.20",
         "node-fetch": "^2.6.1",
         "ocfl": "^1.0.9",
