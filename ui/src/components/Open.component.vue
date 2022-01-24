@@ -1,11 +1,14 @@
 <template>
   <div class="p-6 bg-gray-200 flex justify-center">
     <div class="container max-w-screen-lg mx-auto">
-      <p class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
-        <button @click="this.$router.back()"><i class="fa fa-backward"></i></button>
-      </p>
+      <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
+        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+           :href="'/view?id=' + encodeURIComponent(this.parent)">{{
+            this.parentTitle || decodeURIComponent(this.parent)
+          }}</a> &gt; {{ this.title }}
+      </h3>
       <div class="shadow bg-white">
-        <div v-if="this.type==='pdf'">
+        <div v-if="this.type === 'pdf'">
           <pdf v-for="i in numPages"
                :key="i"
                :src="pdfdata"
@@ -15,8 +18,17 @@
             </template>
           </pdf>
         </div>
-        <div v-else>
+        <div v-else-if="this.type === 'txt'">
           {{ this.data }}
+        </div>
+        <div v-else-if="this.type === 'audio'">
+          <audio controls>
+            <source :src="this.data">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+        <div v-else>
+          <img height="500px" :src="this.data"/>
         </div>
       </div>
     </div>
@@ -39,37 +51,53 @@ export default {
       data: null,
       type: 'text',
       id: '',
+      name: '',
+      parent: '',
+      parentTitle: ''
     }
   },
   async mounted() {
-    const id = encodeURIComponent(this.$route.query.id)
+    const id = encodeURIComponent(this.$route.query.id);
     this.id = id;
     const path = encodeURIComponent(this.$route.query.path);
     let route = `/object/open?id=${ id }`;
     if (path) {
       route += `&path=${ path }`;
     }
-    console.log(`Sending route: ${ route }`);
     let response = await this.$http.get({ route: route });
+    const title = decodeURIComponent(this.$route.query.title);
+    if (title) {
+      this.title = title;
+    }
+    const parent = decodeURIComponent(this.$route.query.parent);
+    if (parent) {
+      this.parent = parent;
+    }
+    const parentTitle = decodeURIComponent(this.$route.query.parentTitle);
+    if (parentTitle) {
+      this.parentTitle = parentTitle;
+    }
     //TODO: Ask for MIME types
-    if (path && path.endsWith(".pdf")) {
-      this.type = 'pdf';
-      this.data = await response.blob();
-      //var blob = new Blob([this.data], {type: 'application/pdf'});
-      console.log(this.data);
-      const blobURL = window.URL.createObjectURL(this.data);
-      this.pdfdata = pdf.createLoadingTask(blobURL);
-      console.log("this.pdfsrc.promise", this.pdfdata.promise);
-      this.pdfdata.promise.then(pdf => {
-        console.log("pdf in callback", pdf);
-        this.numPages = pdf.numPages;
-        console.log(
-            `this.numPages: ${ this.numPages } pdf.numPages: ${ pdf.numPages } `
-        );
-        console.log(this);
-      });
-    } else {
+    if (path && path.endsWith(".txt")) {
+      this.type = 'txt';
       this.data = await response.text();
+    } else {
+      this.data = await response.blob();
+      const blobURL = window.URL.createObjectURL(this.data);
+      if (path && (path.endsWith(".mp3") || path.endsWith(".wav"))) {
+        this.type = 'audio';
+        this.data = blobURL;
+      } else if (path && path.endsWith(".pdf")) {
+        this.type = 'pdf';
+        this.pdfdata = pdf.createLoadingTask(blobURL);
+        this.pdfdata.promise.then(pdf => {
+          this.numPages = pdf.numPages;
+          console.log(`this.numPages: ${ this.numPages } pdf.numPages: ${ pdf.numPages }`);
+        });
+      } else {
+        this.type = 'other';
+        this.data = blobURL;
+      }
     }
   },
   methods: {

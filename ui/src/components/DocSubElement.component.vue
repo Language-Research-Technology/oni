@@ -24,7 +24,9 @@
              x-ref="content"
              aria-labelledby="collapse-1-button">
       <li v-for="(value, name) in this.value" :key="this.name">
-        <doc-element :crateId="this.crateId" :id="this.parent" :name="name" :value="value" :type="this.value['@type']"/>
+        <doc-element :crateId="this.crateId" :id="this.parent"
+                     :name="name" :value="value" :type="this.value['@type']"
+                     :title="this.title" :parentTitle="this.parentTitle" />
       </li>
     </section>
      </div>
@@ -47,7 +49,7 @@ export default {
     first,
     getURL() {
       if (this.type && this.type.includes('File')) {
-        return '/open?id=' + encodeURIComponent(this.crateId) + '&path=' + encodeURIComponent(this.value)
+        return '/open?id=' + encodeURIComponent(this.crateId) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parent) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
       } else {
         return '/view?id=' + encodeURIComponent(this.parent);
       }
@@ -60,10 +62,12 @@ export default {
   },
   props: {
     parent: null,
-    crateId:'',
+    crateId: '',
+    parentTitle:'',
     name: '',
     type: '',
-    value: {}
+    value: {},
+    title: ''
   },
   mounted() {
   },

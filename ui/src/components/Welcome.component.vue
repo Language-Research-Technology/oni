@@ -44,8 +44,11 @@
             </a>
           </div>
         </div>
-        <div v-if="this.scrollId" class="flex items-center justify-center">
-          <button class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" @click="getNext()">Next</button>
+        <div v-if="this.more" class="flex items-center justify-center">
+          <button
+              class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+              @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i> More
+          </button>
         </div>
         <div class="p-3 m-3"></div>
       </div>
@@ -64,14 +67,15 @@ export default {
       siteName: this.$store.state.configuration.ui.siteName,
       siteNameX: this.$store.state.configuration.ui.siteNameX || '',
       welcome: this.$store.state.configuration.ui.welcomeMessage,
-      items: []
+      searchInput: '',
+      items: [],
+      more: false
     };
   },
   async mounted() {
     if (this.$route.path === "/") this.$router.push("/welcome");
     let response = await this.$http.get({ route: '/search/items' });
     const items = await response.json();
-    console.log(items)
     this.populate(items);
   },
   methods: {
@@ -90,16 +94,19 @@ export default {
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
-        for (let item of thisItems) {
-          this.items.push(item['_source']);
+        if (thisItems.length > 0) {
+          for (let item of thisItems) {
+            this.items.push(item['_source']);
+          }
+          this.more = true;
+        } else {
+          this.more = false;
         }
       }
     },
     async getNext() {
-      let response = await this.$http.get({ route: `/search/items?scroll=${this.scrollId}` });
+      let response = await this.$http.get({ route: `/search/items?scroll=${ this.scrollId }` });
       const items = await response.json();
-      this.items = [];
-      this.scrollId = null;
       this.populate(items);
     }
   }

@@ -21,8 +21,9 @@ export function setupSearchRoutes({ server, configuration }) {
           const id = decodeURIComponent(req.query['id'])
           query = { match: { '@id': id.trim() } };
           const result = await search({ configuration, index, query });
-          log.debug(`Total: ${ result?.hits?.total }`);
-          res.send(first(result?.hits?.hits));
+          const total = result?.hits?.total;
+          log.debug(`Total: ${ total?.value }`);
+          hits = first(result?.hits?.hits);
         } else {
           if (req.query.multi) {
             query = {

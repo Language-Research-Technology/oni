@@ -8,7 +8,9 @@
       </div>
       <ul>
         <li v-for="(value, name) in meta" :key="name">
-          <doc-element :crateId="this.crateId" :id="this.meta['@id']" :name="name" :value="value"/>
+          <doc-element :crateId="this.crateId" :parentTitle="this.title"
+                       :id="this.meta['@id']" :name="name" :value="value"
+                       />
         </li>
       </ul>
     </div>
@@ -22,7 +24,6 @@ import { first } from 'lodash';
 
 export default {
   props: {
-    title: '',
     crateId: '',
     meta: {}
   },
@@ -31,14 +32,25 @@ export default {
         import('./DocElement.component.vue')
     )
   },
+  mounted() {
+    this.title = this.getTitle();
+  },
   methods: {
     getTitle() {
-      const title = first(this.meta['name']);
-      return title?.['@value'] || this.meta['@id'];
+      const title = first(this.meta['name'])?.['@value'];
+      if (title) {
+        this.title = title;
+        return title;
+      } else {
+        return this.meta['@id'];
+      }
     }
   },
   data() {
-    return {}
+    return {
+      title: '',
+      type:''
+    }
   }
 }
 </script>

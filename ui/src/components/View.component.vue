@@ -1,5 +1,10 @@
 <template>
-  <view-doc :title="'Document'" :crateId="this.crateId" :meta="this.metadata"/>
+  <div v-if="this.metadata">
+    <view-doc :crateId="this.crateId" :meta="this.metadata"/>
+  </div>
+  <div v-else>
+    <view-doc-error/>
+  </div>
 </template>
 
 <script>
@@ -11,11 +16,15 @@ export default {
   components: {
     ViewDoc: defineAsyncComponent(() =>
         import('./ViewDoc.component.vue')
+    ),
+    ViewDocError: defineAsyncComponent(() =>
+        import('./ViewDocError.component.vue')
     )
   },
   data() {
     return {
-      metadata: {}
+      crateId: '',
+      metadata: null
     }
   },
   async mounted() {
@@ -25,11 +34,10 @@ export default {
     if (element) {
       route += `&element=${ element }`;
     }
-    console.log(`Sending route: ${route}`);
+    console.log(`Sending route: ${ route }`);
     let response = await this.$http.get({ route: route });
     const metadata = await response.json();
     this.populate(metadata);
-    console.log(metadata);
   },
   methods: {
     populate(metadata) {
