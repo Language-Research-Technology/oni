@@ -78,7 +78,7 @@ export default {
       this.parentTitle = parentTitle;
     }
     //TODO: Ask for MIME types
-    if (path && path.endsWith(".txt")) {
+    if (path && (path.endsWith(".txt") || path.endsWith(".csv"))) {
       this.type = 'txt';
       this.data = await response.text();
     } else {

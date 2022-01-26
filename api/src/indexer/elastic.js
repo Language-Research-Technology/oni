@@ -38,15 +38,16 @@ export async function elasticIndex({ configuration }) {
   }
 }
 
-export async function search({ index, query }) {
+export async function search({ index, query, aggs, explain= false }) {
   try {
-    console.log(query);
     const { body } = await client.search({
       index: index,
-      scroll: '1m',
+      scroll: '10m',
       body: {
-        query: query
-      }
+        query: query,
+        aggs: aggs
+      },
+      explain: explain,
     });
     return body;
   } catch (e) {

@@ -10,6 +10,7 @@ export function setupSearchRoutes({ server, configuration }) {
         //TODO: Is this where we use Marco's suggestion of building queries?
         // https://elastic-builder.js.org/
         let query;
+        let aggs;
         let index = req.params?.index;
         //TODO: How do we make this more dynamic
         //Do we send all queries straight to api?
@@ -30,15 +31,26 @@ export function setupSearchRoutes({ server, configuration }) {
               multi_match: {
                 query: req.query.multi.trim(),
                 type: 'most_fields',
+                //TODO: place this in configuration
                 fields: [ '@id', 'name.@value', '_text_english', '_text_arabic_standard',
                   '_text_chinese_mandarin', '_text_persian_iranian', '_text_turkish',
                   '_text_vietnamese' ]
               }
             };
+
           } else {
             query = { match_all: {} };
+            aggs = {}
           }
-          hits = await search({ configuration, index, query });
+          //TODO: place this in configuration
+          aggs = {
+            "languages": {
+              "terms": { "field": "hasFile.language.name.@value.keyword" }
+            }
+          }
+          hits = await search({ configuration, index, query, aggs, explain: true });
+          console.log('aggregations:')
+          console.log(hits?.aggregations)
         }
         res.send(hits);
       } catch (e) {
