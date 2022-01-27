@@ -1,4 +1,5 @@
 const path = require('path');
+const util = require('util')
 
 function workingPath(currentPath) {
   if (path.isAbsolute(currentPath)) {
@@ -8,6 +9,15 @@ function workingPath(currentPath) {
   }
 }
 
+function inspect(obj, depth = null) {
+
+  console.log(
+    util.inspect(obj, { showHidden: false, depth, colors: true })
+  );
+
+}
+
 module.exports = {
-  workingPath
+  workingPath,
+  inspect
 }

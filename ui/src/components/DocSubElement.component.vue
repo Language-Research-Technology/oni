@@ -19,7 +19,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/> </svg>
         <span>{{ first(this.value['name'])?.['@value'] }}</span>
       </button>
-    <section v-show='toggle'
+    <section v-show="toggle"
              class="overflow-hidden transition-all duration-300 ease-out"
              x-ref="content"
              aria-labelledby="collapse-1-button">

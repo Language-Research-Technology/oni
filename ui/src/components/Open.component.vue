@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 bg-gray-200 flex justify-center">
+  <div class="p-6 bg-indigo-100 flex justify-center">
     <div class="container max-w-screen-lg mx-auto">
       <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"

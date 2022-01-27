@@ -4,44 +4,70 @@ import { ROCrate } from 'ro-crate';
 import { recordResolve } from '../controllers/recordResolve';
 import { first } from 'lodash';
 import fs from 'fs';
+import * as path from 'path';
 
 export async function putCollectionMappings({ configuration, client }) {
 
-  const mappings = {
-    "mappings": {
-      "properties": {
-        "@id": {
-          "type": "keyword"
-        },
-        "_text_english": {
-          "type": "text",
-          "analyzer": "english"
-        },
-        "_text_arabic_standard": {
-          "type": "text",
-          "analyzer": "arabic"
-        },
-        "_text_chinese_mandarin": {
-          "type": "text"
-        },
-        "_text_persian_iranian": {
-          "type": "text",
-          "analyzer": "persian"
-        },
-        "_text_turkish": {
-          "type": "text",
-          "analyzer": "turkish"
-        },
-        "_text_vietnamese": {
-          "type": "text"
+  //TODO: move this to config
+  try {
+    const mappings = {
+      "mappings": {
+        "properties": {
+          "@id": {
+            "type": "keyword"
+          },
+          "hasFile": {
+            "type": "nested",
+            "properties": {
+              "language": {
+                "type": "nested",
+                "properties": {
+                  "name": {
+                    "type": "nested",
+                    "properties": {
+                      "@value": {
+                        "type": "keyword"
+                      }
+                    }
+
+                  }
+                }
+              }
+            }
+          },
+          "_text_english": {
+            "type": "text",
+            "analyzer": "english"
+          },
+          "_text_arabic_standard": {
+            "type": "text",
+            "analyzer": "arabic"
+          },
+          "_text_chinese_mandarin": {
+            "type": "text"
+          },
+          "_text_persian_iranian": {
+            "type": "text",
+            "analyzer": "persian"
+          },
+          "_text_turkish": {
+            "type": "text",
+            "analyzer": "turkish"
+          },
+          "_text_vietnamese": {
+            "type": "text"
+          }
         }
       }
-    }
+    };
+
+    const { body } = await client.indices.create({
+      index: 'items',
+      body: mappings
+    });
+  } catch (e) {
+    throw new Error(e);
   }
-  const { body } = await client.indices.create({
-    index: 'items',
-    body: mappings
-  });
 }
 
 export async function indexCollections({ configuration, client }) {
@@ -79,7 +105,7 @@ export async function indexCollections({ configuration, client }) {
       });
     }
   } catch (e) {
-    console.log(e.message)
+    throw new Error(e);
   }
 }
 
@@ -127,7 +153,6 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
           var lg = 'english';
           if (ff) {
             if (ff.language) {
-
               for (let l of crate.utils.asArray(ff.language)) {
                 const ll = crate.getItem(l['@id']);
                 if (ll) {
@@ -139,15 +164,23 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
               }
             }
             //TODO find csvs too all text formats
-            if (ff.encodingFormat && crate.utils.asArray(ff.encodingFormat.includes('text/plain'))) {
-              const hackFilePath = ff['@id'].replace(/^.*path=/, '');
+            const eff = ff?.encodingFormat?.find((ef) => {
+              if (typeof ef === 'string') return ef.match('text/plain');
+            });
+            //console.log(crate.getNormalizedTree(ff.encodingFormat, 1))
+            if (eff) {
               const fileObj = await getFile({
                 record: record.data,
                 itemId: ff['@id'],
                 catalogFilename: configuration.api.ocfl.catalogFilename
               });
-              const fileContent = fs.readFileSync(fileObj.filePath, 'utf-8');
-              item['_text_' + lg] = fileContent;
+              if (fs.existsSync(path.resolve(fileObj.filePath))) {
+                const fileContent = fs.readFileSync(path.resolve(fileObj.filePath), { encoding: 'utf-8' });
+                //item['_text_' + lg] = fileContent;
+                addContent(item['hasFile'], ff['@id'], fileContent);
+              } else {
+                console.log(`path: ${ fileObj.filePath } does not resolve to a file`);
+              }
             }
           }
         }
@@ -158,8 +191,9 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
         });
       }
     }
-  } catch (e) {
-    console.log(e.message)
+  } catch
+    (e) {
+    throw new Error(e);
   }
 }
 
@@ -174,3 +208,10 @@ function flattenContains(item) {
   }
 }
 
+function addContent(arr, id, content) {
+  const index = arr.findIndex(x => x['@id'] === id);
+  if (index !== -1) {
+    arr[index]['_content'] = content
+  }
+  return arr;
+}

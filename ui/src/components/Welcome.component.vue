@@ -23,14 +23,14 @@
       <div class="flex justify-between">
         <div class="w-1/4 pt-4">
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
-            <ul v-if="aggs?.['buckets'].length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 mb-4 shadow-md">
+            <ul v-if="aggs?.values?.buckets?.length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 mb-4 shadow-md">
               <li class="border-b-2">
                 <button
                     class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggsName.toUpperCase() }}
                 </button>
               </li>
-              <li class="m-2 mt-4" v-for="ag of aggs['buckets']">
+              <li class="m-2 mt-4" v-for="ag of aggs?.values?.buckets">
                 <button @click="this.facet(aggsName, ag)"
                     class="text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow-md hover:bg-gray-100">
                   {{ ag.key }} | {{ ag.doc_count }}
@@ -128,6 +128,7 @@ export default {
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
+        console.log(thisItems);
         if (thisItems.length > 0) {
           for (let item of thisItems) {
             this.items.push(item['_source']);
@@ -139,6 +140,7 @@ export default {
       }
       if (items['aggregations']) {
         this.aggregations = items['aggregations'];
+        console.log(this.aggregations)
       }
     },
     async getNext() {

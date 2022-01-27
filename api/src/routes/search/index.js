@@ -1,6 +1,9 @@
 import { search, scroll } from '../../indexer/elastic';
 import { getLogger } from '../../services';
 import { first } from 'lodash';
+import { inspect } from '../../services/utils';
+
+import * as esb from 'elastic-builder';
 
 const log = getLogger();
 
@@ -27,30 +30,47 @@ export function setupSearchRoutes({ server, configuration }) {
           hits = first(result?.hits?.hits);
         } else {
           if (req.query.multi) {
-            query = {
-              multi_match: {
-                query: req.query.multi.trim(),
-                type: 'most_fields',
-                //TODO: place this in configuration
-                fields: [ '@id', 'name.@value', '_text_english', '_text_arabic_standard',
-                  '_text_chinese_mandarin', '_text_persian_iranian', '_text_turkish',
-                  '_text_vietnamese' ]
-              }
-            };
-
+            const fields = [ '@id', 'name.@value', '_text_english', '_text_arabic_standard',
+              '_text_chinese_mandarin', '_text_persian_iranian', '_text_turkish',
+              '_text_vietnamese' ];
+            const query = esb.multiMatchQuery(fields, req.query.multi.trim());
+            inspect(query.toJSON());
           } else {
             query = { match_all: {} };
             aggs = {}
           }
           //TODO: place this in configuration
-          aggs = {
-            "languages": {
-              "terms": { "field": "hasFile.language.name.@value.keyword" }
-            }
-          }
+          aggs = esb.nestedAggregation('languages', 'hasFile.language.name')
+                    .agg(
+                      esb.termsAggregation('values', 'hasFile.language.name.@value')
+                        .agg(esb.termsAggregation('values', 'hasFile.language.name.@value.keyword')
+                        )
+                    );
+          inspect(aggs.toJSON());
+          // aggs = {
+          //   "languages": {
+          //     "nested": {
+          //       "path": "hasFile.language.name"
+          //     },
+          //     "aggs": {
+          //       "values": {
+          //         "terms": {
+          //           "field": "hasFile.language.name.@value"
+          //         },
+          //         "aggs": {
+          //           "values": {
+          //             "terms": {
+          //               "field": "hasFile.language.name.@value.keyword"
+          //             }
+          //           }
+          //         }
+          //       }
+          //     }
+          //   }
+          // }
           hits = await search({ configuration, index, query, aggs, explain: true });
-          console.log('aggregations:')
-          console.log(hits?.aggregations)
+          inspect({ Total: hits?.hits?.total });
+          inspect({ Aggregations: hits?.aggregations }, 2);
         }
         res.send(hits);
       } catch (e) {

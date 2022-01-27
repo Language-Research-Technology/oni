@@ -41,6 +41,7 @@
         "client-oauth2": "^4.3.3",
         "client-sessions": "^0.8.0",
         "date-fns": "^2.23.0",
+        "elastic-builder": "^2.16.0",
         "fs-extra": "^10.0.0",
         "hasha": "^5.2.2",
         "jose": "^4.3.7",

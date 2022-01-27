@@ -24,6 +24,7 @@ export async function elasticBootstrap({ configuration }) {
     });
     await putCollectionMappings({configuration, client});
   } catch (e) {
+    log.error('------')
     log.error(e.message);
   }
 }
