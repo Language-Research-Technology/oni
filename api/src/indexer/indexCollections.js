@@ -149,7 +149,7 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
           }
         }
         for (let f of crate.utils.asArray(m['hasFile'])) {
-          const ff = crate.getItem(f['@id']);
+          const ff = crate.getItem(f['@id']); //TODO: maybe normalize this
           var lg = 'english';
           if (ff) {
             if (ff.language) {

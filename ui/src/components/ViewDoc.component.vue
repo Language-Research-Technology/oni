@@ -6,8 +6,8 @@
           {{ getTitle() }}
         </p>
       </div>
-      <ul>
-        <li v-for="(value, name) in meta" :key="name">
+      <ul >
+        <li v-for="(value, name) in meta" :key="name" >
           <doc-element :crateId="this.crateId" :parentTitle="this.title"
                        :id="this.meta['@id']" :name="name" :value="value"
                        />

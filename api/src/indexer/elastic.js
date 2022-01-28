@@ -1,11 +1,12 @@
-import { getLogger } from '../services';
-import { Client } from '@elastic/elasticsearch';
-import { indexCollections, putCollectionMappings } from './indexCollections';
+import {getLogger} from '../services';
+import {Client} from '@elastic/elasticsearch';
+import {indexCollections, putCollectionMappings} from './indexCollections';
+import {inspect} from '../services/utils';
 
 const log = getLogger();
 let client;
 
-export async function elasticInit({ configuration }) {
+export async function elasticInit({configuration}) {
   try {
     client = new Client({
       node: configuration.api.elastic.node,
@@ -17,7 +18,7 @@ export async function elasticInit({ configuration }) {
   }
 }
 
-export async function elasticBootstrap({ configuration }) {
+export async function elasticBootstrap({configuration}) {
   try {
     await client.indices.delete({
       index: '*'
@@ -29,43 +30,45 @@ export async function elasticBootstrap({ configuration }) {
   }
 }
 
-export async function elasticIndex({ configuration }) {
+export async function elasticIndex({configuration}) {
   try {
     //TODO: move this out to a pluggable file
-    await indexCollections({ configuration, client });
+    await indexCollections({configuration, client});
   } catch (e) {
     log.error(e.message);
-    return { error: e.message }
+    return {error: e.message}
   }
 }
 
-export async function search({ index, query, aggs, explain= false }) {
+export async function search({index, query, aggs, highlight, explain = false}) {
   try {
-    const { body } = await client.search({
+    const {body} = await client.search({
       index: index,
       scroll: '10m',
       body: {
         query: query,
+        highlight: highlight,
         aggs: aggs
       },
       explain: explain,
     });
+    inspect(highlight)
     return body;
   } catch (e) {
     log.error(e.message);
-    return { error: e.message }
+    return {error: e.message}
   }
 }
 
-export async function scroll({ scrollId }) {
+export async function scroll({scrollId}) {
   try {
-    const { body } = await client.scroll({
+    const {body} = await client.scroll({
       scrollId: scrollId,
       scroll: '1m'
     });
     return body;
   } catch (e) {
     log.error(e.message);
-    return { error: e.message }
+    return {error: e.message}
   }
 }

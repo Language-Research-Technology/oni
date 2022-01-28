@@ -32,7 +32,7 @@
               </li>
               <li class="m-2 mt-4" v-for="ag of aggs?.values?.buckets">
                 <button @click="this.facet(aggsName, ag)"
-                    class="text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow-md hover:bg-gray-100">
+                        class="text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow-md hover:bg-gray-100">
                   {{ ag.key }} | {{ ag.doc_count }}
                 </button>
               </li>
@@ -42,28 +42,32 @@
         <div class="w-3/4 pt-4">
           <div v-for="item of this.items" class="flex">
             <div class="w-full h-auto rounded-lg m-2 pb-4 px-4 flex flex-col items-center">
-              <a :href="'/view?id=' + encodeURIComponent(item['@id'])"
+              <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
                  class="w-full block p-5 max-w-screen-md bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {{ first(item.name)?.['@value'] || first(first(item.identifier)?.value)?.['@value'] }}
+                  {{ first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value'] }}
                 </h5>
                 <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">{{ item.conformsTo }}</p>
                 <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-                  <span v-if="item._contains?.['@type'].length > 0">Contains:&nbsp;</span>
-                  <span v-for="type of item._contains?.['@type']">{{ type }}</span>
+                  <span v-if="item._source._contains?.['@type'].length > 0">Contains:&nbsp;</span>
+                  <span v-for="type of item._source._contains?.['@type']">{{ type }}</span>
                 </p>
                 <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-                  <span v-if="item._contains?.['language'].length > 0">Languages:&nbsp;</span>
+                  <span v-if="item._source._contains?.['language'].length > 0">Languages:&nbsp;</span>
                 </p>
                 <div class="flex flex-wrap">
                   <button
                       class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow"
-                      v-for="language of item._contains?.['language']">{{
+                      v-for="language of item._source._contains?.['language']">{{
                       first(language.name)?.['@value']
                     }}
                   </button>
                 </div>
-                <p v-if="item?.memberOf"> Related: {{ first(item?.memberOf)?.['@id'] }}</p>
+                <p v-if="item._source?.memberOf"> Related: {{ first(item._source?.memberOf)?.['@id'] }}</p>
+                <ul v-if="item.highlight">
+                  <li v-for="highlight of item.highlight"
+                      v-html="wrapHighlight(first(highlight))"></li>
+                </ul>
               </a>
             </div>
           </div>
@@ -82,7 +86,7 @@
 
 <script>
 import 'element-plus/theme-chalk/display.css'
-import { first } from 'lodash';
+import {first} from 'lodash';
 
 export default {
   data() {
@@ -98,7 +102,7 @@ export default {
   },
   async mounted() {
     if (this.$route.path === "/") this.$router.push("/welcome");
-    let response = await this.$http.get({ route: '/search/items' });
+    let response = await this.$http.get({route: '/search/items'});
     const items = await response.json();
     this.populate(items);
   },
@@ -108,7 +112,7 @@ export default {
       console.log(name)
       console.log(ag)
       const input = this.searchInput;
-      let response = await this.$http.get({ route: `/search/items?multi=${ input }` });
+      let response = await this.$http.get({route: `/search/items?multi=${input}`});
       const items = await response.json();
       this.items = [];
       this.scrollId = null;
@@ -116,7 +120,7 @@ export default {
     },
     async search() {
       const input = this.searchInput;
-      let response = await this.$http.get({ route: `/search/items?multi=${ input }` });
+      let response = await this.$http.get({route: `/search/items?multi=${input}`});
       const items = await response.json();
       this.items = [];
       this.scrollId = null;
@@ -131,7 +135,7 @@ export default {
         console.log(thisItems);
         if (thisItems.length > 0) {
           for (let item of thisItems) {
-            this.items.push(item['_source']);
+            this.items.push(item);
           }
           this.more = true;
         } else {
@@ -144,9 +148,13 @@ export default {
       }
     },
     async getNext() {
-      let response = await this.$http.get({ route: `/search/items?scroll=${ this.scrollId }` });
+      let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
       const items = await response.json();
       this.populate(items);
+    },
+    wrapHighlight(text) {
+
+      return '... ' + text + ' ...';
     }
   }
 };

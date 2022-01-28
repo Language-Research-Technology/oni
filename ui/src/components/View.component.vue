@@ -9,8 +9,8 @@
 
 <script>
 import 'element-plus/theme-chalk/display.css'
-import { omitBy } from 'lodash';
-import { defineAsyncComponent } from 'vue';
+import {omitBy, reject} from 'lodash';
+import {defineAsyncComponent} from 'vue';
 
 export default {
   components: {
@@ -30,12 +30,12 @@ export default {
   async mounted() {
     const id = encodeURIComponent(this.$route.query.id)
     const element = encodeURIComponent(this.$route.query.element);
-    let route = `/search/items?id=${ id }`;
+    let route = `/search/items?id=${id}`;
     if (element) {
-      route += `&element=${ element }`;
+      route += `&element=${element}`;
     }
-    console.log(`Sending route: ${ route }`);
-    let response = await this.$http.get({ route: route });
+    console.log(`Sending route: ${route}`);
+    let response = await this.$http.get({route: route});
     const metadata = await response.json();
     this.populate(metadata);
   },
@@ -43,7 +43,9 @@ export default {
     populate(metadata) {
       if (metadata?._source) {
         this.crateId = metadata._source._crateId;
+        //TODO: Omit in the backend
         this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
+        console.log(this.metadata)
       }
     }
   }
