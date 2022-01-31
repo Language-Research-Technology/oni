@@ -33,8 +33,6 @@ export default {
   },
   methods: {
     async search() {
-      console.log('searchbar mounted')
-      console.log(this.searchInput);
       let response;
       if (this.searchInput) {
         this.searchQuery = this.searchInput;

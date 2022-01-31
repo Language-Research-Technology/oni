@@ -2,19 +2,6 @@
   <div class="h-screen">
     <nav-foot/>
     <search-bar @populate='populate' :searchInput="searchInput"/>
-    <!--    <div class="bg-white w-full flex items-center justify-center">-->
-    <!--      <div class="flex rounded p-3 m-4 ">-->
-    <!--        <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."-->
-    <!--               v-model="searchInput">-->
-    <!--        <button @click="this.search()" class="flex items-center justify-center px-4 border-l rounded">-->
-    <!--          <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"-->
-    <!--               viewBox="0 0 24 24">-->
-    <!--            <path-->
-    <!--                d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/>-->
-    <!--          </svg>-->
-    <!--        </button>-->
-    <!--      </div>-->
-    <!--    </div>-->
     <div class="flex justify-center items-center bg-indigo-100">
       <div v-if="this.items.length > 0" class="flex justify-between">
         <div class="w-1/4 pt-4">
@@ -67,7 +54,6 @@
               </a>
             </div>
           </div>
-
           <div v-if="this.more" class="flex items-center justify-center">
             <button
                 class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
@@ -112,26 +98,7 @@ export default {
   async mounted() {
     if (this.$route.query.search) {
       this.searchInput = this.$route.query.search;
-      this.items = []
-    } else {
-      this.searchInput = '';
-      this.items = []
     }
-    console.log('welcome mounted')
-    console.log(this.items);
-    // if (this.$route.query.search) {
-    //   const searchQuery = this.$route.query.search;
-    //   this.searchInput = searchQuery;
-    // }
-    // if (this.$route.path === "/") this.$router.push("/welcome");
-    // let response;
-    // if (this.searchInput) {
-    //   response = await this.$http.get({route: `/search/items?multi=${this.searchInput}`});
-    // } else {
-    //   response = await this.$http.get({route: '/search/items'});
-    // }
-    // const items = await response.json();
-    // this.populate(items);
   },
   methods: {
     first,
@@ -148,9 +115,8 @@ export default {
     },
     populate({items, scrollId, newSearch}) {
       if (newSearch) {
-        this.items = []
+        this.items = [];
       }
-      console.log('populate!')
       if (items['_scroll_id']) {
         this.scrollId = items['_scroll_id'];
       }
