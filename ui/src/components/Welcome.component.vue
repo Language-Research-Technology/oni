@@ -1,29 +1,25 @@
 <template>
-  <div class="w-full h-screen bg-indigo-100">
-    <div class="flex justify-center bg-indigo-100">
-      <div class="h-auto rounded-lg pt-8 pb-8 px-8 flex flex-col items-center">
-        <p class="font-light text-4xl mb-4">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></p>
-        <p class="text-right mb-4">{{ welcome }}</p>
-      </div>
-    </div>
-    <div class="flex items-center justify-center bg-indigo-100">
-      <div class="flex border-2 rounded">
-        <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80" placeholder="Search..."
-               v-model="searchInput">
-        <button @click="this.search()" class="flex items-center justify-center px-4 border-l">
-          <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
-               viewBox="0 0 24 24">
-            <path
-                d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+  <div class="h-screen">
+    <nav-foot/>
+    <search-bar @populate='populate' :searchInput="searchInput"/>
+    <!--    <div class="bg-white w-full flex items-center justify-center">-->
+    <!--      <div class="flex rounded p-3 m-4 ">-->
+    <!--        <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."-->
+    <!--               v-model="searchInput">-->
+    <!--        <button @click="this.search()" class="flex items-center justify-center px-4 border-l rounded">-->
+    <!--          <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"-->
+    <!--               viewBox="0 0 24 24">-->
+    <!--            <path-->
+    <!--                d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/>-->
+    <!--          </svg>-->
+    <!--        </button>-->
+    <!--      </div>-->
+    <!--    </div>-->
     <div class="flex justify-center items-center bg-indigo-100">
-      <div class="flex justify-between">
+      <div v-if="this.items.length > 0" class="flex justify-between">
         <div class="w-1/4 pt-4">
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
-            <ul v-if="aggs?.values?.buckets?.length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 mb-4 shadow-md">
+            <ul v-if="aggs?.values?.buckets?.length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 ml-6 shadow-md">
               <li class="border-b-2">
                 <button
                     class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
@@ -41,7 +37,7 @@
         </div>
         <div class="w-3/4 pt-4">
           <div v-for="item of this.items" class="flex">
-            <div class="w-full h-auto rounded-lg m-2 pb-4 px-4 flex flex-col items-center">
+            <div class="w-full h-auto rounded-lg m-2 pb-4 pr-4 flex flex-col items-center">
               <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
                  class="w-full block p-5 max-w-screen-md bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -57,7 +53,7 @@
                 </p>
                 <div class="flex flex-wrap">
                   <button
-                      class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow"
+                      class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
                       v-for="language of item._source._contains?.['language']">{{
                       first(language.name)?.['@value']
                     }}
@@ -71,6 +67,7 @@
               </a>
             </div>
           </div>
+
           <div v-if="this.more" class="flex items-center justify-center">
             <button
                 class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
@@ -80,20 +77,32 @@
           <div class="p-3 m-3"></div>
         </div>
       </div>
+      <div v-if="this.items.length <= 0"
+           class="w-full h-auto rounded-lg p-4 m-4 flex justify-center ">
+        <p class="bg-white rounded p-4 m-4 shadow-md">
+          No items were found with that search input
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+
 import 'element-plus/theme-chalk/display.css'
 import {first} from 'lodash';
+import NavFoot from './NavFoot.component.vue';
+import {defineAsyncComponent} from "vue";
 
 export default {
+  components: {
+    NavFoot,
+    SearchBar: defineAsyncComponent(() =>
+        import("@/components/SearchBar.component.vue")
+    ),
+  },
   data() {
     return {
-      siteName: this.$store.state.configuration.ui.siteName,
-      siteNameX: this.$store.state.configuration.ui.siteNameX || '',
-      welcome: this.$store.state.configuration.ui.welcomeMessage,
       searchInput: '',
       items: [],
       more: false,
@@ -101,14 +110,33 @@ export default {
     };
   },
   async mounted() {
-    if (this.$route.path === "/") this.$router.push("/welcome");
-    let response = await this.$http.get({route: '/search/items'});
-    const items = await response.json();
-    this.populate(items);
+    if (this.$route.query.search) {
+      this.searchInput = this.$route.query.search;
+      this.items = []
+    } else {
+      this.searchInput = '';
+      this.items = []
+    }
+    console.log('welcome mounted')
+    console.log(this.items);
+    // if (this.$route.query.search) {
+    //   const searchQuery = this.$route.query.search;
+    //   this.searchInput = searchQuery;
+    // }
+    // if (this.$route.path === "/") this.$router.push("/welcome");
+    // let response;
+    // if (this.searchInput) {
+    //   response = await this.$http.get({route: `/search/items?multi=${this.searchInput}`});
+    // } else {
+    //   response = await this.$http.get({route: '/search/items'});
+    // }
+    // const items = await response.json();
+    // this.populate(items);
   },
   methods: {
     first,
     async facet(name, ag) {
+      console.log('facet')
       console.log(name)
       console.log(ag)
       const input = this.searchInput;
@@ -118,21 +146,16 @@ export default {
       this.scrollId = null;
       this.populate(items);
     },
-    async search() {
-      const input = this.searchInput;
-      let response = await this.$http.get({route: `/search/items?multi=${input}`});
-      const items = await response.json();
-      this.items = [];
-      this.scrollId = null;
-      this.populate(items);
-    },
-    populate(items) {
+    populate({items, scrollId, newSearch}) {
+      if (newSearch) {
+        this.items = []
+      }
+      console.log('populate!')
       if (items['_scroll_id']) {
         this.scrollId = items['_scroll_id'];
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
-        console.log(thisItems);
         if (thisItems.length > 0) {
           for (let item of thisItems) {
             this.items.push(item);
@@ -144,16 +167,14 @@ export default {
       }
       if (items['aggregations']) {
         this.aggregations = items['aggregations'];
-        console.log(this.aggregations)
       }
     },
     async getNext() {
       let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
       const items = await response.json();
-      this.populate(items);
+      this.populate({items});
     },
     wrapHighlight(text) {
-
       return '... ' + text + ' ...';
     }
   }

@@ -46,8 +46,8 @@ export function setupSearchRoutes({server, configuration}) {
                 .numberOfFragments(3)
                 .fragmentSize(150)
                 .fields(['hasFile._content', 'hasFile.name.@value.keyword.keyword'])
-                .preTags('<em class="font-bold">', 'hasFile._content')
-                .postTags('</em>', 'hasFile._content')
+                .preTags('<mark class="font-bold">', 'hasFile._content')
+                .postTags('</mark>', 'hasFile._content')
               );
             query = esbQuery.toJSON().query;
             highlight = esbQuery.toJSON().highlight;

@@ -1,4 +1,6 @@
 <template>
+  <search-bar @populate='populate' :searchInput="searchInput"/>
+
   <div v-if="this.metadata">
     <view-doc :crateId="this.crateId" :meta="this.metadata"/>
   </div>
@@ -14,6 +16,9 @@ import {defineAsyncComponent} from 'vue';
 
 export default {
   components: {
+    SearchBar: defineAsyncComponent(() =>
+        import("@/components/SearchBar.component.vue")
+    ),
     ViewDoc: defineAsyncComponent(() =>
         import('./ViewDoc.component.vue')
     ),
@@ -23,6 +28,7 @@ export default {
   },
   data() {
     return {
+      searchInput: '',
       crateId: '',
       metadata: null
     }
