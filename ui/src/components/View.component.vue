@@ -1,5 +1,5 @@
 <template>
-  <search-bar @populate='populate' :searchInput="searchInput"/>
+  <search-bar @populate='populate' :searchInput="searchInput" />
 
   <div v-if="this.metadata">
     <view-doc :crateId="this.crateId" :meta="this.metadata"/>

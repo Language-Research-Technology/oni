@@ -56,15 +56,26 @@ export function setupSearchRoutes({server, configuration}) {
             aggs = {}
           }
           //TODO: place this in configuration
-          aggs = esb.nestedAggregation('languages', 'hasFile.language.name')
-            .agg(
-              esb.termsAggregation('values', 'hasFile.language.name.@value')
-                .agg(esb.termsAggregation('values', 'hasFile.language.name.@value.keyword')
-                )
-            );
+          const aggsQuery = esb.requestBodySearch()
+            .query(esb.matchQuery('not', 'important'))
+            .agg(esb.nestedAggregation('languages', 'hasFile.language.name')
+              .agg(
+                esb.termsAggregation('values', 'hasFile.language.name.@value')
+                  .agg(esb.termsAggregation('values', 'hasFile.language.name.@value.keyword')
+                  )
+              ))
+            .agg(esb.nestedAggregation('types', 'hasFile')
+              .agg(
+                esb.termsAggregation('values', 'hasFile.@type.keyword')
+                  .agg(esb.termsAggregation('values', 'hasFile.@type.keyword.keyword')
+                  )
+              ))
+          const aggsQueryJson = aggsQuery.toJSON();
+          aggs = aggsQueryJson.aggs;
+          inspect(aggs)
           hits = await search({configuration, index, query, aggs, highlight, explain: false});
           inspect({Total: hits?.hits?.total});
-          inspect({Aggregations: hits?.aggregations}, 2);
+          inspect({Aggregations: hits?.aggregations}, 4);
         }
         res.send(hits);
       } catch (e) {

@@ -14,10 +14,15 @@
                 </button>
               </li>
               <li class="m-2 mt-4" v-for="ag of aggs?.values?.buckets">
-                <button @click="this.facet(aggsName, ag)"
-                        class="text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 border border-gray-400 rounded shadow-md hover:bg-gray-100">
-                  {{ ag.key }} | {{ ag.doc_count }}
-                </button>
+                <div class="form-check form-check-inline">
+                  <input checked v-model="ag.key.checked" v-bind:id="ag.key"
+                      class="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+                      type="checkbox" :id="ag.key" :value="ag.key">
+                  <label class="form-check-label inline-block text-gray-800" :for="ag.key">
+                    {{ clean(ag.key) }} <span
+                      class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{ ag.doc_count }}</span>
+                  </label>
+                </div>
               </li>
             </ul>
           </div>
@@ -28,7 +33,9 @@
               <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
                  class="w-full block p-5 max-w-screen-md bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {{ first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value'] }}
+                  {{
+                    clean(first(item._source.name)?.['@value']) || first(first(item._source.identifier)?.value)?.['@value']
+                  }}
                 </h5>
                 <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">{{ item.conformsTo }}</p>
                 <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
@@ -96,9 +103,6 @@ export default {
     };
   },
   async mounted() {
-    if (this.$route.query.search) {
-      this.searchInput = this.$route.query.search;
-    }
   },
   methods: {
     first,
@@ -142,6 +146,10 @@ export default {
     },
     wrapHighlight(text) {
       return '... ' + text + ' ...';
+    },
+    clean(text) {
+      //TODO: Do we want to do this? Just adding a space for each campital leter
+      return text.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1).join(' ')
     }
   }
 };

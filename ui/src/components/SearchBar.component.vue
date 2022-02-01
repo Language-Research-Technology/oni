@@ -1,9 +1,10 @@
 <template>
   <div class="bg-white w-full h-auto flex items-center justify-center">
     <div class="flex rounded p-3 m-4 ">
-      <input @keyup.enter="this.search()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."
-             v-model="searchInput">
-      <button @click="this.search()" class="flex items-center justify-center px-4 border-l rounded">
+      <input @keyup.enter="this.doSearch()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."
+             v-model="searchQuery"
+             v-on:change="searchInputField">
+      <button @click="this.doSearch()" class="flex items-center justify-center px-4 border-l rounded">
         <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 24 24">
           <path
@@ -17,7 +18,7 @@
 <script>
 
 import {defineAsyncComponent} from 'vue';
-import {first} from 'lodash';
+import {first, isEmpty} from 'lodash';
 
 export default {
   props: {
@@ -29,16 +30,38 @@ export default {
     )
   },
   mounted() {
-    this.search();
+    //TODO: change this to configuration so search can go to X page
+    if (this.$route.path === '/welcome') {
+      this.search();
+    }
   },
   methods: {
+    searchInputField(e) {
+      //TODO: change this to configuration so it can update X route
+      if (this.$router.path === 'welcome') {
+        this.searchQuery = e.target.value;
+        const query = {...this.$router.query, search: e.target.value};
+        this.$router.replace({query});
+      }
+    },
     async search() {
+      console.log(this.$route.path);
+      if (!isEmpty(this.searchQuery)) {
+        await this.doSearch();
+      } else if (!isEmpty(this.$route.query.search)) {
+        this.searchQuery = this.$route.query.search;
+        await this.doSearch();
+      } else if (isEmpty(this.searchQuery)) {
+        await this.doSearch()
+      }
+    },
+    async doSearch() {
       let response;
-      if (this.searchInput) {
-        this.searchQuery = this.searchInput;
+      if (this.searchQuery) {
         await this.$router.push({path: 'welcome', query: {search: this.searchQuery}});
         response = await this.$http.get({route: `/search/items?multi=${this.searchQuery}`});
       } else {
+        await this.$router.push({path: 'welcome'});
         response = await this.$http.get({route: '/search/items'});
       }
       this.items = await response.json();
@@ -47,7 +70,7 @@ export default {
   },
   data() {
     return {
-      searchQuery:'',
+      searchQuery: '',
       items: [],
       scrollId: ''
     }
