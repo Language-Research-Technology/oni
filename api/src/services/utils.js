@@ -10,11 +10,8 @@ function workingPath(currentPath) {
 }
 
 function inspect(obj, depth = null) {
-
-  console.log(
-    util.inspect(obj, { showHidden: false, depth, colors: true })
-  );
-
+  const ins = util.inspect(obj, {showHidden: false, depth, colors: true})
+  console.log(ins);
 }
 
 module.exports = {

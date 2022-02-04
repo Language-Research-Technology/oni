@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white w-full h-auto flex items-center justify-center">
+  <div class="bg-white w-full flex items-center justify-center">
     <div class="flex rounded p-3 m-4 ">
       <input @keyup.enter="this.doSearch()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."
              v-model="searchQuery"
@@ -31,25 +31,27 @@ export default {
   },
   mounted() {
     //TODO: change this to configuration so search can go to X page
-    if (this.$route.path === '/welcome') {
+    if (this.$route.path === '/search') {
       this.search();
     }
+    this.$emit('input', this.searchQuery)
   },
   methods: {
     searchInputField(e) {
       //TODO: change this to configuration so it can update X route
-      if (this.$router.path === 'welcome') {
+      if (this.$router.path === 'search') {
         this.searchQuery = e.target.value;
-        const query = {...this.$router.query, search: e.target.value};
+        const query = {...this.$router.query, q: e.target.value};
         this.$router.replace({query});
       }
+      this.$emit('input', this.searchQuery)
     },
     async search() {
       console.log(this.$route.path);
       if (!isEmpty(this.searchQuery)) {
         await this.doSearch();
-      } else if (!isEmpty(this.$route.query.search)) {
-        this.searchQuery = this.$route.query.search;
+      } else if (!isEmpty(this.$route.query.q)) {
+        this.searchQuery = this.$route.query.q;
         await this.doSearch();
       } else if (isEmpty(this.searchQuery)) {
         await this.doSearch()
@@ -58,10 +60,10 @@ export default {
     async doSearch() {
       let response;
       if (this.searchQuery) {
-        await this.$router.push({path: 'welcome', query: {search: this.searchQuery}});
+        await this.$router.push({path: 'search', query: {q: this.searchQuery}});
         response = await this.$http.get({route: `/search/items?multi=${this.searchQuery}`});
       } else {
-        await this.$router.push({path: 'welcome'});
+        await this.$router.push({path: 'search'});
         response = await this.$http.get({route: '/search/items'});
       }
       this.items = await response.json();

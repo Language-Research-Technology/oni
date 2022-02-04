@@ -1,7 +1,7 @@
 import ShellComponent from "@/components/Shell.component.vue";
 import UserComponent from "@/components/User.component.vue";
 import LoginComponent from "@/components/Login.component.vue";
-import WelcomeComponent from "@/components/Welcome.component.vue";
+import SearchComponent from "@/components/Search.component.vue";
 import ViewComponent from "@/components/View.component.vue";
 import OpenComponent from "@/components/Open.component.vue";
 import HelpComponent from "@/components/Help.component.vue";
@@ -23,9 +23,9 @@ const routes = [
     name: "root",
     component: ShellComponent,
     children: [ {
-      path: "welcome",
-      name: "welcome",
-      component: WelcomeComponent
+      path: "search",
+      name: "search",
+      component: SearchComponent
     }, {
       path: "view",
       name: "view",

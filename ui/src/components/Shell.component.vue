@@ -14,7 +14,7 @@ export default {
   },
   mounted() {
     //this.$store.dispatch("loadConfiguration");
-    if (this.$route.path === "/") this.$router.push("/welcome");
+    if (this.$route.path === "/") this.$router.push("/search");
   },
   data() {
     return {}

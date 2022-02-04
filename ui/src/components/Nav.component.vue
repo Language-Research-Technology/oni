@@ -6,7 +6,7 @@
       <ul class="flex items-center">
         <li class="h-6 w-6">
           <button>
-            <router-link to="/welcome">
+            <router-link to="/search">
               <h1 class="pl-8 lg:pl-0 text-gray-700"><i class="fa fa-home"></i></h1>
             </router-link>
           </button>
@@ -81,7 +81,7 @@ export default {
       removeLocalStorage({ key: tokenSessionKey });
       removeLocalStorage({ key: 'isLoggedIn' });
       this.isLoggedIn = false;
-      await this.$router.push('/welcome');
+      await this.$router.push('/search');
     }
   }
 };

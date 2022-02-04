@@ -1,23 +1,23 @@
 <template>
   <div class="h-screen">
     <nav-foot/>
-    <search-bar @populate='populate' :searchInput="searchInput"/>
+    <search-bar @populate='populate' :searchInput="searchInput" @input="onInputChange"/>
     <div class="flex justify-center items-center bg-indigo-100">
       <div v-if="this.items.length > 0" class="flex justify-between">
-        <div class="w-1/4 pt-4">
+        <div class="h-screen sticky top-0 w-1/4 pt-4">
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
             <ul v-if="aggs?.values?.buckets?.length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 ml-6 shadow-md">
               <li class="border-b-2">
                 <button
                     class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
-                  {{ aggsName.toUpperCase() }}
+                  {{ aggsName }}
                 </button>
               </li>
               <li class="m-2 mt-4" v-for="ag of aggs?.values?.buckets">
                 <div class="form-check form-check-inline">
-                  <input checked v-model="ag.key.checked" v-bind:id="ag.key"
-                      class="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
-                      type="checkbox" :id="ag.key" :value="ag.key">
+                  <input checked v-bind:id="ag.key" v-on:change="updateSelectedCheckbox"
+                         class="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+                         type="checkbox" :id="ag.key" :value="ag.key">
                   <label class="form-check-label inline-block text-gray-800" :for="ag.key">
                     {{ clean(ag.key) }} <span
                       class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{ ag.doc_count }}</span>
@@ -70,7 +70,7 @@
           <div class="p-3 m-3"></div>
         </div>
       </div>
-      <div v-if="this.items.length <= 0"
+      <div v-if="!this.items.length > 0"
            class="w-full h-auto rounded-lg p-4 m-4 flex justify-center ">
         <p class="bg-white rounded p-4 m-4 shadow-md">
           No items were found with that search input
@@ -83,9 +83,9 @@
 <script>
 
 import 'element-plus/theme-chalk/display.css'
-import {first} from 'lodash';
+import {cloneDeep, first} from 'lodash';
 import NavFoot from './NavFoot.component.vue';
-import {defineAsyncComponent} from "vue";
+import {toRaw, defineAsyncComponent} from "vue";
 
 export default {
   components: {
@@ -99,8 +99,13 @@ export default {
       searchInput: '',
       items: [],
       more: false,
-      aggregations: {}
+      aggregations: {},
+      filter: {}
     };
+  },
+  updated() {
+    console.log(`Search Input: ${this.searchInput}`);
+    console.log(`Search Query: ${this.$route.query.q}`);
   },
   async mounted() {
   },
@@ -137,6 +142,7 @@ export default {
       }
       if (items['aggregations']) {
         this.aggregations = items['aggregations'];
+        console.log(toRaw(this.aggregations));
       }
     },
     async getNext() {
@@ -150,6 +156,41 @@ export default {
     clean(text) {
       //TODO: Do we want to do this? Just adding a space for each campital leter
       return text.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1).join(' ')
+    },
+    onInputChange(value) {
+      this.searchInput = value;
+    },
+    async updateSelectedCheckbox(event) {
+      const target = event.target.value;
+      const isChecked = event.target.checked;
+      for (let ag in this.aggregations) {
+        for (let v of this.aggregations[ag].values.buckets) {
+          if (v['key'] === target && isChecked) {
+            this.filter[v['key']] = {from: ag, key: v['key'], checked: true}
+          } else if (v['key'] === target && !isChecked) {
+            this.filter[v['key']] = {from: ag, key: v['key'], checked: false}
+          } else {
+            if (!this.filter[v['key']]) {
+              this.filter[v['key']] = {from: ag, key: v['key'], checked: true}
+            }
+          }
+        }
+      }
+      const input = this.$route.query.q || '';
+      const filter = toRaw(this.filter);
+      const filterIndex = []
+      for (let f in filter) {
+        filterIndex.push(filter[f])
+      }
+      console.log(`search: ${input}`);
+      console.log(filterIndex)
+      let response = await this.$http.post({
+        route: '/search/items',
+        body: {multi: input, filter: filterIndex}
+      });
+      const items = await response.json();
+      console.log(items)
+      this.populate({items});
     }
   }
 };

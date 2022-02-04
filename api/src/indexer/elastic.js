@@ -40,19 +40,15 @@ export async function elasticIndex({configuration}) {
   }
 }
 
-export async function search({index, query, aggs, highlight, explain = false}) {
+export async function search({index, searchBody, explain = false}) {
   try {
     const {body} = await client.search({
       index: index,
       scroll: '10m',
-      body: {
-        query: query,
-        highlight: highlight,
-        aggs: aggs
-      },
+      body: searchBody,
       explain: explain,
     });
-    inspect(highlight)
+
     return body;
   } catch (e) {
     log.error(e.message);
