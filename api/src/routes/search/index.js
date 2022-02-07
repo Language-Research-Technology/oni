@@ -11,7 +11,7 @@ export function setupSearchRoutes({server, configuration}) {
   server.get("/search/:index", async (req, res, next) => {
       try {
         const configuration = await loadConfiguration();
-        const {aggregations} = configuration['api']['elastic'];
+        const {aggregations, highlightFields, fields} = configuration['api']['elastic'];
         let searchBody = {};
         let index = req.params?.index;
         let hits;
@@ -26,13 +26,11 @@ export function setupSearchRoutes({server, configuration}) {
         } else {
           if (req.query.multi) {
             const searchQuery = req.query.multi.trim();
-            const fields = ['@id', 'name.@value'];
-            searchBody = multiQuery({searchQuery, fields});
+            searchBody = multiQuery({searchQuery, fields, highlightFields});
           } else {
             searchBody.query = {match_all: {}};
           }
           searchBody.aggs = aggsQueries({aggregations});
-
           hits = await search({configuration, index, searchBody, explain: false});
           inspect({Total: hits?.hits?.total});
           inspect({Aggregations: hits?.aggregations}, 4);
@@ -47,17 +45,18 @@ export function setupSearchRoutes({server, configuration}) {
   server.post("/search/:index", async (req, res, next) => {
     try {
       const configuration = await loadConfiguration();
-      const {aggregations} = configuration['api']['elastic'];
+      const {aggregations, highlightFields, fields} = configuration['api']['elastic'];
       let index = req.params?.index;
       if (index) {
         let searchBody = {};
         let hits;
         const searchQuery = req.body.multi.trim();
-        const fields = ['@id', 'name.@value'];
         const filters = req.body.filter;
-        searchBody = boolQuery({searchQuery, fields, filters});
+        searchBody = boolQuery({searchQuery, fields, filters, highlightFields});
         searchBody.aggs = aggsQueries({aggregations});
+        //inspect(searchBody.aggs)
         hits = await search({configuration, index, searchBody, explain: false});
+        //inspect(hits)
         res.send(hits);
       } else {
         res.send({error: 'Error', message: 'Index name not sent'}).status(400);

@@ -50,8 +50,10 @@ export default {
       if (metadata?._source) {
         this.crateId = metadata._source._crateId;
         //TODO: Omit in the backend
-        this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
-        console.log(this.metadata)
+        console.log(metadata._source);
+        this.metadata = metadata._source;
+        //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
+        //console.log(this.metadata)
       }
     }
   }

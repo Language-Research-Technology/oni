@@ -2,20 +2,23 @@
   <div class="h-screen">
     <nav-foot/>
     <search-bar @populate='populate' :searchInput="searchInput" @input="onInputChange"/>
-    <div class="flex justify-center items-center bg-indigo-100">
-      <div v-if="this.items.length > 0" class="flex justify-between">
-        <div class="h-screen sticky top-0 w-1/4 pt-4">
+    <div class="flex justify-center bg-indigo-100">
+      <div v-if="this.items.length > 0" class="flex">
+        <div class="flex-1 h-screen sticky top-0 w-2/5 pt-4 p-4">
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
-            <ul v-if="aggs?.values?.buckets?.length > 0" class="bg-white rounded pb-4 pl-2 pr-2 m-2 ml-6 shadow-md">
+            <ul class="w-full min-w-full bg-white rounded p-2 mb-4 shadow-md">
               <li class="border-b-2">
                 <button
                     class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggsName }}
                 </button>
               </li>
-              <li class="m-2 mt-4" v-for="ag of aggs?.values?.buckets">
+              <li v-if="aggs?.buckets?.length <= 0"
+                  class="w-full min-w-full">&nbsp;
+              </li>
+              <li class="m-2 mt-4" v-for="ag of aggs?.buckets">
                 <div class="form-check form-check-inline">
-                  <input checked v-bind:id="ag.key" v-on:change="updateSelectedCheckbox"
+                  <input v-bind:id="ag.key" v-on:change="updateSelectedCheckbox"
                          class="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
                          type="checkbox" :id="ag.key" :value="ag.key">
                   <label class="form-check-label inline-block text-gray-800" :for="ag.key">
@@ -27,11 +30,12 @@
             </ul>
           </div>
         </div>
-        <div class="w-3/4 pt-4">
-          <div v-for="item of this.items" class="flex">
-            <div class="w-full h-auto rounded-lg m-2 pb-4 pr-4 flex flex-col items-center">
+        <div class="flex-auto w-3/5 pt-4 p-2">
+          <div v-for="item of this.items"
+               class="flex-none mt-0 mb-4 w-full h-auto bg-white rounded-lg block p-4 max-w-screen-md border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+            <div class="rounded-lg pb-4 pr-4 items-center">
               <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
-                 class="w-full block p-5 max-w-screen-md bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                 class="">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                   {{
                     clean(first(item._source.name)?.['@value']) || first(first(item._source.identifier)?.value)?.['@value']
@@ -83,7 +87,7 @@
 <script>
 
 import 'element-plus/theme-chalk/display.css'
-import {cloneDeep, first} from 'lodash';
+import {groupBy, first} from 'lodash';
 import NavFoot from './NavFoot.component.vue';
 import {toRaw, defineAsyncComponent} from "vue";
 
@@ -141,9 +145,18 @@ export default {
         }
       }
       if (items['aggregations']) {
-        this.aggregations = items['aggregations'];
-        console.log(toRaw(this.aggregations));
+        this.aggregations = this.populateAggregations(items['aggregations']);
       }
+    },
+    populateAggregations(aggregations) {
+      const a = {};
+      for (let agg of Object.keys(aggregations)) {
+        a[agg] = {
+          buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets
+        };
+      }
+      console.log(a);
+      return a;
     },
     async getNext() {
       let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
@@ -155,7 +168,8 @@ export default {
     },
     clean(text) {
       //TODO: Do we want to do this? Just adding a space for each campital leter
-      return text.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1).join(' ')
+      //return text.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1).join(' ')
+      return text;
     },
     onInputChange(value) {
       this.searchInput = value;
@@ -164,33 +178,34 @@ export default {
       const target = event.target.value;
       const isChecked = event.target.checked;
       for (let ag in this.aggregations) {
-        for (let v of this.aggregations[ag].values.buckets) {
+        for (let v of this.aggregations[ag].buckets) {
           if (v['key'] === target && isChecked) {
             this.filter[v['key']] = {from: ag, key: v['key'], checked: true}
           } else if (v['key'] === target && !isChecked) {
             this.filter[v['key']] = {from: ag, key: v['key'], checked: false}
-          } else {
-            if (!this.filter[v['key']]) {
-              this.filter[v['key']] = {from: ag, key: v['key'], checked: true}
-            }
           }
         }
       }
       const input = this.$route.query.q || '';
       const filter = toRaw(this.filter);
+      const filterGroup = groupBy(filter, 'from');
       const filterIndex = []
-      for (let f in filter) {
-        filterIndex.push(filter[f])
+      for (let f in filterGroup) {
+        const keys = [];
+        for (let e of filterGroup[f]) {
+          keys.push({key: e.key, checked: e.checked});
+        }
+        filterIndex.push({field: f, keys: keys});
       }
-      console.log(`search: ${input}`);
-      console.log(filterIndex)
+      const fields = filterIndex.map((f) => f.field);
       let response = await this.$http.post({
         route: '/search/items',
-        body: {multi: input, filter: filterIndex}
+        body: {multi: input, filter: filterIndex, fields: fields}
       });
       const items = await response.json();
-      console.log(items)
-      this.populate({items});
+      this.items = [];
+      this.aggregations = [];
+      this.populate({items, newSearch: true});
     }
   }
 };

@@ -12,9 +12,6 @@ export async function putCollectionMappings({configuration, client}) {
   try {
     const mappings = {
       "mappings": {
-        "items":{
-          "_all":{"enabled":true}
-        },
         "properties": {
           "@id": {
             "type": "keyword"
@@ -194,8 +191,7 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
             }
           }
 
-          fileItem['_text'] = fileContent;
-          //fileItem['']['_content'] = fileContent;
+          fileItem['_text_' + lg] = fileContent;
           fileItem._parent = {
             name: item.name,
             '@id': item['@id'],
@@ -208,11 +204,13 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
           });
         }
         flattenContains(item);
-        //delete item['hasFile'];
+
+        delete item['hasFile'];
         const {body} = await client.index({
           index: index,
           body: item
         });
+
       }
     }
   } catch
