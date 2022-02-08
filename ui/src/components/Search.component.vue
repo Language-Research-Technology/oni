@@ -2,9 +2,9 @@
   <div class="h-screen">
     <nav-foot/>
     <search-bar @populate='populate' :searchInput="searchInput" @input="onInputChange"/>
-    <div class="flex justify-center bg-indigo-100">
+    <div class="flex justify-evenly bg-indigo-100">
       <div v-if="this.items.length > 0" class="flex">
-        <div class="flex-1 h-screen sticky top-0 w-2/5 pt-4 p-4">
+        <div class="flex-auto h-screen sticky top-0 w-2/5 pt-4 p-4">
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
             <ul class="w-full min-w-full bg-white rounded p-2 mb-4 shadow-md">
               <li class="border-b-2">
@@ -30,10 +30,10 @@
             </ul>
           </div>
         </div>
-        <div class="flex-auto w-3/5 pt-4 p-2">
+        <div class="flex-auto w-4/5 pt-4 p-2">
           <div v-for="item of this.items"
-               class="flex-none mt-0 mb-4 w-full h-auto bg-white rounded-lg block p-4 max-w-screen-md border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-            <div class="rounded-lg pb-4 pr-4 items-center">
+               class="mt-0 mb-4 w-full h-auto bg-white rounded-lg block p-4 max-w-screen-md border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+            <div class="rounded-lg pb-4 items-center">
               <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
                  class="">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -86,7 +86,7 @@
 
 <script>
 
-import 'element-plus/theme-chalk/display.css'
+import { ElButton } from 'element-plus'
 import {groupBy, first} from 'lodash';
 import NavFoot from './NavFoot.component.vue';
 import {toRaw, defineAsyncComponent} from "vue";
@@ -97,6 +97,7 @@ export default {
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
     ),
+    ElButton
   },
   data() {
     return {

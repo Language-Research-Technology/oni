@@ -10,7 +10,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./routes";
 import { store } from "./store";
-import ElementPlus from "element-plus";
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import log from "loglevel";
 import prefix from "loglevel-plugin-prefix";
 
