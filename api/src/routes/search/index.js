@@ -30,10 +30,16 @@ export function setupSearchRoutes({server, configuration}) {
           } else {
             searchBody.query = {match_all: {}};
           }
+          inspect(searchBody.query);
+          console.log('%j', searchBody.query);
           searchBody.aggs = aggsQueries({aggregations});
+          inspect(searchBody.aggs);
+          console.log('%j', searchBody.aggs);
           hits = await search({configuration, index, searchBody, explain: false});
+          inspect(hits.aggregations)
+
           inspect({Total: hits?.hits?.total});
-          inspect({Aggregations: hits?.aggregations}, 4);
+          //inspect({Aggregations: hits?.aggregations}, 4);
         }
         res.send(hits);
       } catch (e) {
@@ -54,9 +60,12 @@ export function setupSearchRoutes({server, configuration}) {
         const filters = req.body.filter;
         searchBody = boolQuery({searchQuery, fields, filters, highlightFields});
         searchBody.aggs = aggsQueries({aggregations});
-        //inspect(searchBody.aggs)
+        inspect(searchBody.aggs);
+        console.log('%j', searchBody.aggs);
         hits = await search({configuration, index, searchBody, explain: false});
         //inspect(hits)
+        mergeSelectedKeys(hits.aggregations, filters)
+        inspect(hits.aggregations)
         res.send(hits);
       } else {
         res.send({error: 'Error', message: 'Index name not sent'}).status(400);
@@ -67,4 +76,10 @@ export function setupSearchRoutes({server, configuration}) {
 
     }
   })
+}
+
+//TODO!
+function mergeSelectedKeys(aggs, filters){
+  console.log('addselectedkeys')
+  console.log(filters)
 }

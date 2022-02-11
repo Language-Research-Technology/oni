@@ -1,11 +1,14 @@
 import {inspect} from '../services/utils';
 import * as esb from 'elastic-builder';
 import {getLogger} from "../services";
+import {isEmpty} from "lodash";
 
 const log = getLogger();
 
 export function boolQuery({searchQuery, fields, filters, highlightFields}) {
-  const disMaxQueries = [];
+  let disMaxQueries = [];
+  const filterDisMaxQueries = [];
+
   for (let f of filters) {
     const keys = [];
     const fq = []
@@ -18,21 +21,31 @@ export function boolQuery({searchQuery, fields, filters, highlightFields}) {
     if (keys.length > 0) {
       fq.push(esb.termsQuery(field, keys));
       if (f.path) {
-        disMaxQueries.push(
-          esb.nestedQuery().path(f.path).query(esb.boolQuery().filter(fq))
+        filterDisMaxQueries.push(
+          esb.nestedQuery()
+            .path(f.path)
+            .query(
+              esb.boolQuery()
+                .must(
+                  esb.multiMatchQuery(fields, searchQuery))
+                .filter(fq))
         );
       } else {
-        disMaxQueries.push(
+        filterDisMaxQueries.push(
           esb.boolQuery().filter(esb.termsQuery(field, keys))
         );
       }
     }
   }
-  // disMaxQueries.push(esb.nestedQuery()
-  //   .path('hasFile')
-  //   .query(esb.boolQuery().should([esb.matchQuery('hasFile._content', searchQuery)]))
-  // );
-  disMaxQueries.push(esb.multiMatchQuery(fields, searchQuery));
+  if (filterDisMaxQueries.length > 0) {
+    disMaxQueries = disMaxQueries.concat(filterDisMaxQueries);
+  } else {
+    if (isEmpty(searchQuery)) {
+      disMaxQueries.push(esb.matchAllQuery())
+    } else {
+      disMaxQueries.push(esb.multiMatchQuery(fields, searchQuery));
+    }
+  }
 
   const esbQuery = esb.requestBodySearch()
     .query(esb.disMaxQuery().queries(disMaxQueries))
@@ -47,7 +60,7 @@ export function boolQuery({searchQuery, fields, filters, highlightFields}) {
   const query = esbQuery.toJSON().query;
   log.debug('bool query')
   inspect(query)
-  console.log('%j', {query:query})
+  console.log('%j', {query: query})
   const highlight = esbQuery.toJSON().highlight;
   return {query, highlight};
 }

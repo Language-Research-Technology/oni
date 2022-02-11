@@ -34,12 +34,12 @@
               <li v-if="aggs?.buckets?.length <= 0"
                   class="w-full min-w-full">&nbsp;
               </li>
-              <li class="m-2 mt-4" v-for="ag of aggs?.buckets">
-                <div class="form-check form-check-inline">
+              <li class="m-2 mt-4 cursor-pointer" v-for="ag of aggs?.buckets">
+                <div class="form-check form-check-inline  cursor-pointer">
                   <input v-bind:id="ag.key" v-on:change="updateSelectedCheckbox"
-                         class="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+                         class=" cursor-pointer form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
                          type="checkbox" :id="ag.key" :value="ag.key">
-                  <label class="form-check-label inline-block text-gray-800" :for="ag.key">
+                  <label class=" cursor-pointer form-check-label inline-block text-gray-800" :for="ag.key">
                     {{ clean(ag.key) }} <span
                       class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{ ag.doc_count }}</span>
                   </label>
@@ -133,6 +133,7 @@ export default {
       console.log(toRaw(items));
       if (newSearch) {
         this.items = [];
+        this.scrollToTop();
       }
       if (items['_scroll_id']) {
         this.scrollId = items['_scroll_id'];
@@ -160,8 +161,10 @@ export default {
           buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets
         };
       }
-      console.log(a);
       return a;
+    },
+    updateCheckboxes() {
+
     },
     async getNext() {
       let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
@@ -185,6 +188,10 @@ export default {
       const items = await response.json();
       this.populate({items, newSearch: true});
     },
+    scrollToTop() {
+      //TODO: smooth scroll please
+      window.scrollTo(0, 0);
+    },
     async clearAggregations() {
       for (let ag in this.aggregations) {
         for (let v of this.aggregations[ag].buckets) {
@@ -203,10 +210,14 @@ export default {
             this.filter[v['key']] = {from: ag, key: v['key'], checked: true}
           } else if (v['key'] === target && !isChecked) {
             this.filter[v['key']] = {from: ag, key: v['key'], checked: false}
+          } else {
+            this.filter[v['key']] = {from: ag, key: v['key'], checked: false}
           }
         }
       }
       await this.selectAggregations();
+      //TODO: send the check back to the right item
+      event.target.checked = false;
     },
     async selectAggregations() {
       const input = this.$route.query.q || '';
@@ -221,13 +232,15 @@ export default {
         filterIndex.push({field: f, keys: keys});
       }
       const fields = filterIndex.map((f) => f.field);
+      console.log(toRaw(fields));
+      console.log(toRaw(filterIndex));
       let response = await this.$http.post({
         route: '/search/items',
         body: {multi: input, filter: filterIndex, fields: fields}
       });
       const items = await response.json();
       this.items = [];
-      //this.aggregations = [];
+      this.filters = [];
       this.populate({items, newSearch: true});
     }
   }
