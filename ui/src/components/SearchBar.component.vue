@@ -97,7 +97,6 @@ export default {
     return {
       siteName: this.$store.state.configuration.ui.siteName,
       siteNameX: this.$store.state.configuration.ui.siteNameX || '',
-      welcome: this.$store.state.configuration.ui.welcomeMessage,
       searchQuery: '',
       items: [],
       scrollId: ''
