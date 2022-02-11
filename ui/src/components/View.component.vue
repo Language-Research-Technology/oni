@@ -1,9 +1,17 @@
 <template>
-  <search-bar @populate='populate' :searchInput="searchInput" />
-
-  <div v-if="this.metadata">
+  <search-bar @populate='populate' :searchInput="searchInput"/>
+  <el-row :justify="'center'" v-if="this.metadata">
+    <el-col :span="22" >
+    <div class="py-4 sticky top-0 bg-white z-10">
+      <el-row :align="'middle'"
+              class="mb-2 text-2xl font-medium dark:text-white">
+        <h5>{{ getTitle() }}</h5>
+      </el-row>
+    <hr class="divider divider-gray pt-2"/>
+    </div>
     <view-doc :crateId="this.crateId" :meta="this.metadata"/>
-  </div>
+    </el-col>
+  </el-row>
   <div v-else>
     <view-doc-error/>
   </div>
@@ -11,7 +19,7 @@
 
 <script>
 import 'element-plus/theme-chalk/display.css'
-import {omitBy, reject} from 'lodash';
+import {first} from 'lodash';
 import {defineAsyncComponent} from 'vue';
 
 export default {
@@ -54,6 +62,15 @@ export default {
         this.metadata = metadata._source;
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
         //console.log(this.metadata)
+      }
+    },
+    getTitle() {
+      const title = first(this.metadata['name'])?.['@value'];
+      if (title) {
+        this.title = title;
+        return title;
+      } else {
+        return this.metadata['@id'];
       }
     }
   }

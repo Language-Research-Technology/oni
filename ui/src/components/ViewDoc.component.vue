@@ -1,26 +1,20 @@
 <template>
-  <div class="p-6 bg-indigo-100 flex justify-center">
-    <div class="container max-w-screen-lg mx-auto">
-      <div class="md:col-span-5">
-        <p class="relative space-x-3 font-bold text-xl select-none text-left">
-          {{ getTitle() }}
-        </p>
+  <el-row>
+    <el-col :span="24">
+      <div v-for="(value, name, i) in meta" :key="name">
+        <doc-element v-if="display(value, name)" :crateId="this.crateId" :parentTitle="this.title"
+                     :id="this.meta['@id']" :name="name" :value="value"
+                     :index="i"
+        />
       </div>
-      <ul >
-        <li v-for="(value, name) in meta" :key="name" >
-          <doc-element :crateId="this.crateId" :parentTitle="this.title"
-                       :id="this.meta['@id']" :name="name" :value="value"
-                       />
-        </li>
-      </ul>
-    </div>
-  </div>
+    </el-col>
+  </el-row>
 </template>
 
 <script>
 
-import { defineAsyncComponent } from 'vue';
-import { first } from 'lodash';
+import {defineAsyncComponent} from 'vue';
+import {isEmpty} from 'lodash';
 
 export default {
   props: {
@@ -33,23 +27,19 @@ export default {
     )
   },
   mounted() {
-    this.title = this.getTitle();
   },
   methods: {
-    getTitle() {
-      const title = first(this.meta['name'])?.['@value'];
-      if (title) {
-        this.title = title;
-        return title;
-      } else {
-        return this.meta['@id'];
-      }
+    display(value, name) {
+      if (name.startsWith('_')) {
+        return false;
+      } else return !isEmpty(value);
+
     }
   },
   data() {
     return {
       title: '',
-      type:''
+      type: ''
     }
   }
 }

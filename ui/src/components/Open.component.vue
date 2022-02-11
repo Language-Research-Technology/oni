@@ -1,44 +1,46 @@
 <template>
-  <div class="p-6 bg-indigo-100 flex justify-center">
-    <div class="container max-w-screen-lg mx-auto">
-      <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
-        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-           :href="'/view?id=' + encodeURIComponent(this.parent)">{{
-            this.parentTitle || decodeURIComponent(this.parent)
-          }}</a> &gt; {{ this.title }}
-      </h3>
-      <div class="shadow bg-white">
-        <div v-if="this.type === 'pdf'">
-          <pdf v-for="i in numPages"
-               :key="i"
-               :src="pdfdata"
-               :page="i">
-            <template slot="loading">
-              loading content here...
-            </template>
-          </pdf>
-        </div>
-        <div v-else-if="this.type === 'txt'">
-          {{ this.data }}
-        </div>
-        <div v-else-if="this.type === 'audio'">
-          <audio controls>
-            <source :src="this.data">
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-        <div v-else>
-          <img height="500px" :src="this.data"/>
+  <el-row :justify="'center'" class="bg-gray-50">
+    <el-col :span="20">
+      <div class="container max-w-screen-lg mx-auto">
+        <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
+          <a class="break-words underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+             :href="'/view?id=' + encodeURIComponent(this.parent)">{{
+              this.parentTitle || decodeURIComponent(this.parent)
+            }}</a> &gt; {{ this.title }}
+        </h3>
+        <div class="shadow m-6">
+          <div v-if="this.type === 'pdf'">
+            <pdf v-for="i in numPages"
+                 :key="i"
+                 :src="pdfdata"
+                 :page="i">
+              <template slot="loading">
+                loading content here...
+              </template>
+            </pdf>
+          </div>
+          <div class="p-4 break-words" v-else-if="this.type === 'txt'">
+            {{ this.data }}
+          </div>
+          <div class="p-4" v-else-if="this.type === 'audio'">
+            <audio controls>
+              <source :src="this.data">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+          <div class="p-4" v-else>
+            <img height="500px" :src="this.data"/>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </el-col>
+  </el-row>
 </template>
 
 <script>
 import 'element-plus/theme-chalk/display.css'
 import pdf from 'vue3-pdf';
-import { first } from 'lodash';
+import {first} from 'lodash';
 
 export default {
   components: {
@@ -60,11 +62,11 @@ export default {
     const id = encodeURIComponent(this.$route.query.id);
     this.id = id;
     const path = encodeURIComponent(this.$route.query.path);
-    let route = `/object/open?id=${ id }`;
+    let route = `/object/open?id=${id}`;
     if (path) {
-      route += `&path=${ path }`;
+      route += `&path=${path}`;
     }
-    let response = await this.$http.get({ route: route });
+    let response = await this.$http.get({route: route});
     const title = decodeURIComponent(this.$route.query.title);
     if (title) {
       this.title = title;
@@ -92,7 +94,7 @@ export default {
         this.pdfdata = pdf.createLoadingTask(blobURL);
         this.pdfdata.promise.then(pdf => {
           this.numPages = pdf.numPages;
-          console.log(`this.numPages: ${ this.numPages } pdf.numPages: ${ pdf.numPages }`);
+          console.log(`this.numPages: ${this.numPages} pdf.numPages: ${pdf.numPages}`);
         });
       } else {
         this.type = 'other';

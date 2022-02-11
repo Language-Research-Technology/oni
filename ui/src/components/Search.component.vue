@@ -1,12 +1,30 @@
 <template>
-  <div class="h-screen">
-    <nav-foot/>
-    <search-bar @populate='populate' :searchInput="searchInput" @input="onInputChange"/>
-    <div class="flex justify-evenly bg-indigo-100">
-      <div v-if="this.items.length > 0" class="flex">
-        <div class="flex-auto h-screen sticky top-0 w-2/5 pt-4 p-4">
+  <div class="min-w-full pb-4 pt-0 px-2 pl-4">
+    <div class="sticky top-0 bg-white z-10">
+      <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
+                  :clearSearch="clear"/>
+    </div>
+    <el-row :gutter="40" :offset="1">
+      <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" :span="4"
+              class="pr-4 max-w-0 h-auto">
+        <div class="sticky top-20 pt-4">
+          <div class="flex w-full">
+            <ul class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
+              <li>
+                <p class="text-center">Aggregations</p>
+              </li>
+              <li class="p-4">
+                <hr class="divider divide-gray-500"/>
+              </li>
+              <li>
+                <p class="text-center">
+                  <el-button v-on:click="this.clearAggregations">CLEAR</el-button>
+                </p>
+              </li>
+            </ul>
+          </div>
           <div class="flex w-full" v-for="(aggs, aggsName) of aggregations" :key="aggsName">
-            <ul class="w-full min-w-full bg-white rounded p-2 mb-4 shadow-md">
+            <ul class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
               <li class="border-b-2">
                 <button
                     class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
@@ -30,87 +48,71 @@
             </ul>
           </div>
         </div>
-        <div class="flex-auto w-4/5 pt-4 p-2">
-          <div v-for="item of this.items"
-               class="mt-0 mb-4 w-full h-auto bg-white rounded-lg block p-4 max-w-screen-md border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-            <div class="rounded-lg pb-4 items-center">
-              <a :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
-                 class="">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {{
-                    clean(first(item._source.name)?.['@value']) || first(first(item._source.identifier)?.value)?.['@value']
-                  }}
-                </h5>
-                <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">{{ item.conformsTo }}</p>
-                <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-                  <span v-if="item._source._contains?.['@type'].length > 0">Contains:&nbsp;</span>
-                  <span v-for="type of item._source._contains?.['@type']">{{ type }}</span>
-                </p>
-                <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-                  <span v-if="item._source._contains?.['language'].length > 0">Languages:&nbsp;</span>
-                </p>
-                <div class="flex flex-wrap">
-                  <button
-                      class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
-                      v-for="language of item._source._contains?.['language']">{{
-                      first(language.name)?.['@value']
-                    }}
-                  </button>
-                </div>
-                <p v-if="item._source?.memberOf"> Related: {{ first(item._source?.memberOf)?.['@id'] }}</p>
-                <ul v-if="item.highlight">
-                  <li v-for="highlight of item.highlight"
-                      v-html="wrapHighlight(first(highlight))"></li>
-                </ul>
-              </a>
-            </div>
-          </div>
-          <div v-if="this.more" class="flex items-center justify-center">
-            <button
-                class="bg-white shadow bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
-                @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i> More
-            </button>
-          </div>
-          <div class="p-3 m-3"></div>
+      </el-col>
+      <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0">
+        <div class="sticky top-20 bg-white z-10">
+          <p class="pt-8 pb-10">Found {{ this.totals['value'] || 0 }} Results</p>
+          <hr class="divider divide-red-700 pt-2"/>
         </div>
-      </div>
-      <div v-if="!this.items.length > 0"
-           class="w-full h-auto rounded-lg p-4 m-4 flex justify-center ">
-        <p class="bg-white rounded p-4 m-4 shadow-md">
-          No items were found with that search input
-        </p>
-      </div>
-    </div>
+        <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
+          <search-detail-element
+              :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
+              :name="clean(first(item._source.name)?.['@value']) || first(first(item._source.identifier)?.value)?.['@value']"
+              :conformsTo="item.conformsTo"
+              :types="item._source?.['@type']"
+              :languages="item._source._contains?.['language']"
+              :memberOf="item._source?.memberOf"
+              :highlight="item?.highlight"
+          />
+        </div>
+        <div v-if="!this.items.length > 0">
+          <el-row class="pb-4 items-center">
+            <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
+              No items were found with that search input
+            </h5>
+          </el-row>
+          <el-row>
+            <p class="text-center">
+              <el-button type="primary" v-on:click="this.resetSearch">Start Over</el-button>
+            </p>
+          </el-row>
+        </div>
+        <el-row :gutter="2" v-if="this.more" class="flex justify-center p-6">
+          <el-button @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i>&nbsp;VIEW MORE
+          </el-button>
+        </el-row>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
 
-import { ElButton } from 'element-plus'
 import {groupBy, first} from 'lodash';
-import NavFoot from './NavFoot.component.vue';
 import {toRaw, defineAsyncComponent} from "vue";
+import SearchDetailElement from './SearchDetailElement.component.vue';
 
 export default {
   components: {
-    NavFoot,
+    SearchDetailElement,
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
-    ),
-    ElButton
+    )
   },
   data() {
     return {
       searchInput: '',
       items: [],
+      totals: {},
       more: false,
       aggregations: {},
-      filter: {}
+      filter: {},
+      clear: false
     };
   },
   updated() {
-    console.log(`Search Input: ${this.searchInput}`);
-    console.log(`Search Query: ${this.$route.query.q}`);
+    // console.log(`Search Input: ${this.searchInput}`);
+    // console.log(`Search Query: ${this.$route.query.q}`);
   },
   async mounted() {
   },
@@ -128,6 +130,7 @@ export default {
       this.populate(items);
     },
     populate({items, scrollId, newSearch}) {
+      console.log(toRaw(items));
       if (newSearch) {
         this.items = [];
       }
@@ -136,6 +139,7 @@ export default {
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
+        this.totals = items['hits']['total'];
         if (thisItems.length > 0) {
           for (let item of thisItems) {
             this.items.push(item);
@@ -164,9 +168,6 @@ export default {
       const items = await response.json();
       this.populate({items});
     },
-    wrapHighlight(text) {
-      return '... ' + text + ' ...';
-    },
     clean(text) {
       //TODO: Do we want to do this? Just adding a space for each campital leter
       //return text.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1).join(' ')
@@ -174,6 +175,24 @@ export default {
     },
     onInputChange(value) {
       this.searchInput = value;
+    },
+    async resetSearch() {
+      this.clear = !this.clear;
+      this.searchInput = '';
+      this.$route.query.q = '';
+      await this.$router.push({path: 'search', query: {q: ''}});
+      let response = await this.$http.get({route: `/search/items`});
+      const items = await response.json();
+      this.populate({items, newSearch: true});
+    },
+    async clearAggregations() {
+      for (let ag in this.aggregations) {
+        for (let v of this.aggregations[ag].buckets) {
+          this.filter[v['key']] = {from: ag, key: v['key'], checked: false}
+        }
+      }
+      await this.resetSearch();
+      await this.selectAggregations();
     },
     async updateSelectedCheckbox(event) {
       const target = event.target.value;
@@ -187,6 +206,9 @@ export default {
           }
         }
       }
+      await this.selectAggregations();
+    },
+    async selectAggregations() {
       const input = this.$route.query.q || '';
       const filter = toRaw(this.filter);
       const filterGroup = groupBy(filter, 'from');
@@ -205,7 +227,7 @@ export default {
       });
       const items = await response.json();
       this.items = [];
-      this.aggregations = [];
+      //this.aggregations = [];
       this.populate({items, newSearch: true});
     }
   }

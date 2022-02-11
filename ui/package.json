@@ -47,6 +47,7 @@
         "sass-loader": "^12.1.0",
         "tailwindcss": "^2.2.8",
         "terser-webpack-plugin": "^5.1.4",
+        "unplugin-element-plus": "^0.2.0",
         "vue-loader": "^16.5.0",
         "vue3-pdf": "^4.2.6",
         "webpack": "^5.51.1",

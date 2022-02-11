@@ -3,12 +3,12 @@
 const path = require("path");
 const fs = require('fs-extra');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const { VueLoaderPlugin } = require("vue-loader");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const {VueLoaderPlugin} = require("vue-loader");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const webpack = require('webpack');
 
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config({path: '../.env'});
 
 let configuration;
 if (process.env.ONI_CONFIG_PATH) {
@@ -23,7 +23,7 @@ const config = fs.readJsonSync(path.resolve(__dirname, configuration));
 
 module.exports = {
   target: "web",
-  entry: [ "./src/main.js" ],
+  entry: ["./src/main.js"],
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[contenthash].js",
@@ -39,7 +39,7 @@ module.exports = {
       template: "./public/index.html",
     }),
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({ filename: "[contenthash].css" }),
+    new MiniCssExtractPlugin({filename: "[contenthash].css"})
   ],
   module: {
     rules: [
@@ -105,6 +105,10 @@ module.exports = {
         //     },
         // ],
       },
+      {
+        test: /\.mjs$/i,
+        resolve: { byDependency: { esm: { fullySpecified: false } } }
+      }
     ],
   },
   resolve: {
