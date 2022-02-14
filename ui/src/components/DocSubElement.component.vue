@@ -59,7 +59,13 @@ export default {
     first,
     getURL() {
       if (this.type && this.type.includes('File')) {
-        const id = first(this.root)?.['@value'] || this.root['@value'];
+        let id;
+        if (this.root) {
+          id = first(this.root)?.['@value'] || this.root['@value'];
+        } else {
+          id = first(this.crateId)?.['@value'] || this.crateId['@value'];
+        }
+        //TODO: fix this unhandled id
         return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parentId) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
       } else {
         return '/view?id=' + encodeURIComponent(this.parentId);

@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     display(value, name) {
-      if (name.startsWith('_')) {
+      if (name.startsWith('_text')) {
         return false;
       } else return !isEmpty(value);
 
