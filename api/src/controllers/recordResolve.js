@@ -23,12 +23,11 @@ export async function recordResolve({ id, getUrid, configuration }) {
       log.debug('Create New ROCrate');
       for (let c of response) {
         const subcrate = new ROCrate(c);
-        subcrate.index();
         subcrate.toGraph();
         const rootNamedId = subcrate.getNamedIdentifier(configuration.api.identifier.main);
         const root = subcrate.getRootDataset();
         subcrate.changeGraphId(root, rootNamedId);
-        for (let s of subcrate.getGraph()) {
+        for (let s of subcrate.getFlatGraph()) {
           rocrate.addItem(s);
         }
       }

@@ -1,16 +1,17 @@
 <template>
   <el-row :class="this.index % 2 == 0 ? 'bg-white': 'bg-gray-100'" :name="this.name">
     <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
-      <h4 class="p-3 font-bold">{{ clean(this.name) }}</h4>
+      <h4 class="p-3 font-bold break-words">{{ clean(this.name) }}</h4>
     </el-col>
     <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="20">
       <div class="p-3">
         <div class=""
              v-if="!isString(this.value)" v-for="val in toArray(this.value)">
           <div v-if="val['@id']">
-            <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parent="this.id" :name="this.name"
+            <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parentId="this.id"
+                             :name="this.name"
                              :value="val" :type="this.type" :title="getTitle(val['name'])"
-                             :index="this.index"/>
+                             :index="this.index" :root="this.root"/>
           </div>
           <div v-else>
             <span v-if="val['@value']">{{ val['@value'] }}</span>
@@ -18,10 +19,10 @@
           </div>
         </div>
         <div v-else>
-          <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parent="this.id"
+          <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parentId="this.id"
                            :name="this.name" :value="this.value"
                            :type="this.type" :title="this.title"
-                           :index="this.index"/>
+                           :index="this.index" :root="this.root"/>
         </div>
       </div>
     </el-col>
@@ -38,16 +39,7 @@ export default {
         import('./DocSubElement.component.vue')
     )
   },
-  props: {
-    index: 0,
-    id: null,
-    crateId: '',
-    parentTitle: '',
-    name: '',
-    value: {},
-    title: '',
-    type: ''
-  },
+  props: ['index', 'id', 'crateId', 'parentTitle', 'name', 'value', 'title', 'type', 'root'],
   mounted() {
   },
   methods: {

@@ -28,10 +28,10 @@
                aria-labelledby="collapse-1-button">
         <el-row v-for="(value, name, i) in this.value" :key="this.name">
           <el-col :span="24">
-          <doc-element :crateId="this.crateId" :id="this.parent"
+          <doc-element :crateId="this.crateId" :id="this.parentId"
                        :name="name" :value="value" :type="this.value['@type']"
                        :title="this.title" :parentTitle="this.parentTitle"
-                       :index="i"/>
+                       :index="i" :root="this.root"/>
             </el-col>
         </el-row>
       </section>
@@ -54,13 +54,15 @@ import {defineAsyncComponent} from 'vue';
 import {first} from 'lodash';
 
 export default {
+  props: ['index', 'parentId', 'crateId', 'parentTitle', 'name', 'type', 'value', 'title', 'root'],
   methods: {
     first,
     getURL() {
       if (this.type && this.type.includes('File')) {
-        return '/open?id=' + encodeURIComponent(this.crateId) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parent) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
+        const id = first(this.root)?.['@value'] || this.root['@value'];
+        return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parentId) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
       } else {
-        return '/view?id=' + encodeURIComponent(this.parent);
+        return '/view?id=' + encodeURIComponent(this.parentId);
       }
     }
   },
@@ -68,16 +70,6 @@ export default {
     DocElement: defineAsyncComponent(() =>
         import('./DocElement.component.vue')
     )
-  },
-  props: {
-    index: 0,
-    parent: null,
-    crateId: '',
-    parentTitle: '',
-    name: '',
-    type: '',
-    value: {},
-    title: ''
   },
   mounted() {
   },

@@ -48,6 +48,7 @@ export default {
   },
   data() {
     return {
+      title: '',
       pdfdata: null,
       numPages: 1,
       data: null,
@@ -66,6 +67,7 @@ export default {
     if (path) {
       route += `&path=${path}`;
     }
+    console.log(route);
     let response = await this.$http.get({route: route});
     const title = decodeURIComponent(this.$route.query.title);
     if (title) {
@@ -80,6 +82,7 @@ export default {
       this.parentTitle = parentTitle;
     }
     //TODO: Ask for MIME types
+
     if (path && (path.endsWith(".txt") || path.endsWith(".csv"))) {
       this.type = 'txt';
       this.data = await response.text();

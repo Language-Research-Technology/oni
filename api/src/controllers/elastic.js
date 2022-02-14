@@ -106,48 +106,23 @@ function composeTermAggs(name, field, agg) {
 
 export function aggsQueries({aggregations}) {
   log.debug('aggs queries');
-  let nestedAggs = [];
+  let aggsArray = [];
   for (let aO of aggregations) {
     if (aO.path) {
-      nestedAggs.push(
+      aggsArray.push(
         composeTermAggs('values', aO.field, esb.nestedAggregation(aO.name, aO.path))
       );
     } else {
-      nestedAggs.push(
+      aggsArray.push(
         esb.termsAggregation(aO.name, aO.field)
       );
     }
   }
   const aggsQuery = esb.requestBodySearch()
     .query(esb.matchQuery('not', 'important'))
-    .aggs(nestedAggs);
+    .aggs(aggsArray);
   const aggsQueryJson = aggsQuery.toJSON();
+  inspect(aggsQueryJson.aggs);
   return aggsQueryJson.aggs;
 }
 
-export function aggsQuery() {
-  log.debug('aggs query');
-  const aggsQuery = esb.requestBodySearch()
-    .query(esb.matchQuery('not', 'important'))
-    .agg(esb.nestedAggregation('language', 'hasFile.language.name')
-      .agg(
-        esb.termsAggregation('values', 'hasFile.language.name.@value')
-        // .agg(
-        //   esb.termsAggregation('values', 'hasFile.language.name.@value.keyword')
-        // )
-      )
-    )
-    .agg(esb.nestedAggregation('@type', 'hasFile')
-      .agg(
-        esb.termsAggregation('values', 'hasFile.@type.keyword')
-          .agg(
-            esb.termsAggregation('values', 'hasFile.@type.keyword.keyword')
-          )
-      )
-    );
-  const aggsQueryJson = aggsQuery.toJSON();
-  const aggs = aggsQueryJson.aggs;
-  console.log("%j", aggs)
-  inspect(aggs);
-  return aggs
-}

@@ -1,12 +1,17 @@
 <template>
-  <el-row :offset="1" :gutter="40" :align="'middle'" class="p-4">
-    <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4" class="px-2 pr-4 pb-4 max-w-0 h-auto">
-      <el-row :justify="'center'" :align="'middle'">
+  <el-row :offset="1" :gutter="40" :align="'bottom'" class="pt-0">
+    <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" class="px-0 pb-3 max-w-0 h-auto">
+      <el-row :justify="'center'" :align="'middle'" class="px-2">
         <p class="font-light">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></p>
       </el-row>
+      <el-row v-if="totals">
+        <div class="py-6">
+          <div>&nbsp;</div>
+        </div>
+      </el-row>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="20" class="px-4 pr-4 max-w-0 h-auto">
-      <el-row :justify="'center'" :gutter="20" :align="'middle'" class="">
+    <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" class="pt-8 px-4 pr-4 max-w-0 h-auto">
+      <el-row :justify="'center'" :gutter="20" :align="'middle'">
         <label for="search_input" class="">
         <input @keyup.enter="this.doSearch()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."
                v-model="searchQuery"
@@ -29,6 +34,12 @@
           </svg>
         </button>
       </el-row>
+      <el-row v-if="totals">
+        <div class="divide-solid divide-y-2 divide-red-700 py-6">
+          <div>Found {{ totals }} results</div>
+          <div></div>
+        </div>
+      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -39,7 +50,7 @@ import {defineAsyncComponent} from 'vue';
 import {first, isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch'],
+  props: ['searchInput', 'clearSearch', 'totals'],
   components: {
     DocElement: defineAsyncComponent(() =>
         import('./DocElement.component.vue')

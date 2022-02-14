@@ -2,12 +2,12 @@
   <div class="min-w-full pb-4 pt-0 px-2 pl-4">
     <div class="sticky top-0 bg-white z-10">
       <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
-                  :clearSearch="clear"/>
+                  :clearSearch="clear" :totals="this.totals['value'] || 0"/>
     </div>
     <el-row :gutter="40" :offset="1">
       <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" :span="4"
               class="pr-4 max-w-0 h-auto">
-        <div class="sticky top-20 pt-4">
+        <div class="sticky top-32 pt-8">
           <div class="flex w-full">
             <ul class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
               <li>
@@ -50,10 +50,6 @@
         </div>
       </el-col>
       <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0">
-        <div class="sticky top-20 bg-white z-10">
-          <p class="pt-8 pb-10">Found {{ this.totals['value'] || 0 }} Results</p>
-          <hr class="divider divide-red-700 pt-2"/>
-        </div>
         <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
           <search-detail-element
               :href="'/view?id=' + encodeURIComponent(item._source['@id'])"

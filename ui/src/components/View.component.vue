@@ -9,7 +9,7 @@
       </el-row>
     <hr class="divider divider-gray pt-2"/>
     </div>
-    <view-doc :crateId="this.crateId" :meta="this.metadata"/>
+    <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
     </el-col>
   </el-row>
   <div v-else>
@@ -38,7 +38,8 @@ export default {
     return {
       searchInput: '',
       crateId: '',
-      metadata: null
+      metadata: null,
+      parent: {}
     }
   },
   async mounted() {
@@ -57,6 +58,7 @@ export default {
     populate(metadata) {
       if (metadata?._source) {
         this.crateId = metadata._source._crateId;
+        this.root = first(metadata._source._rootId);
         //TODO: Omit in the backend
         console.log(metadata._source);
         this.metadata = metadata._source;

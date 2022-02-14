@@ -2,68 +2,20 @@ import {getRootConformsTos} from '../controllers/rootConformsTo';
 import {getFile, getRawCrate, getRecord} from '../controllers/record';
 import {ROCrate} from 'ro-crate';
 import {recordResolve} from '../controllers/recordResolve';
-import {first} from 'lodash';
 import fs from 'fs';
 import * as path from 'path';
+import { getLogger } from "../services";
+
+const log = getLogger();
 
 export async function putCollectionMappings({configuration, client}) {
 
   //TODO: move this to config
   try {
+    const elastic = configuration['api']['elastic']
     const mappings = {
-      "mappings": {
-        "items":{
-          "_all":{"enabled":true}
-        },
-        "properties": {
-          "@id": {
-            "type": "keyword"
-          },
-          "hasFile": {
-            "type": "nested",
-            "properties": {
-              "language": {
-                "type": "nested",
-                "properties": {
-                  "name": {
-                    "type": "nested",
-                    "properties": {
-                      "@value": {
-                        "type": "keyword"
-                      }
-                    }
-
-                  }
-                }
-              }
-            }
-          },
-          "_text_english": {
-            "type": "text",
-            "analyzer": "english"
-          },
-          "_text_arabic_standard": {
-            "type": "text",
-            "analyzer": "arabic"
-          },
-          "_text_chinese_mandarin": {
-            "type": "text"
-          },
-          "_text_persian_iranian": {
-            "type": "text",
-            "analyzer": "persian"
-          },
-          "_text_turkish": {
-            "type": "text",
-            "analyzer": "turkish"
-          },
-          "_text_vietnamese": {
-            "type": "text"
-          }
-        }
-      }
+      mappings: elastic['mappings']
     };
-
     const {body} = await client.indices.create({
       index: 'items',
       body: mappings
@@ -79,32 +31,24 @@ export async function indexCollections({configuration, client}) {
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection'
     });
     let i = 0;
-    console.log(`Trying to index: ${rootConformsTos.length}`);
+    log.debug(`Trying to index: ${rootConformsTos.length}`);
     for (let rootConformsTo of rootConformsTos) {
-      const col = rootConformsTo.dataValues;
+      const col = rootConformsTo['dataValues'];
       i++;
-      console.log(`${i} : ${col.crateId}`);
+      log.debug(`${i} : ${col.crateId}`);
       let record = await getRecord({crateId: col.crateId});
-      /*    const rawCrate = await getRawCrate({
-            diskPath: record.data['diskPath'],
-            catalogFilename: configuration.api.ocfl.catalogFilename
-          });*/
       const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration});
       const crate = new ROCrate(resolvedCrate);
       crate.toGraph();
       const root = crate.getRootDataset();
-      const item = crate.getNormalizedTree(root, 2);
-      item._crateId = col.crateId;
-      item._contains = {
-        '@type': {},
-        'language': {}
-      };
-      await indexMembers(root, item, crate, client, configuration, record, col.crateId);
-      item.conformsTo = 'Collection';
+      root._crateId = col.crateId;
+      root._containsTypes = [];
+      await indexMembers(root, crate, client, configuration, record, col.crateId, root._crateId);
+      root.conformsTo = 'Collection';
       const index = 'items';
       const {body} = await client.index({
         index: index,
-        body: item
+        body: crate.getNormalizedTree(root, 2)
       });
     }
   } catch (e) {
@@ -112,106 +56,90 @@ export async function indexCollections({configuration, client}) {
   }
 }
 
-async function indexMembers(i, parent, crate, client, configuration, record, crateId) {
+async function indexMembers(parent, crate, client, configuration, record, crateId, rootId) {
   try {
     const index = 'items';
-    for (let m of crate.utils.asArray(i.hasMember)) {
-      if (m['@type'].includes('RepositoryCollection')) {
-        const item = crate.getNormalizedTree(m, 2);
+    for (let item of crate.utils.asArray(parent.hasMember)) {
+      if (item['@type'].includes('RepositoryCollection')) {
+        item._rootId = rootId;
         item._crateId = crateId;
-        item._contains = {
-          '@type': {},
-          'language': {}
-        }
-        await indexMembers(m, item, crate, client, configuration, record, crateId);
+        item._containsTypes = [];
+        await indexMembers(item, crate, client, configuration, record, crateId, rootId);
         item.conformsTo = 'RepositoryCollection';
-        item.partOf = {'@id': i['@id']};
+        item.partOf = {'@id': parent['@id']};
         //Bubble up types to the parent
-        for (let t of crate.utils.asArray(item._contains['@type'])) {
+        for (let t of crate.utils.asArray(item._containsTypes)) {
           if (t !== 'RepositoryObject') {
-            parent._contains['@type'][t] = t;
+            if (!parent._containsTypes.includes(t)) {
+              crate.pushValue(parent, '_containsTypes', t);
+            }
           }
         }
-
         const {body} = await client.index({
           index: index,
-          body: item
+          body: crate.getNormalizedTree(item, 2)
         });
-      } else if (m['@type'].includes('RepositoryObject')) {
-        const item = crate.getNormalizedTree(m, 2);
+      } else if (item['@type'].includes('RepositoryObject')) {
         item._crateId = crateId;
-        item._contains = {
-          '@type': {},
-          'language': {}
-        }
         item.conformsTo = 'RepositoryObject';
-        item.partOf = {'@id': i['@id']};
-        for (let t of crate.utils.asArray(m['@type'])) {
-          if (t !== 'RepositoryObject') {
-            parent._contains['@type'][t] = t;
+        item.partOf = {'@id': parent['@id']};
+        for (let type of crate.utils.asArray(item['@type'])) {
+          if (type !== 'RepositoryObject') {
+            if (!parent._containsTypes.includes(type)) {
+              crate.pushValue(parent, '_containsTypes', type);
+            }
           }
         }
-        for (let f of crate.utils.asArray(m['hasFile'])) {
-          const ff = crate.getItem(f['@id']); //TODO: maybe normalize this
-          const fileItem = crate.getNormalizedTree(ff, 1);
-          fileItem._contains = {
-            language: {},
-            '@type': {},
-          };
-          var lg = 'english';
+        for (let hasFile of crate.utils.asArray(item['hasFile'])) {
+          const fileItem = crate.getItem(hasFile['@id']);
           let fileContent = '';
-          if (ff) {
-            if (ff.language) {
-              for (let l of crate.utils.asArray(ff.language)) {
-                const ll = crate.getItem(l['@id']);
-                if (ll) {
-                  const nl = crate.getNormalizedTree(ll, 1);
-                  lg = first(nl['name'])['@value'].toLowerCase().replace(/\W+/g, '_')
-                  item._contains.language[nl['@id']] = nl;
-                  parent._contains.language[nl['@id']] = nl;
-                  fileItem._contains.language[nl['@id']] = nl;
+          if (fileItem) {
+            fileItem._rootId = rootId;
+            if (fileItem.language) {
+              for (let fileItemLanguage of crate.utils.asArray(fileItem.language)) {
+                const languageItem = crate.getItem(fileItemLanguage['@id']);
+                if (languageItem) {
+                  crate.pushValue(item, 'language', languageItem);
+                  crate.pushValue(parent, 'language', languageItem);
+                  crate.pushValue(fileItem, 'language', languageItem);
+                  crate.pushValue(fileItem, 'file', hasFile);
                 }
               }
             }
+
             //TODO find csvs too all text formats
-            const eff = ff?.encodingFormat?.find((ef) => {
+            const fileItemFormat = fileItem?.encodingFormat?.find((ef) => {
               if (typeof ef === 'string') return ef.match('text/plain');
             });
-            //console.log(crate.getNormalizedTree(ff.encodingFormat, 1))
-            if (eff) {
+            if (fileItemFormat) {
               const fileObj = await getFile({
                 record: record.data,
-                itemId: ff['@id'],
+                itemId: fileItem['@id'],
                 catalogFilename: configuration.api.ocfl.catalogFilename
               });
               if (fs.existsSync(path.resolve(fileObj.filePath))) {
                 fileContent = fs.readFileSync(path.resolve(fileObj.filePath), {encoding: 'utf-8'});
-                //item['_text_' + lg] = fileContent;
-                addContent(item['hasFile'], ff['@id'], fileContent);
+                //addContent(item['hasFile'], fileItem['@id'], fileContent);
               } else {
-                console.log(`path: ${fileObj.filePath} does not resolve to a file`);
+                log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
               }
             }
           }
 
           fileItem['_text'] = fileContent;
-          //fileItem['']['_content'] = fileContent;
           fileItem._parent = {
             name: item.name,
             '@id': item['@id'],
             '@type': item['@type']
           }
-          flattenContains(fileItem);
           const {body} = await client.index({
             index: index,
-            body: fileItem
+            body: crate.getNormalizedTree(fileItem, 2)
           });
         }
-        flattenContains(item);
-        //delete item['hasFile'];
         const {body} = await client.index({
           index: index,
-          body: item
+          body: crate.getNormalizedTree(item, 2)
         });
       }
     }
@@ -221,16 +149,6 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
   }
 }
 
-
-function flattenContains(item) {
-  for (let c of Object.keys(item._contains)) {
-    const contains = [];
-    for (let k of Object.keys(item._contains[c])) {
-      contains.push(item._contains[c][k])
-    }
-    item._contains[c] = contains;
-  }
-}
 
 function addContent(arr, id, content) {
   const index = arr.findIndex(x => x['@id'] === id);
