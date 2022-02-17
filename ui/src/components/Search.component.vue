@@ -38,15 +38,28 @@
         </div>
       </el-col>
       <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0">
+        <el-row :align="'middle'">
+          <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey" class="pb-10"
+                           v-model="this.filters">
+            <el-button color="#626aef" plain @click="this.clearFilterX({filter, filterKey})">
+              {{ filter }}
+              <el-icon class="el-icon--right">
+                <CloseBold/>
+              </el-icon>
+            </el-button>
+          </el-button-group>
+        </el-row>
         <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
           <search-detail-element
+              :id="item._source['@id']"
               :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
               :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
               :conformsTo="item.conformsTo"
               :types="item._source?.['@type']"
-              :languages="item._source._contains?.['language']"
+              :languages="item._source?.['language']"
               :memberOf="item._source?.memberOf"
               :highlight="item?.highlight"
+              :root="item._source?._root"
           />
         </div>
         <div v-if="!this.items.length > 0">
@@ -57,7 +70,7 @@
           </el-row>
           <el-row>
             <p class="text-center">
-              <el-button type="primary" v-on:click="this.resetSearch">Start Over</el-button>
+              <el-button type="primary" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
             </p>
           </el-row>
         </div>
@@ -73,7 +86,8 @@
 
 <script>
 
-import {groupBy, first, isEmpty} from 'lodash';
+import {omit, first, isEmpty} from 'lodash';
+import {CloseBold} from "@element-plus/icons-vue";
 import {toRaw, defineAsyncComponent} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
@@ -82,6 +96,7 @@ export default {
   components: {
     SearchDetailElement,
     SearchAggs,
+    CloseBold,
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
     )
@@ -94,17 +109,48 @@ export default {
       more: false,
       aggregations: {},
       filters: {},
-      clear: false
+      clear: false,
+      filterButton: []
     };
   },
   updated() {
     // console.log(`Search Input: ${this.searchInput}`);
     // console.log(`Search Query: ${this.$route.query.q}`);
   },
+  watch: {
+    '$route.query.filters'() {
+        this.updateFilters();
+    }
+  },
   async mounted() {
+    const q = this.$route.query.q;
+    console.log(q)
+    this.updateFilters()
   },
   methods: {
     first,
+    updateFilters() {
+      try {
+        if(this.$route.query.filters) {
+          const filters = decodeURIComponent(this.$route.query.filters);
+          const filterQuery = JSON.parse(filters);
+          for (let [key, val] of Object.entries(filterQuery)) {
+            this.filters[key] = val;
+          }
+          this.$emit('selected', this.filters);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    async clearFilterX({filter, filterKey}) {
+      console.log({filter, filterKey});
+      this.filters = omit(this.filters, filterKey);
+      console.log(toRaw(this.filters));
+      this.$route.query.filters = encodeURIComponent(this.filters);
+      await this.$router.push({path: 'search', query: {q: this.$route.query.q}});
+      await this.search()
+    },
     async bucketSelected({checkedBuckets, id}) {
       // this.filters[id] = checkedBuckets.map((k) => {
       //   return {key: k}
@@ -159,6 +205,7 @@ export default {
       this.clear = !this.clear;
       this.searchInput = '';
       this.$route.query.q = '';
+      this.filterButton = [];
       await this.$router.push({path: 'search', query: {q: ''}});
       let response = await this.$http.get({route: `/search/items`});
       const items = await response.json();

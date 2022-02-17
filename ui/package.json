@@ -7,6 +7,7 @@
         "build": "npm install && webpack -c webpack-production.js"
     },
     "dependencies": {
+        "@element-plus/icons-vue": "^0.2.7",
         "@fortawesome/fontawesome-free": "^5.15.1",
         "@fortawesome/fontawesome-svg-core": "^1.2.32",
         "core-js": "^3.16.4",

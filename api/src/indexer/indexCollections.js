@@ -43,7 +43,11 @@ export async function indexCollections({configuration, client}) {
       const root = crate.getRootDataset();
       root._crateId = col.crateId;
       root._containsTypes = [];
-      await indexMembers(root, crate, client, configuration, record, col.crateId, root._crateId);
+      const rootInfo = {
+        '@id': root._crateId,
+        'name': root.name || ''
+      }
+      await indexMembers(root, crate, client, configuration, record, col.crateId, rootInfo);
       root.conformsTo = 'Collection';
       const index = 'items';
       const {body} = await client.index({
@@ -56,15 +60,15 @@ export async function indexCollections({configuration, client}) {
   }
 }
 
-async function indexMembers(parent, crate, client, configuration, record, crateId, rootId) {
+async function indexMembers(parent, crate, client, configuration, record, crateId, root) {
   try {
     const index = 'items';
     for (let item of crate.utils.asArray(parent.hasMember)) {
       if (item['@type'].includes('RepositoryCollection')) {
-        item._rootId = rootId;
+        item._root = root;
         item._crateId = crateId;
         item._containsTypes = [];
-        await indexMembers(item, crate, client, configuration, record, crateId, rootId);
+        await indexMembers(item, crate, client, configuration, record, crateId, root);
         item.conformsTo = 'RepositoryCollection';
         item.partOf = {'@id': parent['@id']};
         //Bubble up types to the parent
@@ -94,7 +98,7 @@ async function indexMembers(parent, crate, client, configuration, record, crateI
           const fileItem = crate.getItem(hasFile['@id']);
           let fileContent = '';
           if (fileItem) {
-            fileItem._rootId = rootId;
+            fileItem._root = root;
             if (fileItem.language) {
               for (let fileItemLanguage of crate.utils.asArray(fileItem.language)) {
                 const languageItem = crate.getItem(fileItemLanguage['@id']);

@@ -3,7 +3,7 @@
     <el-row :align="'middle'">
       <h5 class="mb-2 text-2xl font-medium dark:text-white">
         <a :href="href"
-           class="text-blue-600 hover:text-blue-800 visited:text-purple-600">{{ name }}</a>
+           class="text-blue-600 hover:text-blue-800 visited:text-purple-600">{{ this.name || this.id }}</a>
       </h5>
     </el-row>
     <el-row :align="'middle'">
@@ -33,6 +33,18 @@
         </button>
       </div>
     </el-row>
+    <el-row :align="'middle'">
+      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+        <span>From:&nbsp;</span>
+      </p>
+      <div class="flex flex-wrap" v-if="root">
+        <button
+            class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
+            v-for="r of root">
+          <router-link :to="getFilter({field: '_root.@id', id: r['@id']})">{{ first(r.name)?.['@value'] }}</router-link>
+        </button>
+      </div>
+    </el-row>
     <el-row :align="'middle'" v-if="memberOf">
       <p> Related: {{ first(memberOf)?.['@id'] }}</p>
     </el-row>
@@ -52,19 +64,32 @@ import {first} from 'lodash';
 export default {
   components: {},
   props: {
+    id: '',
     href: '',
     name: '',
     conformsTo: '',
     types: {},
     languages: {},
     memberOf: {},
+    root: {},
     highlight: {}
   },
   data() {
     return {}
   },
   methods: {
-    first
+    first,
+    getFilter({field, id}) {
+      const val = {};
+      val[field] = id;
+      const valEncoded = encodeURIComponent(JSON.stringify(val));
+      if (this.$route.query.q) {
+        const searchQuery = `q=${this.$route.query.q}`;
+        return `/search?${searchQuery}&filters=${valEncoded}`;
+      } else {
+        return `/search?filters=${valEncoded}`;
+      }
+    }
   }
 }
 </script>

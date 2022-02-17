@@ -20,7 +20,40 @@ export default {
     clear() {
       this.checkedBuckets = [];
     },
-    onChange() {
+    async onChange() {
+      if (this.$route.query.filters) {
+        const filters = this.$route.query.filters;
+        let decodedFilters = decodeURIComponent(filters);
+        const queryFilters = JSON.parse(decodedFilters);
+        console.log(queryFilters);
+        for (let cB of this.checkedBuckets) {
+          console.log(cB);
+          if (!queryFilters[this.aggsName]) {
+            queryFilters[this.aggsName] = [];
+          }
+          queryFilters[this.aggsName].push(cB);
+        }
+        console.log(queryFilters);
+        const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
+        //TODO: emit filters to parent
+        const query = {...this.$router.query, filters: encodedFilters};
+        await this.$router.replace({query});
+        //await this.$router.push({path: 'search', query: {filters: filters}});
+        console.log(encodedFilters);
+      } else {
+        const queryFilters = {};
+        for (let cB of this.checkedBuckets) {
+          console.log(cB);
+          if (!queryFilters[this.aggsName]) {
+            queryFilters[this.aggsName] = [];
+          }
+          queryFilters[this.aggsName].push(cB);
+        }
+        console.log(queryFilters);
+        const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
+        console.log(encodedFilters)
+        //await this.$router.push({path: 'search', query: {filters: encodedFilters}});
+      }
       this.$emit('selected', {checkedBuckets: this.checkedBuckets, id: this.aggsName});
     }
   },
