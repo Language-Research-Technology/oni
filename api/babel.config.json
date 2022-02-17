@@ -2,5 +2,6 @@
   "presets": ["@babel/preset-env"],
   "plugins": ["@babel/plugin-proposal-optional-chaining"],
   "ignore": ["node_modules"],
-  "only": ["src"]
+  "only": ["src"],
+  "sourceMaps": "inline"
 }

@@ -17,7 +17,8 @@
       "sourceMaps": true,
       "env": {
         "DOTENV_CONFIG_PATH": "${workspaceRoot}/.env",
-        "BABEL_ENV": "development"
+        "BABEL_ENV": "development",
+        "ONI_CONFIG_PATH": "configuration/development-configuration.json"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -43,7 +44,8 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "env": {
-        "DOTENV_CONFIG_PATH": "${workspaceRoot}/.env"
+        "DOTENV_CONFIG_PATH": "${workspaceRoot}/.env",
+        "ONI_CONFIG_PATH": "${workspaceRoot}/configuration/development-configuration.json"
       },
       "cwd": "${workspaceRoot}/api"
     }

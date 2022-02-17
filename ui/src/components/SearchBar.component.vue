@@ -13,18 +13,20 @@
     <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" class="pt-8 px-4 pr-4 max-w-0 h-auto">
       <el-row :justify="'center'" :gutter="20" :align="'middle'">
         <label for="search_input" class="">
-        <input @keyup.enter="this.doSearch()" type="text" class="px-4 py-2 w-80 border rounded" placeholder="Search..."
-               v-model="searchQuery"
-               v-on:change="searchInputField"
-               name="search_input" id="search_input"/>
-        <button tabindex="-1"
-                class="border-r cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-red-600">
-          <svg @click="this.reset()" class="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+          <input @keyup.enter="this.doSearch()" type="text" class="px-4 py-2 w-80 border rounded"
+                 placeholder="Search..."
+                 v-model="searchQuery"
+                 v-on:change="searchInputField"
+                 name="search_input" id="search_input"/>
+          <button tabindex="-1"
+                  class="border-r cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-red-600">
+            <svg @click="this.reset()" class="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </label>
         <button @click="this.doSearch()" class="flex items-center justify-center px-2 rounded hover:text-red-600">
           <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
@@ -47,10 +49,9 @@
 <script>
 
 import {defineAsyncComponent} from 'vue';
-import {first, isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'totals'],
+  props: ['searchInput', 'clearSearch', 'totals', 'filters', 'search'],
   components: {
     DocElement: defineAsyncComponent(() =>
         import('./DocElement.component.vue')
@@ -61,12 +62,9 @@ export default {
     // console.log(this.searchInput)
     //this.searchQuery = this.searchInput;
   },
-  mounted() {
-    //TODO: change this to configuration so search can go to X page
-    if (this.$route.path === '/search') {
-      this.search();
-    }
-    this.$emit('input', this.searchQuery)
+  async mounted() {
+    this.searchQuery = this.$route.query.q || '';
+    await this.doSearch();
   },
   watch: {
     clearSearch() {
@@ -74,40 +72,25 @@ export default {
     }
   },
   methods: {
-    reset() {
+    async reset() {
       this.searchQuery = '';
-      this.$emit('input', this.searchQuery);
+      this.$route.query.q = '';
+      await this.$router.push({path: 'search'});
+      await this.doSearch();
     },
-    searchInputField(e) {
-      //TODO: change this to configuration so it can update X route
+    async searchInputField(e) {
       if (this.$router.path === 'search') {
         this.searchQuery = e.target.value;
         const query = {...this.$router.query, q: e.target.value};
-        this.$router.replace({query});
+        await this.$router.replace({query});
+      } else {
+        this.searchQuery = e.target.value;
+        await this.$router.push({path: 'search', query: {q: this.searchQuery}});
       }
-      this.$emit('input', this.searchQuery)
-    },
-    async search() {
-      if (!isEmpty(this.searchQuery)) {
-        await this.doSearch();
-      } else if (!isEmpty(this.$route.query.q)) {
-        this.searchQuery = this.$route.query.q;
-        await this.doSearch();
-      } else if (isEmpty(this.searchQuery)) {
-        await this.doSearch()
-      }
+      await this.doSearch();
     },
     async doSearch() {
-      let response;
-      if (this.searchQuery) {
-        await this.$router.push({path: 'search', query: {q: this.searchQuery}});
-        response = await this.$http.get({route: `/search/items?multi=${this.searchQuery}`});
-      } else {
-        await this.$router.push({path: 'search'});
-        response = await this.$http.get({route: '/search/items'});
-      }
-      this.items = await response.json();
-      this.$emit('populate', {items: this.items, newSearch: true});
+      this.$emit('search', this.searchQuery);
     }
   },
   data() {

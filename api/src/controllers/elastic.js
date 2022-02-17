@@ -6,49 +6,28 @@ import {isEmpty} from "lodash";
 const log = getLogger();
 
 export function boolQuery({searchQuery, fields, filters, highlightFields}) {
-  let disMaxQueries = [];
-  const filterDisMaxQueries = [];
+  log.debug('bool query');
+  const filterTerms = [];
+  let boolQueryObj;
 
-  for (let f of filters) {
-    const keys = [];
-    const fq = []
-    const field = f.field.concat('.keyword');
-    for (let k of f.keys) {
-      if (k.checked) {
-        keys.push(k.key)
-      }
-    }
-    if (keys.length > 0) {
-      fq.push(esb.termsQuery(field, keys));
-      if (f.path) {
-        filterDisMaxQueries.push(
-          esb.nestedQuery()
-            .path(f.path)
-            .query(
-              esb.boolQuery()
-                .must(
-                  esb.multiMatchQuery(fields, searchQuery))
-                .filter(fq))
-        );
-      } else {
-        filterDisMaxQueries.push(
-          esb.boolQuery().filter(esb.termsQuery(field, keys))
-        );
-      }
+  for (let bucket of Object.keys(filters)) {
+    if (filters[bucket].length > 0) {
+      //TODO: send if whether keyword is needed
+      filterTerms.push(esb.termsQuery(bucket.concat('.keyword'), filters[bucket]))
     }
   }
-  if (filterDisMaxQueries.length > 0) {
-    disMaxQueries = disMaxQueries.concat(filterDisMaxQueries);
-  } else {
-    if (isEmpty(searchQuery)) {
-      disMaxQueries.push(esb.matchAllQuery())
-    } else {
-      disMaxQueries.push(esb.multiMatchQuery(fields, searchQuery));
-    }
+  if (isEmpty(searchQuery) && filterTerms.length > 0) {
+    boolQueryObj = esb.boolQuery().must(filterTerms);
+  } else if (!isEmpty(searchQuery) && filterTerms.length > 0) {
+    boolQueryObj = esb.boolQuery().must(esb.multiMatchQuery(fields, searchQuery)).filter(filterTerms);
+  } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
+    boolQueryObj = esb.multiMatchQuery(fields, searchQuery);
+  } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
+    boolQueryObj = esb.matchAllQuery();
   }
 
   const esbQuery = esb.requestBodySearch()
-    .query(esb.disMaxQuery().queries(disMaxQueries))
+    .query(boolQueryObj)
     .highlight(esb.highlight()
       .numberOfFragments(3)
       .fragmentSize(150)
@@ -58,34 +37,8 @@ export function boolQuery({searchQuery, fields, filters, highlightFields}) {
     );
 
   const query = esbQuery.toJSON().query;
-  log.debug('bool query')
-  inspect(query)
-  console.log('%j', {query: query})
+  log.debug(JSON.stringify(query));
   const highlight = esbQuery.toJSON().highlight;
-  return {query, highlight};
-}
-
-export function multiQuery({searchQuery, fields, highlightFields}) {
-
-  log.debug('multi query');
-  const esbQuery = esb.requestBodySearch()
-    .query(esb.disMaxQuery()
-      .queries([
-        esb.multiMatchQuery(fields, searchQuery)
-      ])
-    )
-    .highlight(esb.highlight()
-      .numberOfFragments(3)
-      .fragmentSize(150)
-      .fields(highlightFields)
-      .preTags('<mark class="font-bold">', highlightFields[0])
-      .postTags('</mark>', highlightFields[0])
-    );
-
-  const query = esbQuery.toJSON().query;
-  inspect(query);
-  const highlight = esbQuery.toJSON().highlight;
-  //inspect(highlight);
   return {query, highlight};
 }
 
@@ -105,7 +58,7 @@ function composeTermAggs(name, field, agg) {
 }
 
 export function aggsQueries({aggregations}) {
-  log.debug('aggs queries');
+  log.debug('aggsQueries');
   let aggsArray = [];
   for (let aO of aggregations) {
     if (aO.path) {
@@ -122,7 +75,6 @@ export function aggsQueries({aggregations}) {
     .query(esb.matchQuery('not', 'important'))
     .aggs(aggsArray);
   const aggsQueryJson = aggsQuery.toJSON();
-  inspect(aggsQueryJson.aggs);
   return aggsQueryJson.aggs;
 }
 
