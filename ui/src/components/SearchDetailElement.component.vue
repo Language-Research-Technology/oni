@@ -3,7 +3,7 @@
     <el-row :align="'middle'">
       <h5 class="mb-2 text-2xl font-medium dark:text-white">
         <a :href="href"
-           class="text-blue-600 hover:text-blue-800 visited:text-purple-600">{{ this.name || this.id }}</a>
+           class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-all">{{ this.name || this.id }}</a>
       </h5>
     </el-row>
     <el-row :align="'middle'">

@@ -2,7 +2,7 @@
   <div class="min-w-full pb-4 pt-0 px-2 pl-4">
     <div class="sticky top-0 bg-white z-10">
       <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
-                  @search="search" :clearSearch="clear" :totals="this.totals['value'] || 0" :filters="this.filters"/>
+                  @search="search" :clearSearch="clear" :filters="this.filters"/>
     </div>
     <el-row :gutter="40" :offset="1">
       <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" :span="4"
@@ -38,17 +38,25 @@
         </div>
       </el-col>
       <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0">
-        <el-row :align="'middle'">
-          <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey" class="pb-10"
-                           v-model="this.filters">
-            <el-button color="#626aef" plain @click="this.clearFilterX({filter, filterKey})">
-              {{ filter }}
-              <el-icon class="el-icon--right">
-                <CloseBold/>
-              </el-icon>
-            </el-button>
-          </el-button-group>
-        </el-row>
+        <div class="sticky top-20 z-10 bg-white pb-5">
+          <el-row v-if="totals" :align="'middle'">
+            <div class="divide-solid divide-y-2 divide-red-700 py-4">
+              <div>Found {{ this.totals['value'] || 0 }} results</div>
+              <div></div>
+            </div>
+          </el-row>
+          <el-row :align="'middle'">
+            <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey"
+                             v-model="this.filters">
+              <el-button color="#626aef" plain @click="this.clearFilterX({filter, filterKey})">
+                {{ filter }}
+                <el-icon class="el-icon--right">
+                  <CloseBold/>
+                </el-icon>
+              </el-button>
+            </el-button-group>
+          </el-row>
+        </div>
         <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
           <search-detail-element
               :id="item._source['@id']"
@@ -119,7 +127,7 @@ export default {
   },
   watch: {
     '$route.query.filters'() {
-        this.updateFilters();
+      this.updateFilters();
     }
   },
   async mounted() {
@@ -131,7 +139,7 @@ export default {
     first,
     updateFilters() {
       try {
-        if(this.$route.query.filters) {
+        if (this.$route.query.filters) {
           const filters = decodeURIComponent(this.$route.query.filters);
           const filterQuery = JSON.parse(filters);
           for (let [key, val] of Object.entries(filterQuery)) {

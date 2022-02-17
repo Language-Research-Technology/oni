@@ -1,6 +1,6 @@
 <template>
-  <el-row :offset="1" :gutter="40" :align="'bottom'" class="pt-0">
-    <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" class="px-0 pb-3 max-w-0 h-auto">
+  <el-row :offset="1" :gutter="40" :align="'bottom'" class="pt-0 pb-2">
+    <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4" class="px-0 pb-4 max-w-0 h-auto">
       <el-row :justify="'center'" :align="'middle'" class="px-2">
         <p class="font-light">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></p>
       </el-row>
@@ -36,12 +36,6 @@
           </svg>
         </button>
       </el-row>
-      <el-row v-if="totals">
-        <div class="divide-solid divide-y-2 divide-red-700 py-6">
-          <div>Found {{ totals }} results</div>
-          <div></div>
-        </div>
-      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -51,7 +45,7 @@
 import {defineAsyncComponent} from 'vue';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'totals', 'filters', 'search'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search'],
   components: {
     DocElement: defineAsyncComponent(() =>
         import('./DocElement.component.vue')
