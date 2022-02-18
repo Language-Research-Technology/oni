@@ -31,8 +31,7 @@
                 </button>
               </li>
               <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
-              <search-aggs :buckets="aggs.buckets" :aggsName="aggsName" @selected="this.bucketSelected"
-                           :ref="aggsName"/>
+              <search-aggs :buckets="aggs.buckets" :aggsName="aggsName" :ref="aggsName"/>
             </ul>
           </div>
         </div>
@@ -47,7 +46,7 @@
           </el-row>
           <el-row :align="'middle'">
             <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey"
-                             v-model="this.filters">
+                             v-model="this.filters" >
               <el-button color="#626aef" plain @click="this.clearFilterX({filter, filterKey})">
                 {{ filter }}
                 <el-icon class="el-icon--right">
@@ -126,26 +125,29 @@ export default {
     // console.log(`Search Query: ${this.$route.query.q}`);
   },
   watch: {
-    '$route.query.filters'() {
+    '$route.query.f'() {
+      console.log('watching route query filters')
       this.updateFilters();
     }
   },
   async mounted() {
     const q = this.$route.query.q;
     console.log(q)
-    this.updateFilters()
+    await this.updateFilters();
   },
   methods: {
     first,
-    updateFilters() {
+    async updateFilters() {
       try {
-        if (this.$route.query.filters) {
-          const filters = decodeURIComponent(this.$route.query.filters);
+        if (this.$route.query.f) {
+          const filters = decodeURIComponent(this.$route.query.f);
           const filterQuery = JSON.parse(filters);
           for (let [key, val] of Object.entries(filterQuery)) {
             this.filters[key] = val;
           }
-          this.$emit('selected', this.filters);
+          //this.$emit('selected', this.filters);
+          await this.search();
+          await this.updateFiltersRoute();
         }
       } catch (e) {
         console.error(e);
@@ -154,18 +156,19 @@ export default {
     async clearFilterX({filter, filterKey}) {
       console.log({filter, filterKey});
       this.filters = omit(this.filters, filterKey);
-      console.log(toRaw(this.filters));
-      this.$route.query.filters = encodeURIComponent(this.filters);
-      await this.$router.push({path: 'search', query: {q: this.$route.query.q}});
-      await this.search()
+      await this.updateFiltersRoute();
+    },
+    async updateFiltersRoute() {
+      let filters = toRaw(this.filters);
+      filters = encodeURIComponent(JSON.stringify(filters));
+      await this.$router.push({path: 'search', query: {q: this.$route.query.q, f: filters}});
     },
     async bucketSelected({checkedBuckets, id}) {
       // this.filters[id] = checkedBuckets.map((k) => {
       //   return {key: k}
       // });
       this.filters[id] = checkedBuckets;
-      console.log(this.filters);
-      await this.search();
+      await this.updateFiltersRoute();
     },
     populate({items, scrollId, newSearch}) {
       console.log(toRaw(items));

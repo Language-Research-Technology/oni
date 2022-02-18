@@ -4,11 +4,6 @@
       <el-row :justify="'center'" :align="'middle'" class="px-2">
         <p class="font-light">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></p>
       </el-row>
-      <el-row v-if="totals">
-        <div class="py-6">
-          <div>&nbsp;</div>
-        </div>
-      </el-row>
     </el-col>
     <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" class="pt-8 px-4 pr-4 max-w-0 h-auto">
       <el-row :justify="'center'" :gutter="20" :align="'middle'">

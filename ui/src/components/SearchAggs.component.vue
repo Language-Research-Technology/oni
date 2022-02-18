@@ -21,8 +21,8 @@ export default {
       this.checkedBuckets = [];
     },
     async onChange() {
-      if (this.$route.query.filters) {
-        const filters = this.$route.query.filters;
+      if (this.$route.query.f) {
+        const filters = this.$route.query.f;
         let decodedFilters = decodeURIComponent(filters);
         const queryFilters = JSON.parse(decodedFilters);
         console.log(queryFilters);
@@ -36,9 +36,7 @@ export default {
         console.log(queryFilters);
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
         //TODO: emit filters to parent
-        const query = {...this.$router.query, filters: encodedFilters};
-        await this.$router.replace({query});
-        //await this.$router.push({path: 'search', query: {filters: filters}});
+        await this.$router.push({path: 'search', query: {f: encodedFilters}});
         console.log(encodedFilters);
       } else {
         const queryFilters = {};
@@ -52,9 +50,9 @@ export default {
         console.log(queryFilters);
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
         console.log(encodedFilters)
-        //await this.$router.push({path: 'search', query: {filters: encodedFilters}});
+        await this.$router.push({path: 'search', query: {f: encodedFilters}});
       }
-      this.$emit('selected', {checkedBuckets: this.checkedBuckets, id: this.aggsName});
+      //this.$emit('selected', {checkedBuckets: this.checkedBuckets, id: this.aggsName});
     }
   },
   data() {

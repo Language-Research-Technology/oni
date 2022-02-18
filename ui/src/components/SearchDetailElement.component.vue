@@ -59,7 +59,7 @@
   </div>
 </template>
 <script>
-import {first} from 'lodash';
+import {first, merge} from 'lodash';
 
 export default {
   components: {},
@@ -80,15 +80,24 @@ export default {
   methods: {
     first,
     getFilter({field, id}) {
-      const val = {};
-      val[field] = id;
-      const valEncoded = encodeURIComponent(JSON.stringify(val));
+      const filter = {};
+      filter[field] = id;
+      let filterEncoded = encodeURIComponent(JSON.stringify(filter));
+      if (this.$route.query.f) {
+        filterEncoded = this.mergeQueryFilters({filters: this.$route.query.f, filter})
+      }
       if (this.$route.query.q) {
         const searchQuery = `q=${this.$route.query.q}`;
-        return `/search?${searchQuery}&filters=${valEncoded}`;
+        return `/search?${searchQuery}&f=${filterEncoded}`;
       } else {
-        return `/search?filters=${valEncoded}`;
+        return `/search?f=${filterEncoded}`;
       }
+    },
+    mergeQueryFilters({filters, filter}) {
+      let decodedFilters = decodeURIComponent(filters);
+      decodedFilters = JSON.parse(decodedFilters);
+      const merged = merge(decodedFilters, filter);
+      return encodeURIComponent(JSON.stringify(merged));
     }
   }
 }
