@@ -8,7 +8,7 @@ const log = getLogger();
 export function setupSearchRoutes({server, configuration}) {
   server.get("/search/:index", async (req, res, next) => {
     try {
-
+      log.debug('search/index');
       const {aggregations, highlightFields, fields} = configuration['api']['elastic'];
       let searchBody = {};
       let index = req.params?.index;
@@ -22,7 +22,6 @@ export function setupSearchRoutes({server, configuration}) {
         log.debug(`Total: ${result?.hits?.total?.value}`);
         results = first(result?.hits?.hits);
       } else {
-
         const searchQuery = req.query?.multi?.trim() || '';
         let filters = [];
         if (req.query.filters) {
@@ -31,6 +30,7 @@ export function setupSearchRoutes({server, configuration}) {
         }
         searchBody = boolQuery({searchQuery, fields, filters, highlightFields});
         searchBody.aggs = aggsQueries({aggregations});
+        log.debug(JSON.stringify({aggs: searchBody.aggs}));
         results = await search({configuration, index, searchBody, explain: false});
       }
       res.send(results);

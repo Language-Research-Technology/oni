@@ -58,8 +58,8 @@ export default {
   methods: {
     first,
     getURL() {
+      let id;
       if (this.type && this.type.includes('File')) {
-        let id;
         if (this.root) {
           id = this.root['@id'];
         } else if(this.crateId) {
@@ -68,7 +68,9 @@ export default {
         //TODO: fix this unhandled id
         return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parentId) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
       } else {
-        return '/view?id=' + encodeURIComponent(this.parentId);
+        //TODO: decide what to put in a href that is not searchable
+        id = this.value;
+        return '/view?id=' + encodeURIComponent(id);
       }
     }
   },

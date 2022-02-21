@@ -43,12 +43,13 @@ export async function indexCollections({configuration, client}) {
       const root = crate.getRootDataset();
       root._crateId = col.crateId;
       root._containsTypes = [];
-      const rootInfo = {
+      const _root = {
         '@id': root._crateId,
         'name': root.name || ''
       }
-      await indexMembers(root, crate, client, configuration, record, col.crateId, rootInfo);
+      await indexMembers(root, crate, client, configuration, record, col.crateId, _root);
       root.conformsTo = 'Collection';
+      root._root = _root;
       const index = 'items';
       const {body} = await client.index({
         index: index,
@@ -141,6 +142,7 @@ async function indexMembers(parent, crate, client, configuration, record, crateI
             body: crate.getNormalizedTree(fileItem, 2)
           });
         }
+        item._root = root;
         const {body} = await client.index({
           index: index,
           body: crate.getNormalizedTree(item, 2)

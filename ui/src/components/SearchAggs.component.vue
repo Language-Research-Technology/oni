@@ -31,7 +31,6 @@ export default {
     },
     updateFilters() {
       if (this.$route.query.f) {
-        console.log(this.$route.query.f);
         const filters = this.$route.query.f;
         let decodedFilters = decodeURIComponent(filters);
         const queryFilters = JSON.parse(decodedFilters);

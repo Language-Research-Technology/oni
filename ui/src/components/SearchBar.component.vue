@@ -52,7 +52,9 @@ export default {
     //this.searchQuery = this.searchInput;
   },
   async mounted() {
-    this.searchQuery = this.$route.query.q || '';
+    if(this.$route.query.q) {
+      this.searchQuery = this.$route.query.q;
+    }
   },
   watch: {
     clearSearch() {
