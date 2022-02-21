@@ -14,45 +14,73 @@
   </div>
 </template>
 <script>
+import {find} from 'lodash';
+
 export default {
   props: ['aggsName', 'buckets'],
+  watch: {
+    '$route.query.f'() {
+      console.log('search aggs: watching f');
+      this.updateFilters();
+    }
+  },
+  async mounted() {
+    console.log('search aggs: mounted');
+    await this.updateFilters();
+  },
   methods: {
     clear() {
       this.checkedBuckets = [];
     },
+    updateFilters() {
+      console.log(this.checkedBuckets);
+      if (this.$route.query.f) {
+        console.log(this.$route.query.f);
+        const filters = this.$route.query.f;
+        let decodedFilters = decodeURIComponent(filters);
+        const queryFilters = JSON.parse(decodedFilters);
+        const qfFound = Object.keys(queryFilters).find((qF) => qF === this.aggsName);
+        if (!qfFound) {
+          this.checkedBuckets = [];
+        } else {
+          for (let [key, val] of Object.entries(queryFilters)) {
+            if (key === this.aggsName) {
+              this.checkedBuckets = val;
+            }
+          }
+        }
+      }
+    },
     async onChange() {
+      const query = {}
+      if (this.$route.query.q) {
+        query.q = this.$route.query.q
+      }
       if (this.$route.query.f) {
         const filters = this.$route.query.f;
         let decodedFilters = decodeURIComponent(filters);
         const queryFilters = JSON.parse(decodedFilters);
-        console.log(queryFilters);
-        for (let cB of this.checkedBuckets) {
-          console.log(cB);
-          if (!queryFilters[this.aggsName]) {
-            queryFilters[this.aggsName] = [];
+        let checkedBuckets = [];
+        if (this.checkedBuckets.length > 0) {
+          for (let cB of this.checkedBuckets) {
+            checkedBuckets.push(cB);
           }
-          queryFilters[this.aggsName].push(cB);
         }
-        console.log(queryFilters);
+        queryFilters[this.aggsName] = checkedBuckets;
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
-        //TODO: emit filters to parent
-        await this.$router.push({path: 'search', query: {f: encodedFilters}});
-        console.log(encodedFilters);
+        query.f = encodedFilters;
       } else {
         const queryFilters = {};
         for (let cB of this.checkedBuckets) {
-          console.log(cB);
           if (!queryFilters[this.aggsName]) {
             queryFilters[this.aggsName] = [];
           }
           queryFilters[this.aggsName].push(cB);
         }
-        console.log(queryFilters);
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
-        console.log(encodedFilters)
-        await this.$router.push({path: 'search', query: {f: encodedFilters}});
+        query.f = encodedFilters;
       }
-      //this.$emit('selected', {checkedBuckets: this.checkedBuckets, id: this.aggsName});
+      await this.$router.push({path: 'search', query});
     }
   },
   data() {

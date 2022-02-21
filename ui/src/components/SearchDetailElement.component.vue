@@ -81,7 +81,7 @@ export default {
     first,
     getFilter({field, id}) {
       const filter = {};
-      filter[field] = id;
+      filter[field] = [id];
       let filterEncoded = encodeURIComponent(JSON.stringify(filter));
       if (this.$route.query.f) {
         filterEncoded = this.mergeQueryFilters({filters: this.$route.query.f, filter})

@@ -61,8 +61,8 @@ export default {
       if (this.type && this.type.includes('File')) {
         let id;
         if (this.root) {
-          id = first(this.root)?.['@value'] || this.root['@value'];
-        } else {
+          id = this.root['@id'];
+        } else if(this.crateId) {
           id = first(this.crateId)?.['@value'] || this.crateId['@value'];
         }
         //TODO: fix this unhandled id

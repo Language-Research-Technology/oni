@@ -46,9 +46,10 @@
           </el-row>
           <el-row :align="'middle'">
             <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey"
-                             v-model="this.filters" >
-              <el-button color="#626aef" plain @click="this.clearFilterX({filter, filterKey})">
-                {{ filter }}
+                             v-model="this.filters">
+              <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
+                         @click="this.clearFilterX({f, filterKey})">
+                {{ f }}
                 <el-icon class="el-icon--right">
                   <CloseBold/>
                 </el-icon>
@@ -93,7 +94,7 @@
 
 <script>
 
-import {omit, first, isEmpty} from 'lodash';
+import {remove, first, isEmpty} from 'lodash';
 import {CloseBold} from "@element-plus/icons-vue";
 import {toRaw, defineAsyncComponent} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
@@ -125,15 +126,20 @@ export default {
     // console.log(`Search Query: ${this.$route.query.q}`);
   },
   watch: {
-    '$route.query.f'() {
-      console.log('watching route query filters')
-      this.updateFilters();
+    async '$route.query'() {
+      if (this.$route.query.f) {
+        await this.updateFilters();
+      } else {
+        await this.search();
+      }
     }
   },
   async mounted() {
-    const q = this.$route.query.q;
-    console.log(q)
-    await this.updateFilters();
+    if (this.$route.query.f) {
+      await this.updateFilters();
+    } else {
+      await this.search();
+    }
   },
   methods: {
     first,
@@ -145,7 +151,6 @@ export default {
           for (let [key, val] of Object.entries(filterQuery)) {
             this.filters[key] = val;
           }
-          //this.$emit('selected', this.filters);
           await this.search();
           await this.updateFiltersRoute();
         }
@@ -153,9 +158,10 @@ export default {
         console.error(e);
       }
     },
-    async clearFilterX({filter, filterKey}) {
-      console.log({filter, filterKey});
-      this.filters = omit(this.filters, filterKey);
+    async clearFilterX({f, filterKey}) {
+      if (this.filters[filterKey]) {
+        this.filters[filterKey].splice(this.filters[filterKey].indexOf(f), 1);
+      }
       await this.updateFiltersRoute();
     },
     async updateFiltersRoute() {
@@ -216,8 +222,10 @@ export default {
       this.clear = !this.clear;
       this.searchInput = '';
       this.$route.query.q = '';
+      this.$route.query.f = '';
       this.filterButton = [];
-      await this.$router.push({path: 'search', query: {q: ''}});
+      //this.filters = [];
+      await this.$router.push({path: 'search'});
       let response = await this.$http.get({route: `/search/items`});
       const items = await response.json();
       this.populate({items, newSearch: true});

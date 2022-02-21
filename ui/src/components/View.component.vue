@@ -58,7 +58,7 @@ export default {
     populate(metadata) {
       if (metadata?._source) {
         this.crateId = metadata._source._crateId;
-        this.root = first(metadata._source._rootId);
+        this.root = first(metadata._source._root);
         //TODO: Omit in the backend
         console.log(metadata._source);
         this.metadata = metadata._source;
