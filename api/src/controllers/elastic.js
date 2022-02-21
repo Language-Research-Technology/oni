@@ -39,6 +39,7 @@ export function boolQuery({searchQuery, fields, filters, highlightFields}) {
   const query = esbQuery.toJSON().query;
   log.debug(JSON.stringify(query));
   const highlight = esbQuery.toJSON().highlight;
+  log.debug(JSON.stringify(highlight));
   return {query, highlight};
 }
 

@@ -8,6 +8,5 @@ api/.dev*
 api/test-data/test_ocfl
 api/test-data/*.development.json
 api/test-data/perf/
-configuration.json
-development-configuration.json
-production-configuration.json
+!configuration/example-configuration.json
+configuration/*

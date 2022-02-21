@@ -131,15 +131,16 @@ async function indexMembers(parent, crate, client, configuration, record, crateI
             }
           }
 
-          fileItem['_text'] = fileContent;
           fileItem._parent = {
             name: item.name,
             '@id': item['@id'],
             '@type': item['@type']
           }
+          const fileItemBody = crate.getNormalizedTree(fileItem, 2)
+          fileItemBody['_text'] = fileContent;
           const {body} = await client.index({
             index: index,
-            body: crate.getNormalizedTree(fileItem, 2)
+            body: fileItemBody
           });
         }
         item._root = root;

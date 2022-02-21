@@ -48,7 +48,7 @@ export async function search({index, searchBody, explain = false}) {
       body: searchBody,
       explain: explain,
     });
-
+    log.debug(JSON.stringify(searchBody));
     return body;
   } catch (e) {
     log.error(e.message);
