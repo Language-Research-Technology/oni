@@ -65,7 +65,7 @@ export default {
     },
     async reset() {
       this.searchQuery = '';
-      await this.$router.push({path: 'search'})
+      await this.$router.push({path: 'search'});
     },
     async resetBar() {
       this.searchQuery = '';
@@ -80,7 +80,6 @@ export default {
       this.searchQuery = e.target.value;
       let query = {q: this.searchQuery};
       if (this.$route.query.f) {
-        console.log(this.$route.query.f);
         query = {...query, f: this.$route.query.f};
       }
       await this.$router.push({path: 'search', query});

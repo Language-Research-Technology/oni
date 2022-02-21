@@ -14,18 +14,15 @@
   </div>
 </template>
 <script>
-import {find} from 'lodash';
 
 export default {
   props: ['aggsName', 'buckets'],
   watch: {
     '$route.query.f'() {
-      console.log('search aggs: watching f');
       this.updateFilters();
     }
   },
   async mounted() {
-    console.log('search aggs: mounted');
     await this.updateFilters();
   },
   methods: {
@@ -33,7 +30,6 @@ export default {
       this.checkedBuckets = [];
     },
     updateFilters() {
-      console.log(this.checkedBuckets);
       if (this.$route.query.f) {
         console.log(this.$route.query.f);
         const filters = this.$route.query.f;
