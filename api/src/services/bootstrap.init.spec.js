@@ -1,7 +1,7 @@
 require("regenerator-runtime/runtime");
 import fs from  "fs-extra";
 import {ROCrate} from "ro-crate";
-import {loadFromOcfl, checkin, connectRepo} from  "oni-ocfl";
+import {ocfltools} from  "oni-ocfl";
 import {testOCFLConf as ocfl} from "./";
 
 let records;
@@ -28,14 +28,14 @@ describe("Test loading the configuration", () => {
     });
 
     test("create repo", async () => {
-        const repo = await connectRepo(ocfl.ocflPath);
+        const repo = await ocfltools.connectRepo(ocfl.ocflPath);
         const jsonld = fs.readJsonSync(testData.roCrateDir + "/" + testData.roCrate);
         const crate = new ROCrate(jsonld);
         crate.index();
-        await checkin(repo, 'ATAP', testData.roCrateDir, crate, 'md5')
+        await ocfltools.checkin(repo, 'ATAP', testData.roCrateDir, crate, 'md5')
     })
     test("it should load the ocfl repo", async () => {
-        records = await loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
+        records = await ocfltools.loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
         expect(records.length).toBeGreaterThanOrEqual(1);
     });
     test("It should load ocflobjects", () => {

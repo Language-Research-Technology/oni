@@ -1,5 +1,5 @@
 require("regenerator-runtime/runtime");
-const { createRepo } = require("oni-ocfl");
+const { ocfltools } = require("oni-ocfl");
 const { loadConfiguration } = require("./services");
 
 let configuration;
@@ -7,7 +7,7 @@ let configuration;
 (async () => {
   try {
     configuration = await loadConfiguration();
-    await createRepo({ configuration });
+    await ocfltools.createRepo({ configuration });
   } catch (error) {
     console.error(error);
     process.exit();

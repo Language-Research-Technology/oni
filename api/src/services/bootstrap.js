@@ -1,6 +1,6 @@
 import { getLogger } from './index';
 import { createRecord, deleteRecords } from '../controllers/record';
-import { loadFromOcfl, arcpId } from 'oni-ocfl';
+import { ocfltools } from 'oni-ocfl';
 import { ROCrate } from 'ro-crate';
 
 const log = getLogger();
@@ -15,7 +15,7 @@ export async function initOCFL({ configuration }) {
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
   try {
-    const records = await loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
+    const records = await ocfltools.loadFromOcfl(ocfl.ocflPath, ocfl.catalogFilename, ocfl.hashAlgorithm);
     let i = 0;
     log.info(`Loading records: ${ records.length }`);
     for (let record of records) {
@@ -33,7 +33,7 @@ export async function initOCFL({ configuration }) {
       //TODO: Is this the best way to get the conformsTo array?
       const roCrateMetadata = crate.getItem('ro-crate-metadata.json');
       const rec = {
-        crateId: arcpId({ crate, identifier: identifier['main'] }),
+        crateId: ocfltools.arcpId({ crate, identifier: identifier['main'] }),
         path: record['path'],
         diskPath: ocflObject['path'],
         license: lic,

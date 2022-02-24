@@ -1,7 +1,7 @@
 require("regenerator-runtime/runtime");
 import fs from "fs-extra";
 import {ROCrate} from "ro-crate";
-import {getItem} from "oni-ocfl";
+import {ocfltools } from "oni-ocfl";
 import {host, testOCFLConf} from "./";
 import {OcflObject} from "ocfl";
 import fetch from "node-fetch";
@@ -20,7 +20,7 @@ describe("Test request 1 item", () => {
 
     const record = await getRecord({recordId: id});
     const ocflObject = new OcflObject(record['diskPath']);
-    const filePath = await getItem(ocflObject, testOCFLConf.catalogFilename, itemId);
+    const filePath = await ocfltools.getItem(ocflObject, testOCFLConf.catalogFilename, itemId);
     filePath;
 
   });

@@ -1,6 +1,6 @@
 import models from "../models";
 import { getLogger } from "../services";
-import { getItem, readCrate } from "oni-ocfl";
+import { ocfltools } from "oni-ocfl";
 import { OcflObject } from "ocfl";
 import { transformURIs } from "../services/ro-crate-utils";
 import { castArray } from 'lodash';
@@ -164,7 +164,7 @@ export async function decodeHash({ id }) {
 export async function getRawCrate({ diskPath, catalogFilename, version }) {
   // TODO: return a specific version
   const ocflObject = new OcflObject(diskPath);
-  const json = await readCrate(ocflObject, catalogFilename);
+  const json = await ocfltools.readCrate(ocflObject, catalogFilename);
   return json;
 }
 
@@ -184,7 +184,7 @@ export async function getUridCrate({ host, crateId, diskPath, catalogFilename, t
 export async function getFile({ record, itemId, catalogFilename }) {
   try {
     const ocflObject = new OcflObject(record['diskPath']);
-    const filePath = await getItem(ocflObject, catalogFilename, itemId);
+    const filePath = await ocfltools.getItem(ocflObject, catalogFilename, itemId);
 
     const index = filePath.lastIndexOf("/");
     const fileName = filePath.substr(index);

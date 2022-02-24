@@ -1,11 +1,11 @@
 const { ROCrate } = require('ro-crate');
-const { readCrate } = require('oni-ocfl');
+const { ocfltools } = require('oni-ocfl');
 const { getLogger } = require("./index");
 
 const log = getLogger();
 
 export async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFilename }) {
-  const json = await readCrate(ocflObject, catalogFilename);
+  const json = await ocfltools.readCrate(ocflObject, catalogFilename);
   const crate = new ROCrate(json);
   crate.index();
   crate.toGraph();

@@ -50,7 +50,7 @@
         "lodash": "^4.17.20",
         "node-fetch": "^2.6.1",
         "ocfl": "^1.0.9",
-        "oni-ocfl": "git+https://github.com/Language-Research-Technology/oni-ocfl.git",
+        "oni-ocfl": "git+https://github.com/Arkisto-Platform/oni-ocfl.git",
         "openid-client": "^5.1.0",
         "pg": "^8.7.1",
         "pg-hstore": "^2.3.4",
