@@ -7,10 +7,11 @@ import { setupObjectRoutes } from './object';
 import { setupUserRoutes } from './user';
 import { setupAuthRoutes } from './auth';
 import { setupSearchRoutes } from './search';
+import { setupAdminRoutes } from "./admin";
 
 const version = require('../../package.json')['version'];
 
-export function setupRoutes({ server, configuration }) {
+export function setupRoutes({ server, configuration, repository }) {
 
   setupAuthRoutes({ server, configuration });
 
@@ -36,7 +37,16 @@ export function setupRoutes({ server, configuration }) {
     res.send({ version: version });
   });
 
-  setupObjectRoutes({ server, configuration });
+  setupObjectRoutes({ server, configuration, repository });
   setupUserRoutes({ server, configuration });
   setupSearchRoutes({ server, configuration });
+
+  const admin = configuration['api']['admin'];
+  if (admin) {
+    //set true if you want to expose indexing via rest api
+    //TODO: Add security
+    if (admin['indexRoutes']) {
+      setupAdminRoutes({server, configuration, repository});
+    }
+  }
 }

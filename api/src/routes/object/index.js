@@ -6,16 +6,16 @@ import {
   getRecordSingle,
   getRecordMembers,
   getRecordTypes,
-  getResolveParts
+  getResolveParts,
+  getAllRecordConformsTo
 } from './record';
 import { getRecordCrate } from './recordCrate';
 import { getRecordItem } from './recordItem';
-import { getRecordResolveLinks } from './recordResolve';
 import { routeBearer } from '../../middleware/auth';
 
 const log = getLogger();
 
-export function setupObjectRoutes({ server, configuration }) {
+export function setupObjectRoutes({ server, configuration, repository }) {
 
   server.get("/object", async (req, res, next) => {
     if (!isUndefined(req.query.memberOf) && !isUndefined(req.query.conformsTo)) {
@@ -31,7 +31,7 @@ export function setupObjectRoutes({ server, configuration }) {
     } else if (req.query.id) {
       await getRecordSingle({ req, res, next });
     } else {
-      res.json({ message: 'Either id or conformsTo or memberOf parameters are required' }).status(400);
+      await getAllRecordConformsTo({req, res, next});
       next();
     }
   });
@@ -47,9 +47,9 @@ export function setupObjectRoutes({ server, configuration }) {
         res.json({ message: 'Version and Resolve-Parts: Not implemented' }).status(400);
         next();
       } else if (!isUndefined(req.query['resolve-parts'])) {
-        await getResolveParts({ req, res, next, configuration });
+        await getResolveParts({ req, res, next, configuration, repository });
       } else {
-        await getRecordCrate({ req, res, next, configuration });
+        await getRecordCrate({ req, res, next, configuration, repository });
       }
     } else {
       res.json({ message: 'id parameter value is required' }).status(400);
@@ -72,9 +72,9 @@ export function setupObjectRoutes({ server, configuration }) {
       async function (req, res, next) {
         try {
           if (req.query.id && req.query.path) {
-            await getRecordItem({ req, res, next, configuration });
+            await getRecordItem({ req, res, next, configuration, repository });
           } else if (req.query.id) {
-            await getResolveParts({ req, res, next, configuration, select: [ 'parts' ] });
+            await getResolveParts({ req, res, next, configuration, select: [ 'parts' ], repository });
           } else {
             res.json({ message: 'id parameter value is required' }).status(400);
             next();
@@ -94,9 +94,9 @@ export function setupObjectRoutes({ server, configuration }) {
           if (req.query.id && req.query.path) {
             req.query.id = decodeURIComponent(req.query.id);
             req.query.path = decodeURIComponent(req.query.path);
-            await getRecordItem({ req, res, next, configuration, passthrough: true });
+            await getRecordItem({ req, res, next, configuration, passthrough: true, repository });
           } else if (req.query.id) {
-            await getResolveParts({ req, res, next, configuration, select: [ 'parts' ] });
+            await getResolveParts({ req, res, next, configuration, select: [ 'parts' ], repository });
           } else {
             res.json({ message: 'id parameter value is required' }).status(400);
             next();

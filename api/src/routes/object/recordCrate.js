@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 const log = getLogger();
 
-export async function getRecordCrate({ req, res, next, configuration }) {
+export async function getRecordCrate({ req, res, next, configuration, repository }) {
   log.debug(`get data ${ req.query.id }`);
   let record = await getRecord({ crateId: req.query.id });
   if (record.data) {
@@ -18,11 +18,7 @@ export async function getRecordCrate({ req, res, next, configuration }) {
         res.json({ message: 'Version: Not implemented' }).status(400);
       }
     } else if (!isUndefined(req.query.raw)) {
-      crate = await getRawCrate({
-        diskPath: record.data['diskPath'],
-        catalogFilename: configuration.api.ocfl.catalogFilename,
-        version: version
-      });
+      crate = await getRawCrate({repository, crateId: req.query.id});
       res.json(crate);
     } else if (!isUndefined(req.query.zip)) {
       res.json({ message: 'Zip: Not implemented' }).status(400);
@@ -30,10 +26,9 @@ export async function getRecordCrate({ req, res, next, configuration }) {
       crate = await getUridCrate({
         host: configuration.api.host,
         crateId: req.query.id,
-        diskPath: record.data['diskPath'],
-        catalogFilename: configuration.api.ocfl.catalogFilename,
         typesTransform: configuration.api.rocrate.dataTransform.types,
-        version: version
+        version,
+        repository
       });
       res.json(crate);
     }

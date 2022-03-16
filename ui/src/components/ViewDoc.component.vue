@@ -2,7 +2,7 @@
   <el-row>
     <el-col :span="24">
       <div v-for="(value, name, i) in meta" :key="name">
-        <doc-element v-if="display(value, name)" :crateId="this.crateId" :parentTitle="this.title"
+        <doc-element v-if="display(value, name)" :crateId="this.crateId" :parent="value"
                      :id="this.meta['@id']" :name="name" :value="value"
                      :index="i" :root="this.root"
         />

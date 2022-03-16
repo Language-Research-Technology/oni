@@ -12,11 +12,25 @@ export async function getRootConformsToByCrateId({crateId}){
     attributes: { exclude: [ 'id'] },
     include: [ {
       model: models.record,
-      attributes: [ 'name', 'license', 'diskPath', 'description' ]
+      attributes: [ 'name', 'license', 'description' ]
     } ]
   });
   return conformsTo;
 }
+
+export async function getAllRootConformsTos({ offset = 0, limit = 10 }) {
+  const conformsTo = await models.rootConformsTo.findAll({
+    offset,
+    limit,
+    attributes: { exclude: [ 'id', 'recordId'] },
+    include: [ {
+      model: models.record,
+      attributes: [ 'name', 'license', 'description' ]
+    } ]
+  });
+  return conformsTo;
+}
+
 export async function getRootConformsTos({ conforms, members }) {
 
   try {
@@ -39,7 +53,6 @@ export async function getRootConformsTos({ conforms, members }) {
                m."memberOf",
                r."license"     as "record.license",
                r."name"        as "record.name",
-               --r."diskPath"    as "record.diskPath",
                r."description" as "record.description"
         FROM public."records" as r,
              public."rootMemberOfs" as m,
@@ -48,7 +61,6 @@ export async function getRootConformsTos({ conforms, members }) {
           AND m."memberOf" = :members
           AND c."recordId" = r."id"
           AND m."recordId" = r."id"
-        --'https://github.com/Language-Research-Technology/ro-crate-profile#Collection'
         --ORDER BY m."crateId" ASC LIMIT 100 
       `, {
         replacements: { members: members, conforms: conforms },

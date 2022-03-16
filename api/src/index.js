@@ -1,10 +1,14 @@
+import assert from "assert";
+
 require('regenerator-runtime');
 import restify from 'restify';
 import models from './models';
-import { loadConfiguration, getLogger } from './services/index';
-import { setupRoutes } from './routes';
-import { bootstrap } from './services/bootstrap';
-import { elasticInit, elasticBootstrap, elasticIndex } from './indexer/elastic';
+import {loadConfiguration, getLogger} from './services/index';
+import {setupRoutes} from './routes';
+import {bootstrap} from './services/bootstrap';
+import {elasticInit, elasticBootstrap, elasticIndex} from './indexer/elastic';
+import {ocfltools} from "oni-ocfl";
+
 import corsMiddleware from 'restify-cors-middleware';
 
 const log = getLogger();
@@ -18,6 +22,7 @@ const server = restify.createServer();
 //  This way, jest fetch mock will override fetch when you need it to.
 global.fetch = require('node-fetch');
 let configuration;
+let repository;
 
 (async () => {
   try {
@@ -31,7 +36,7 @@ let configuration;
 
   const cors = corsMiddleware({
     preflightMaxAge: 5, //Optional
-    origins: [ "*" ],
+    origins: ["*"],
     allowHeaders: [
       "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization",
     ],
@@ -43,7 +48,7 @@ let configuration;
   server.use(cors.actual);
   if (process.env.NODE_ENV === "development") {
     server.use((req, res, next) => {
-      log.debug(`${ req.route.method }: ${ req.route.path }`);
+      log.debug(`${req.route.method}: ${req.route.path}`);
       return next();
     });
   }
@@ -67,19 +72,24 @@ let configuration;
     })
   );
 
-  setupRoutes({ server, configuration });
+  if (configuration['api']['bootstrap']) {
+    await bootstrap({configuration});
+  }
+
+  const ocfl = configuration.api.ocfl;
+  const repository = await ocfltools.connectRepo({ocflRoot: ocfl.ocflPath, ocflScratch: ocfl.ocflScratch});
+  assert(await repository.isRepository(), 'Aborting: Bad OCFL repository');
+
+  await elasticInit({configuration});
+  if (configuration['api']['elastic']?.bootstrap) {
+    await elasticBootstrap({configuration});
+    await elasticIndex({configuration, repository});
+  }
+
+  setupRoutes({server, configuration, repository});
 
   server.listen("8080", function () {
     console.log("ready on %s", server.url);
   });
 
-  if (configuration['api']['bootstrap']) {
-    await bootstrap({ configuration });
-  }
-
-  await elasticInit({ configuration });
-  if (configuration['api']['elastic']?.bootstrap) {
-    await elasticBootstrap({ configuration });
-    await elasticIndex({ configuration });
-  }
 })();

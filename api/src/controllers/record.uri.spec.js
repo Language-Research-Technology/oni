@@ -21,7 +21,6 @@ describe('Test load records', () => {
       catalogFilename: testOCFLConf.catalogFilename
     });
     const crate = new ROCrate(newCrate);
-    crate.toGraph();
     const interview427 = crate.getItem('#interview-#427');
     const hasFiles = interview427['hasFile'];
     const anId = hasFiles[hasFiles.length - 1];

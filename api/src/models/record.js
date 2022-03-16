@@ -13,16 +13,6 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         unique: true,
       },
-      path: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      diskPath: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
       license: {
         type: DataTypes.STRING,
         allowNull: true,

@@ -61,7 +61,7 @@ async function randomCollections(n, sourceData) {
 async function createROCrate({ dest, collection, id, repoName }) {
   try {
     const crate = new ROCrate();
-    crate.index();
+
     const root = crate.getRootDataset();
     root.identifier = [
       { "@id": `_:local-id:${repoName}:arcp://name,${repoName}/${id}` }

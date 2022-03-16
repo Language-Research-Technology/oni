@@ -1,5 +1,5 @@
 import {getRootConformsTos} from '../controllers/rootConformsTo';
-import {getFile, getRawCrate, getRecord} from '../controllers/record';
+import {getFile, getRecord} from '../controllers/record';
 import {ROCrate} from 'ro-crate';
 import {recordResolve} from '../controllers/recordResolve';
 import {first} from 'lodash';
@@ -70,7 +70,7 @@ export async function putCollectionMappings({configuration, client}) {
   }
 }
 
-export async function indexCollections({configuration, client}) {
+export async function indexCollections({configuration, client, repository}) {
   try {
     const rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection'
@@ -86,30 +86,32 @@ export async function indexCollections({configuration, client}) {
             diskPath: record.data['diskPath'],
             catalogFilename: configuration.api.ocfl.catalogFilename
           });*/
-      const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration});
+      const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration, repository});
+      console.log(`resolved: ${resolvedCrate._rootNode}`);
       const crate = new ROCrate(resolvedCrate);
-      crate.toGraph();
       const root = crate.getRootDataset();
-      const item = crate.getNormalizedTree(root, 2);
-      item._crateId = col.crateId;
-      item._contains = {
-        '@type': {},
-        'language': {}
-      };
-      await indexMembers(root, item, crate, client, configuration, record, col.crateId);
-      item.conformsTo = 'Collection';
-      const index = 'items';
-      const {body} = await client.index({
-        index: index,
-        body: item
-      });
+      if (root) {
+        const item = crate.getNormalizedTree(root, 2);
+        item._crateId = col.crateId;
+        item._contains = {
+          '@type': {},
+          'language': {}
+        };
+        await indexMembers(root, item, crate, client, configuration, record, col.crateId, repository);
+        item.conformsTo = 'Collection';
+        const index = 'items';
+        const {body} = await client.index({
+          index: index,
+          body: item
+        });
+      }
     }
   } catch (e) {
     throw new Error(e);
   }
 }
 
-async function indexMembers(i, parent, crate, client, configuration, record, crateId) {
+async function indexMembers(i, parent, crate, client, configuration, record, crateId, repository) {
   try {
     const index = 'items';
     for (let m of crate.utils.asArray(i.hasMember)) {
@@ -120,7 +122,7 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
           '@type': {},
           'language': {}
         }
-        await indexMembers(m, item, crate, client, configuration, record, crateId);
+        await indexMembers(m, item, crate, client, configuration, record, crateId, repository);
         item.conformsTo = 'RepositoryCollection';
         item.partOf = {'@id': i['@id']};
         //Bubble up types to the parent
@@ -179,7 +181,8 @@ async function indexMembers(i, parent, crate, client, configuration, record, cra
               const fileObj = await getFile({
                 record: record.data,
                 itemId: ff['@id'],
-                catalogFilename: configuration.api.ocfl.catalogFilename
+                catalogFilename: configuration.api.ocfl.catalogFilename,
+                repository
               });
               if (fs.existsSync(path.resolve(fileObj.filePath))) {
                 fileContent = fs.readFileSync(path.resolve(fileObj.filePath), {encoding: 'utf-8'});

@@ -30,10 +30,10 @@ export async function elasticBootstrap({configuration}) {
   }
 }
 
-export async function elasticIndex({configuration}) {
+export async function elasticIndex({configuration, repository}) {
   try {
     //TODO: move this out to a pluggable file
-    await indexCollections({configuration, client});
+    await indexCollections({configuration, repository, client});
   } catch (e) {
     log.error(e.message);
     return {error: e.message}

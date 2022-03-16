@@ -1,45 +1,50 @@
-import { ROCrate } from 'ro-crate';
-import { getRawCrate, getRecord, getUridCrate } from './record';
-import { getRootMemberOfs } from './rootMemberOf';
-import { getLogger } from '../services';
+import {ROCrate} from 'ro-crate';
+import {getRawCrate, getRecord, getUridCrate} from './record';
+import {getRootMemberOfs} from './rootMemberOf';
+import {getLogger} from '../services';
+import {ocfltools} from "oni-ocfl";
+import * as fs from 'fs-extra';
 
 const log = getLogger();
 
-export async function recordResolve({ id, getUrid, configuration }) {
+export async function recordResolve({id, getUrid, configuration, repository}) {
   try {
-    log.debug(`Get resolve-parts: ${ id }`);
     const response = [];
-    await resolveProfile({
+    await resolveMembers({
       crateId: id,
-      response: response,
-      getUrid: getUrid,
-      configuration: configuration
+      response,
+      getUrid,
+      configuration,
+      repository
     });
+    log.debug(`Found ${response.length} members of ${id}`);
     if (response.length < 1) {
       return null;
+    } else if (response.length === 1) {
+      //It's only one don't resolve.
+      const rocrate = new ROCrate(response[0]);
+      return rocrate.getJson();
     } else {
-      const rocrate = new ROCrate();
-      rocrate.index();
-      log.debug('Create New ROCrate');
+      //Merge all the ROCrates into one giant one.
+      const json = await getCrate({repository, crateId: id, configuration, getUrid});
+      const rocrate = new ROCrate(json);
       for (let c of response) {
         const subcrate = new ROCrate(c);
-        subcrate.toGraph();
-        const rootNamedId = subcrate.getNamedIdentifier(configuration.api.identifier.main);
+        //TODO: below is commented out because we used to support './' as root ids. Not anymore
+        //const rootNamedId = subcrate.getNamedIdentifier(configuration.api.identifier.main);
+        //log.debug(`root Named Id: ${rootNamedId}`);
         const root = subcrate.getRootDataset();
-        subcrate.changeGraphId(root, rootNamedId);
-        for (let s of subcrate.getFlatGraph()) {
-          rocrate.addItem(s);
+        if (root) {
+          //subcrate.changeGraphId(root, rootNamedId);
+          const subcrateGraph = subcrate.getJson();
+          for (let s of subcrateGraph['@graph']) {
+            if (s['@id'] && !rocrate.getItem(s['@id'])) {
+              rocrate.addItem(s);
+            }
+          }
         }
       }
-      log.debug('Updated all "./" s');
-      //TODO: Someone please take a look at this munging
-      //Now we have an extra ./
-      const index = rocrate.json_ld['@graph'].findIndex((o) => o['@id'] === './');
-      if (index > -1) rocrate.json_ld['@graph'].splice(index, 1);
-      //Deleted and then replaced with the req.query.id
-      findAndReplace(rocrate.json_ld['@graph'], id, './');
-      log.debug('Deleted root "./"');
-      return rocrate.json_ld;
+      return rocrate.getJson();
     }
   } catch (e) {
     log.error(e);
@@ -48,47 +53,36 @@ export async function recordResolve({ id, getUrid, configuration }) {
   }
 }
 
-async function resolveProfile({ crateId, response, configuration, getUrid }) {
-  const recordMeta = await getRecord({ crateId });
-  if (!recordMeta.data) {
-    return response;
-  }
-  const member = recordMeta.data['crateId'];
-  const diskPath = recordMeta.data['diskPath'];
-  let record;
-  if (getUrid) {
-    record = await getUridCrate({
-      host: configuration.api.host,
-      crateId: member,
-      diskPath: diskPath,
-      catalogFilename: configuration.api.ocfl.catalogFilename,
-      typesTransform: configuration.api.rocrate.dataTransform.types
-    });
-  } else {
-    record = await getRawCrate({
-      diskPath: recordMeta.data['diskPath'],
-      catalogFilename: configuration.api.ocfl.catalogFilename
-    });
-  }
+async function resolveMembers({crateId, response, configuration, getUrid, repository}) {
+  let record = await getCrate({repository, crateId, configuration, getUrid});
   response.push(record);
-  let memberOfs = await getRootMemberOfs({ crateId: member });
+  let memberOfs = await getRootMemberOfs({crateId});
   for (let memberOf of memberOfs['data']) {
     if (memberOf['dataValues']) {
       const mO = memberOf['dataValues'];
-      await resolveProfile({ crateId: mO['crateId'], response, configuration, getUrid: true });
+      await resolveMembers({
+        crateId: mO['crateId'],
+        response,
+        configuration,
+        getUrid,
+        repository
+      });
     }
   }
   return response;
 }
 
-function findAndReplace(object, value, replacevalue) {
-  for (let x in object) {
-    if (typeof object[x] === typeof {}) {
-      findAndReplace(object[x], value, replacevalue);
-    }
-    if (object['@id'] === value) {
-      object['@id'] = replacevalue;
-      break;
-    }
+export async function getCrate({repository, crateId, configuration, getUrid}) {
+  let record;
+  if (getUrid) {
+    record = await getUridCrate({
+      host: configuration.api.host,
+      crateId,
+      typesTransform: configuration.api.rocrate.dataTransform.types,
+      repository
+    });
+  } else {
+    record = await getRawCrate({repository, crateId});
   }
+  return record;
 }

@@ -1,8 +1,7 @@
 import { getRecord, getRecords } from '../../controllers/record';
-import { getRootConformsTos } from '../../controllers/rootConformsTo';
+import { getAllRootConformsTos, getRootConformsTos } from '../../controllers/rootConformsTo';
 import { getRootMemberOfs } from '../../controllers/rootMemberOf';
 import { getRootTypes } from '../../controllers/rootType';
-import { merge } from 'lodash';
 import { getLogger } from '../../services';
 import { recordResolve } from '../../controllers/recordResolve';
 
@@ -12,11 +11,27 @@ export async function getRecordSingle({ req, res, next }) {
   log.debug(`Get data ${ req.query.id }`);
   let record = await getRecord({ crateId: req.query.id });
   if (record.data) {
-    delete record.data['path'];
-    delete record.data['diskPath'];
     res.send(record.data);
   } else {
     res.send({ id: req.query.id, message: 'Not Found' }).status(404);
+  }
+  next();
+}
+
+export async function getAllRecordConformsTo({req, res, next}) {
+  const result = await getAllRootConformsTos({
+    offset: req.query.offset,
+    limit: req.query.limit
+  });
+  if (result) {
+    res.send({
+      total: result.length || 0,
+      data: result
+    }).status(200);
+  } else {
+    res.send({
+      message: 'Not data found'
+    }).status(404);
   }
   next();
 }
@@ -69,16 +84,14 @@ export async function getAllRecords({ req, res, next }) {
   res.send({
     total: records.total,
     data: records.data.map((r) => {
-      delete r['path'];
-      delete r['diskPath'];
       return r;
     })
   });
   next();
 }
 
-export async function getResolveParts({ req, res, next, configuration, select }) {
-  const data = await recordResolve({ id: req.query.id, getUrid: true, configuration });
+export async function getResolveParts({ req, res, next, configuration, select, repository }) {
+  const data = await recordResolve({ id: req.query.id, getUrid: true, configuration, repository });
   if (select && select.includes('parts')) {
     let parts = [];
     for (let graph of data['@graph']) {

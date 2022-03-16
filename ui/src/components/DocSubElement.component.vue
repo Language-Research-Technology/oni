@@ -28,9 +28,9 @@
                aria-labelledby="collapse-1-button">
         <el-row v-for="(value, name, i) in this.value" :key="this.name">
           <el-col :span="24">
-          <doc-element :crateId="this.crateId" :id="this.parentId"
+          <doc-element :crateId="this.crateId"
                        :name="name" :value="value" :type="this.value['@type']"
-                       :title="this.title" :parentTitle="this.parentTitle"
+                       :title="this.title" :parent="this.value"
                        :index="i" :root="this.root"/>
             </el-col>
         </el-row>
@@ -54,19 +54,17 @@ import {defineAsyncComponent} from 'vue';
 import {first} from 'lodash';
 
 export default {
-  props: ['index', 'parentId', 'crateId', 'parentTitle', 'name', 'type', 'value', 'title', 'root'],
+  props: ['index', 'parent', 'crateId', 'name', 'type', 'value', 'title', 'root'],
   methods: {
     first,
     getURL() {
       let id;
       if (this.type && this.type.includes('File')) {
-        if (this.root) {
-          id = this.root['@id'];
-        } else if(this.crateId) {
-          id = first(this.crateId)?.['@value'] || this.crateId['@value'];
-        }
+        console.log('parent:')
+        console.log(this.value);
+        id = first(this.parent?._parent)['@id'];
         //TODO: fix this unhandled id
-        return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parent=' + encodeURIComponent(this.parentId) + '&parentTitle=' + encodeURIComponent(this.parentTitle)
+        return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parentId=' + encodeURIComponent(this.parent['@id']) + '&parentTitle=' + encodeURIComponent(this.parent['name'])
       } else {
         //TODO: decide what to put in a href that is not searchable
         id = this.value;

@@ -6,7 +6,7 @@ import { getUserMemberships } from '../../controllers/userMembership';
 
 const log = getLogger();
 
-export async function getRecordItem({ req, res, next, configuration, passthrough }) {
+export async function getRecordItem({ req, res, next, configuration, passthrough, repository }) {
   log.debug(`Get data item: ${ req.query.id } : ${ req.query.path }`)
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
@@ -27,12 +27,12 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
     //Check thruthy for pass and if foundAuthorization from isAuthorized
     if (pass) {
       const fileObj = await getFile({
-        record: record.data,
-        itemId: req.query.path,
-        catalogFilename: configuration.api.ocfl.catalogFilename
+        itemId: req.query.id,
+        repository,
+        filePath: req.query.path
       });
       //TODO: send the correct mimeType
-      if (fs.pathExistsSync(fileObj.filePath)) {
+      if (fileObj && fs.pathExistsSync(fileObj.filePath)) {
         res.writeHead(200, {
           'Content-Disposition': 'attachment; filename=' + fileObj.filename,
           'Content-Type': fileObj.mimetype

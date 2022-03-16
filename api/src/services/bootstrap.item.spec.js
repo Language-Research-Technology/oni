@@ -1,11 +1,8 @@
 require("regenerator-runtime/runtime");
-import fs from "fs-extra";
-import {ROCrate} from "ro-crate";
 import {ocfltools } from "oni-ocfl";
-import {host, testOCFLConf} from "./";
+import {testOCFLConf} from "./";
 import {OcflObject} from "ocfl";
-import fetch from "node-fetch";
-import {getRecord, getUridCrate} from "../controllers/record";
+import {getRecord} from "../controllers/record";
 
 const testData = {
   roCrateDir: "../test-data/rocrates/farmstofreeways",

@@ -1,15 +1,16 @@
+import * as fs from "fs-extra";
+
 const { ROCrate } = require('ro-crate');
 const { ocfltools } = require('oni-ocfl');
 const { getLogger } = require("./index");
 
 const log = getLogger();
 
-export async function transformURIs({ host, crateId, ocflObject, uridTypes, catalogFilename }) {
-  const json = await ocfltools.readCrate(ocflObject, catalogFilename);
+export async function transformURIs({ host, crateId, uridTypes, repository }) {
+  log.debug('transformURIs');
+  const jsonInfo = await ocfltools.getFileInfo({ repository, crateId, filePath: 'ro-crate-metadata.json' });
+  const json = await fs.readJson(jsonInfo.path);
   const crate = new ROCrate(json);
-  crate.index();
-  crate.toGraph();
-  log.silly('transformURIs');
   for (const item of crate.getGraph()) {
     const itemType = crate.utils.asArray(item['@type']);
     const updateItems = [];
@@ -21,7 +22,7 @@ export async function transformURIs({ host, crateId, ocflObject, uridTypes, cata
     updateItems.forEach((i) => {
       const ref = crate.getItem(i['@id']);
       if (ref) {
-        log.silly(ref['@id']);
+        log.debug(ref['@id']);
         crate.changeGraphId(ref, `${ host }/stream?id=${ crateId }&path=${ ref['@id'] }`);
       }
     });

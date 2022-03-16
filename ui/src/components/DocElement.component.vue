@@ -8,7 +8,7 @@
         <div class=""
              v-if="!isString(this.value)" v-for="val in toArray(this.value)">
           <div v-if="val['@id']">
-            <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parentId="this.id"
+            <doc-sub-element :crateId="this.crateId" :parent="this.parent"
                              :name="this.name"
                              :value="val" :type="this.type" :title="getTitle(val['name'])"
                              :index="this.index" :root="this.root"/>
@@ -19,7 +19,7 @@
           </div>
         </div>
         <div v-else>
-          <doc-sub-element :crateId="this.crateId" :parentTitle="this.parentTitle" :parentId="this.id"
+          <doc-sub-element :crateId="this.crateId" :parent="this.parent"
                            :name="this.name" :value="this.value"
                            :type="this.type" :title="this.title"
                            :index="this.index" :root="this.root"/>
@@ -39,7 +39,7 @@ export default {
         import('./DocSubElement.component.vue')
     )
   },
-  props: ['index', 'id', 'crateId', 'parentTitle', 'name', 'value', 'title', 'type', 'root'],
+  props: ['index', 'id', 'crateId', 'parent', 'name', 'value', 'title', 'type', 'root'],
   mounted() {
   },
   methods: {

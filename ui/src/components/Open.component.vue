@@ -4,8 +4,8 @@
       <div class="container max-w-screen-lg mx-auto">
         <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
           <a class="break-words underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-             :href="'/view?id=' + encodeURIComponent(this.parent)">{{
-              this.parentTitle || decodeURIComponent(this.parent)
+             :href="'/view?id=' + encodeURIComponent(this.id)">{{
+              this.id || decodeURIComponent(this.id)
             }}</a> &gt; {{ this.title }}
         </h3>
         <div class="shadow m-6">
@@ -28,6 +28,12 @@
               Your browser does not support the audio element.
             </audio>
           </div>
+          <div class="p-4" v-else-if="this.type === 'video'">
+            <video controls>
+              <source :src="this.data" :type="this.sourceType">
+              Your browser does not support the video element.
+            </video>
+          </div>
           <div class="p-4" v-else>
             <img height="500px" :src="this.data"/>
           </div>
@@ -41,9 +47,11 @@
 import 'element-plus/theme-chalk/display.css'
 import pdf from 'vue3-pdf';
 import {first} from 'lodash';
+import {VideoPlay} from "@element-plus/icons-vue";
 
 export default {
   components: {
+    VideoPlay,
     pdf
   },
   data() {
@@ -53,6 +61,7 @@ export default {
       numPages: 1,
       data: null,
       type: 'text',
+      sourceType: '',
       id: '',
       name: '',
       parent: '',
@@ -83,7 +92,7 @@ export default {
     }
     //TODO: Ask for MIME types
 
-    if (path && (path.endsWith(".txt") || path.endsWith(".csv"))) {
+    if (path && (path.endsWith(".txt") || path.endsWith(".csv") || path.endsWith(".eaf"))) {
       this.type = 'txt';
       this.data = await response.text();
     } else {
@@ -92,7 +101,11 @@ export default {
       if (path && (path.endsWith(".mp3") || path.endsWith(".wav"))) {
         this.type = 'audio';
         this.data = blobURL;
-      } else if (path && path.endsWith(".pdf")) {
+      } else if(path && path.endsWith(".mp4")){
+        this.type = 'video';
+        this.sourceType = 'video/mp4';
+        this.data = blobURL;
+      }else if (path && path.endsWith(".pdf")) {
         this.type = 'pdf';
         this.pdfdata = pdf.createLoadingTask(blobURL);
         this.pdfdata.promise.then(pdf => {

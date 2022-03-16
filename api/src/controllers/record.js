@@ -1,9 +1,10 @@
 import models from "../models";
-import { getLogger } from "../services";
-import { ocfltools } from "oni-ocfl";
-import { OcflObject } from "ocfl";
-import { transformURIs } from "../services/ro-crate-utils";
-import { castArray } from 'lodash';
+import {getLogger} from "../services";
+import {ocfltools} from "oni-ocfl";
+
+import {transformURIs} from "../services/ro-crate-utils";
+import {castArray} from 'lodash';
+import * as fs from 'fs-extra';
 
 const log = getLogger();
 
@@ -16,12 +17,12 @@ export async function deleteRecords() {
   return record;
 }
 
-export async function getRecords({ offset = 0, limit = 10 }) {
+export async function getRecords({offset = 0, limit = 10}) {
   let records = await models.record.findAndCountAll({
     offset,
     limit,
     order: [],
-    attributes: { exclude: ['id'] }
+    attributes: {exclude: ['id']}
   });
   return {
     total: records.count,
@@ -29,37 +30,32 @@ export async function getRecords({ offset = 0, limit = 10 }) {
   };
 }
 
-export async function getRecord({ crateId }) {
+export async function getRecord({crateId}) {
   let where = {};
   if (crateId) where.crateId = crateId;
   log.silly(crateId);
   let record = await models.record.findOne({
     where,
-    include: [ {
+    include: [{
       model: models.rootConformsTo
-    } ]
+    }]
   });
   if (record) {
-    return { data: record.get() }
+    return {data: record.get()}
   } else {
-    return { data: null }
+    return {data: null}
   }
 }
 
-export async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
+export async function createRecord({data, memberOfs, atTypes, conformsTos}) {
   try {
     log.silly(data.crateId)
     if (!data.crateId) {
       return new Error(`Id is a required property`);
     }
-    if (!data.path) {
-      return new Error(`Path is a required property`);
-    }
     const r = await models.record.create({
       locked: false,
       crateId: data.crateId,
-      path: data.path,
-      diskPath: data.diskPath,
       license: data.license,
       name: data.name,
       description: data.description
@@ -80,7 +76,7 @@ export async function createRecord({ data, memberOfs, atTypes, conformsTos }) {
       await r.addRootMemberOf(member);
     }
     // If there is no memberOf it means its an oprhan?
-    if(memberOfs.length < 1){
+    if (memberOfs.length < 1) {
       const member = await models.rootMemberOf.create({
         memberOf: null,
         crateId: data.crateId
@@ -113,8 +109,6 @@ export async function createRecordWithCrate(data, hasMembers, atTypes) {
     const r = await models.record.create({
       locked: false,
       crateId: data.crateId,
-      path: data.path,
-      diskPath: data.diskPath,
       license: data.license,
       name: data.name,
       description: data.description
@@ -142,67 +136,69 @@ export async function createRecordWithCrate(data, hasMembers, atTypes) {
   }
 }
 
-export async function findRecordByIdentifier({ identifier, recordId }) {
+export async function findRecordByIdentifier({identifier, recordId}) {
   let clause = {
-    where: { identifier },
+    where: {identifier},
   };
   if (recordId) {
     clause.include = [
-      { model: models.record, where: { id: recordId }, attributes: [ 'id' ], raw: true },
+      {model: models.record, where: {id: recordId}, attributes: ['id'], raw: true},
     ];
   }
   return await models.record.findOne(clause);
 }
 
-export async function decodeHash({ id }) {
+export async function decodeHash({id}) {
 
   // With ARCP like
   // arcp://name,
   // hash it and then find it by it.
 }
 
-export async function getRawCrate({ diskPath, catalogFilename, version }) {
+export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
-  const ocflObject = new OcflObject(diskPath);
-  const json = await ocfltools.readCrate(ocflObject, catalogFilename);
+  log.silly('getRawCrate');
+  const fileInfo = await ocfltools.getFileInfo({repository, crateId, filePath: 'ro-crate-metadata.json'});
+  const json = await fs.readJson(fileInfo.path);
   return json;
 }
 
-export async function getUridCrate({ host, crateId, diskPath, catalogFilename, typesTransform, version }) {
+export async function getUridCrate({host, crateId, typesTransform, version, repository}) {
   // TODO: return a specific version
-  const ocflObject = new OcflObject(diskPath);
+  log.silly('getUridCrate');
   const newCrate = await transformURIs({
     host,
     crateId: crateId,
-    ocflObject,
     uridTypes: typesTransform,
-    catalogFilename
+    repository
   });
   return newCrate;
 }
 
-export async function getFile({ record, itemId, catalogFilename }) {
+export async function getFile({itemId, repository, filePath}) {
   try {
-    const ocflObject = new OcflObject(record['diskPath']);
-    const filePath = await ocfltools.getItem(ocflObject, catalogFilename, itemId);
-
-    const index = filePath.lastIndexOf("/");
-    const fileName = filePath.substr(index);
-    const ext = filePath.lastIndexOf(".");
-    let extName;
-    if (ext) {
-      extName = filePath.substr(ext);
-    }
-    log.debug('getFile: record')
-    log.debug(filePath);
-
-    return {
-      filename: fileName,
-      filePath: filePath,
-      mimetype: extName || 'file'
+    log.debug(`getFile in repository with id: ${itemId} found in: ${filePath}`);
+    const fileInfo = await ocfltools.getFileInfo({repository, crateId: itemId, filePath});
+    if (fileInfo && fileInfo.path) {
+      const filePath = fileInfo.path;
+      log.debug(filePath);
+      const index = filePath.lastIndexOf("/");
+      const fileName = filePath.substr(index);
+      const ext = filePath.lastIndexOf(".");
+      let extName;
+      if (ext) {
+        extName = filePath.substr(ext);
+      }
+      log.debug(`getFile: ${filePath}`);
+      return {
+        filename: fileName,
+        filePath: filePath,
+        mimetype: extName || 'file'
+      }
+    } else {
+      log.error(`File in repository with id: ${itemId} not found in: ${filePath}`);
     }
   } catch (e) {
-    log.error('getFile');
-    return new Error(e);
+    log.error('getFile')
   }
 }
