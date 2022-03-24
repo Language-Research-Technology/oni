@@ -1,5 +1,5 @@
 export { loadConfiguration, filterPrivateInformation } from "./configuration";
-export { getLogger } from './logger';
+export { getLogger, logEvent } from './logger';
 export { routeUser } from '../middleware/auth';
 export { generateToken, verifyToken } from './jwt';
 export {

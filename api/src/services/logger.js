@@ -1,6 +1,7 @@
 import { createLogger, format, transports } from "winston";
 import models from'../models';
 const { combine, timestamp, printf } = format;
+const log = getLogger();
 
 export function getLogger() {
   const myFormat = printf(({ level, message, timestamp }) => {
