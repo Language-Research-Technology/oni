@@ -38,7 +38,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item.conformsTo = 'RepositoryObject';
         item.partOf = {'@id': parent['@id']};
         item._root = root;
-        const normalObjectItem = crate.getNormalizedTree(item, 2)
+        const normalObjectItem = crate.getNormalizedTree(item, 2);
         let {body} = await client.index({
           index: index,
           body: normalObjectItem
@@ -51,7 +51,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             }
           }
         }
-        if (item['hasFile']) log.warn(`Getting files for ${crateId}`);
+        if (item['hasFile']) log.info(`Getting files for ${crateId}`);
         for (let hasFile of crate.utils.asArray(item['hasFile'])) {
           log.debug(`Get Files for ${hasFile['@id']}`);
           const fileItem = crate.getItem(hasFile['@id']);
@@ -89,7 +89,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
               }
             }
           } else {
-            log.debug(`no files for ${hasFile['@id']}`);
+            log.debug(`No files for ${hasFile['@id']}`);
           }
           fileItem._parent = {
             name: item.name,

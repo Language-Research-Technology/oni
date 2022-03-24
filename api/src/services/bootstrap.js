@@ -36,7 +36,8 @@ export async function bootstrapObject({configuration, repository, object}) {
         crateId: crateId,
         license: lic,
         name: first(root['name']),
-        description: first(root['description'])
+        description: first(root['description']) || root['description'],
+        pairtreeId: object.pairtreeId
       }
       log.debug(`Loading ${rec.crateId}`);
       //index the types

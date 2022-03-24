@@ -25,6 +25,11 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.TEXT,
         allowNull: true,
       },
+      pairtreeId: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: true
+      },
       locked: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

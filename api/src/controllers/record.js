@@ -58,7 +58,8 @@ export async function createRecord({data, memberOfs, atTypes, conformsTos}) {
       crateId: data.crateId,
       license: data.license,
       name: data.name,
-      description: data.description
+      description: data.description,
+      pairtreeId: data.pairtreeId
     });
     atTypes = castArray(atTypes);
     for (const ele of atTypes) {
