@@ -49,7 +49,7 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
   } catch (e) {
     log.error(e);
     log.error('Error trying to resolve links');
-    throw new Error(e);
+    return {error: e};
   }
 }
 

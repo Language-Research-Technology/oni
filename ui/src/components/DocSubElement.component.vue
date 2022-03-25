@@ -59,17 +59,9 @@ export default {
     first,
     getURL() {
       let id;
-      if (this.type && this.type.includes('File')) {
-        console.log('parent:')
-        console.log(this.value);
-        id = first(this.parent?._parent)['@id'];
-        //TODO: fix this unhandled id
-        return '/open?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(this.value) + '&title=' + encodeURIComponent(this.title) + '&parentId=' + encodeURIComponent(this.parent['@id']) + '&parentTitle=' + encodeURIComponent(this.parent['name'])
-      } else {
-        //TODO: decide what to put in a href that is not searchable
-        id = this.value;
-        return '/view?id=' + encodeURIComponent(id);
-      }
+      //TODO: decide what to put in a href that is not searchable
+      id = this.value;
+      return '/view?id=' + encodeURIComponent(id);
     }
   },
   components: {

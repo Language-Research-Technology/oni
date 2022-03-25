@@ -1,9 +1,8 @@
 import {getRootConformsTos} from '../controllers/rootConformsTo';
-import {getFile, getRawCrate, getRecord} from '../controllers/record';
+import {getRawCrate} from '../controllers/record';
 import {ROCrate} from 'ro-crate';
-import fs from 'fs';
-import * as path from 'path';
 import {getLogger} from "../services";
+import {indexFiles} from "./indexCollectionsFiles";
 
 const log = getLogger();
 
@@ -39,42 +38,10 @@ export async function indexObjects({crateId, client, index, root, repository}) {
           //Then get a file, same as:
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
           for (let hasFile of crate.utils.asArray(item['hasFile'])) {
-            log.debug(`Get Files for ${hasFile['@id']}`);
-            const fileItem = crate.getItem(hasFile['@id']);
-            crate.pushValue(fileItem, 'file', hasFile);
-            let fileContent = '';
-            if (fileItem) {
-              const fileItemFormat = fileItem?.encodingFormat?.find((ef) => {
-                if (typeof ef === 'string') return ef.match('text');
-              });
-              if (fileItemFormat) {
-                const fileObj = await getFile({
-                  itemId: item['@id'],
-                  repository,
-                  filePath: fileItem['@id']
-                });
-                if (fileObj) {
-                  if (fs.existsSync(path.resolve(fileObj.filePath))) {
-                    fileContent = fs.readFileSync(path.resolve(fileObj.filePath), {encoding: 'utf-8'});
-                    //addContent(item['hasFile'], fileItem['@id'], fileContent);
-                  } else {
-                    log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
-                  }
-                }
-              }
-              fileItem._root = root;
-              fileItem._parent = {
-                name: item.name,
-                '@id': item['@id'],
-                '@type': item['@type']
-              }
-              const normalFileItem = crate.getNormalizedTree(fileItem, 3)
-              normalFileItem['_text'] = fileContent;
-              const {body} = await client.index({
-                index: index,
-                body: normalFileItem
-              });
-            }
+            await indexFiles({
+              crateId: item['@id'], item, hasFile, crate, client,
+              index, root, repository
+            });
           }
         } else {
           log.warn(`Skipping ${item['@id']} not a RepositoryObject`);

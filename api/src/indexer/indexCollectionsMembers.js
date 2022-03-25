@@ -1,7 +1,5 @@
-import {getFile} from '../controllers/record';
-import fs from 'fs';
-import * as path from 'path';
 import {getLogger} from "../services";
+import {indexFiles} from "./indexCollectionsFiles";
 
 const log = getLogger();
 
@@ -53,61 +51,16 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         }
         if (item['hasFile']) log.info(`Getting files for ${crateId}`);
         for (let hasFile of crate.utils.asArray(item['hasFile'])) {
-          log.debug(`Get Files for ${hasFile['@id']}`);
-          const fileItem = crate.getItem(hasFile['@id']);
-          let fileContent = '';
-          if (fileItem) {
-            fileItem._root = root;
-            if (fileItem.language) {
-              for (let fileItemLanguage of crate.utils.asArray(fileItem.language)) {
-                const languageItem = crate.getItem(fileItemLanguage['@id']);
-                if (languageItem) {
-                  crate.pushValue(item, 'language', languageItem);
-                  crate.pushValue(parent, 'language', languageItem);
-                  crate.pushValue(fileItem, 'language', languageItem);
-                  crate.pushValue(fileItem, 'file', hasFile);
-                }
-              }
-            }
-            //TODO find csvs too all text formats
-            const fileItemFormat = fileItem?.encodingFormat?.find((ef) => {
-              if (typeof ef === 'string') return ef.match('text/');
-            });
-            if (fileItemFormat) {
-              const fileObj = await getFile({
-                itemId: fileItem['@id'],
-                repository,
-                filePath: fileItem['@id']
-              });
-              if(fileObj) {
-                if (fs.existsSync(path.resolve(fileObj.filePath))) {
-                  fileContent = fs.readFileSync(path.resolve(fileObj.filePath), {encoding: 'utf-8'});
-                  //addContent(item['hasFile'], fileItem['@id'], fileContent);
-                } else {
-                  log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
-                }
-              }
-            }
-          } else {
-            log.debug(`No files for ${hasFile['@id']}`);
-          }
-          fileItem._parent = {
-            name: item.name,
-            '@id': item['@id'],
-            '@type': item['@type']
-          }
-          const normalFileItem = crate.getNormalizedTree(fileItem, 2)
-          normalFileItem['_text'] = fileContent;
-          const {body} = await client.index({
-            index: index,
-            body: normalFileItem
+          await indexFiles({
+            crateId: crateId, item, hasFile, parent, crate,
+            client, index, root, repository
           });
         }
       } else {
         log.warn(`Skipping ${item['@id']} not a RepositoryCollection or RepositoryObject or does not have @type`);
       }
     }
-  } catch(e) {
+  } catch (e) {
     log.error(e);
   }
 }

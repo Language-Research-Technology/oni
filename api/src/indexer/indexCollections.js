@@ -39,44 +39,49 @@ export async function indexCollections({configuration, repository, client}) {
       i++;
       log.info(`${i}: ${col.crateId}`);
       const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration, repository});
-      const crate = new ROCrate(resolvedCrate);
-      const root = crate.getRootDataset();
-      if (root) {
-        root._crateId = col.crateId;
-        root._containsTypes = [];
-        const _root = {
-          '@id': root._crateId,
-          'name': root.name || ''
-        }
-        if (root.hasMember && root.hasMember.length > 0) {
-          log.debug(`Indexing Members of root`);
-          await indexMembers({
-            parent: root,
-            crate,
-            client,
-            configuration,
-            crateId: col.crateId,
-            root: _root,
-            repository
+      if (resolvedCrate.error) {
+        log.error(`cannot resolve collection: ${col.crateId}`);
+        log.error(resolvedCrate.error);
+      } else {
+        const crate = new ROCrate(resolvedCrate);
+        const root = crate.getRootDataset();
+        if (root) {
+          root._crateId = col.crateId;
+          root._containsTypes = [];
+          const _root = {
+            '@id': root._crateId,
+            'name': root.name || ''
+          }
+          if (root.hasMember && root.hasMember.length > 0) {
+            log.debug(`Indexing Members of root`);
+            await indexMembers({
+              parent: root,
+              crate,
+              client,
+              configuration,
+              crateId: col.crateId,
+              root: _root,
+              repository
+            });
+          } else {
+            log.debug('Indexing objects');
+            await indexObjects({
+              crateId: col.crateId,
+              client,
+              crate,
+              index,
+              root: _root,
+              repository
+            });
+          }
+          root.conformsTo = 'Collection';
+          root._root = _root;
+          const normalRoot = crate.getNormalizedTree(root, 2);
+          const {body} = await client.index({
+            index: index,
+            body: normalRoot
           });
-        } else {
-          log.debug('Indexing objects');
-          await indexObjects({
-            crateId: col.crateId,
-            client,
-            crate,
-            index,
-            root: _root,
-            repository
-          });
         }
-        root.conformsTo = 'Collection';
-        root._root = _root;
-        const normalRoot = crate.getNormalizedTree(root, 2);
-        const {body} = await client.index({
-          index: index,
-          body: normalRoot
-        });
       }
     }
   } catch (e) {
