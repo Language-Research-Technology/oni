@@ -20,7 +20,7 @@
              stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
-        <span>{{ first(this.value['name'])?.['@value'] }}</span>
+        <span>{{ getTitle() }}</span>
       </button>
       <section v-show="toggle"
                class="transition-all duration-300 ease-out w-full"
@@ -62,6 +62,14 @@ export default {
       //TODO: decide what to put in a href that is not searchable
       id = this.value;
       return '/view?id=' + encodeURIComponent(id);
+    },
+    getTitle() {
+      let title = first(this.value['name'])
+      if (title) {
+        return title['@value'] || title;
+      } else {
+        return this.value['@id']
+      }
     }
   },
   components: {
