@@ -11,15 +11,22 @@ import {OcflObject} from "@coedl/ocfl";
 const log = getLogger();
 
 export async function bootstrap({configuration}) {
-  await deleteRecords();
-  return await initOCFL({configuration});
+  try {
+    const deleted = await deleteRecords();
+    deleted;
+    log.info('All records from database have been deleted');
+    return await initOCFL({configuration});
+  } catch (e) {
+    log.error(e);
+    throw new Error(e);
+  }
 }
 
 export async function bootstrapObject({configuration, repository, object}) {
   log.debug(`Loading record: ${object['repositoryPath']}`);
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
-  const jsonInfo = await ocfltools.getFileInfo({ repository, crateId: object.id, filePath: 'ro-crate-metadata.json' });
+  const jsonInfo = await ocfltools.getFileInfo({repository, crateId: object.id, filePath: 'ro-crate-metadata.json'});
   const crateFile = await fs.readJson(jsonInfo.path);
   const crate = new ROCrate(crateFile);
   const root = crate.getRootDataset();

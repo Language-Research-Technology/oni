@@ -20,7 +20,7 @@ module.exports = function (sequelize, DataTypes) {
     }
   );
   RecordCrateMember.associate = function (models) {
-    RecordCrateMember.belongsTo(models.record);
+    RecordCrateMember.belongsTo(models.record, {foreignKey: 'recordId'});
   };
 
   return RecordCrateMember;

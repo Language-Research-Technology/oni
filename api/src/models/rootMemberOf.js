@@ -21,7 +21,7 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: false,
     });
   rootMemberOf.associate = function (models) {
-    rootMemberOf.belongsTo(models.record);
+    rootMemberOf.belongsTo(models.record, {foreignKey: 'recordId'});
   };
 
   return rootMemberOf;

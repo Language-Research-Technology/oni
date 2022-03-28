@@ -10,11 +10,19 @@ const log = getLogger();
 
 export async function deleteRecords() {
   // Ay nanita
-  //This will delete all records and cascade. If you are re-structuring the database do docker-compose down -v
-  let record = await models.record.destroy({
-    truncate: true, cascade: true
-  });
-  return record;
+  //This will delete all rocrate records and cascade. If you are re-structuring the database do docker-compose down -v
+  try {
+    await models.record.destroy({truncate: true, cascade: true});
+    //TODO: find out why cascade does not work with sequelize so we dont do this below.
+    await models.recordCrateType.destroy({truncate: true, cascade: true});
+    await models.recordCrateMember.destroy({truncate: true, cascade: true});
+    await models.rootType.destroy({truncate: true, cascade: true});
+    await models.rootMemberOf.destroy({truncate: true, cascade: true});
+    await models.rootConformsTo.destroy({truncate: true, cascade: true});
+  } catch (e) {
+    log.error(e);
+    throw new Error(e);
+  }
 }
 
 export async function getRecords({offset = 0, limit = 10}) {

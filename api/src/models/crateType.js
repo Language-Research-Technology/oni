@@ -21,7 +21,7 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: false,
     });
   RecordCrateType.associate = function (models) {
-    RecordCrateType.belongsTo(models.record);
+    RecordCrateType.belongsTo(models.record, {foreignKey: 'recordId'});
   };
 
   return RecordCrateType;

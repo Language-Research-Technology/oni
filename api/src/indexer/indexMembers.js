@@ -1,5 +1,5 @@
 import {getLogger} from "../services";
-import {indexFiles} from "./indexCollectionsFiles";
+import {indexFiles} from "./indexFiles";
 
 const log = getLogger();
 
@@ -7,17 +7,15 @@ export async function indexMembers({parent, crate, client, configuration, crateI
   try {
     const index = 'items';
     log.debug(`Indexing ${crateId} `);
-    if (!parent.hasMember) log.debug(`Parent has no members`);
-    if (parent.hasMember.length === 0) log.warn(`No members to index from ${crateId}!`);
     for (let item of crate.utils.asArray(parent.hasMember)) {
       if (item['@type'] && item['@type'].includes('RepositoryCollection')) {
         log.debug(`Indexing RepositoryCollection of ${item['@id']}`);
         item._root = root;
         item._crateId = crateId;
         item._containsTypes = [];
-        await indexMembers({parent: item, crate, client, configuration, crateId, root, repository});
         item.conformsTo = 'RepositoryCollection';
         item.partOf = {'@id': parent['@id']};
+        await indexMembers({parent: item, crate, client, configuration, crateId, root, repository});
         //Bubble up types to the parent
         for (let t of crate.utils.asArray(item._containsTypes)) {
           if (t !== 'RepositoryObject') {

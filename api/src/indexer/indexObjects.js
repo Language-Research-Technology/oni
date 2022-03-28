@@ -2,7 +2,7 @@ import {getRootConformsTos} from '../controllers/rootConformsTo';
 import {getRawCrate} from '../controllers/record';
 import {ROCrate} from 'ro-crate';
 import {getLogger} from "../services";
-import {indexFiles} from "./indexCollectionsFiles";
+import {indexFiles} from "./indexFiles";
 
 const log = getLogger();
 
