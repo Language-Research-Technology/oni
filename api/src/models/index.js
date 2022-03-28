@@ -35,12 +35,14 @@ let modules = [
   require("./user.js"),
   require("./userMembership.js"),
   require("./session.js"),
+  require("./record"),
+  //The order here matters to apply the associations in the loops below. First do the hasMany then the belongsTo
+  //So associations to record go below this
   require('./rootMemberOf'),
   require('./rootConformsTo'),
   require('./rootType'),
   require('./crateMember'),
-  require('./crateType'),
-  require("./record")
+  require('./crateType')
 ];
 
 // Initialize models

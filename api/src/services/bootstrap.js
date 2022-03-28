@@ -12,9 +12,8 @@ const log = getLogger();
 
 export async function bootstrap({configuration}) {
   try {
-    const deleted = await deleteRecords();
-    deleted;
-    log.info('All records from database have been deleted');
+    await deleteRecords();
+    log.info('All collections from database have been deleted');
     return await initOCFL({configuration});
   } catch (e) {
     log.error(e);
