@@ -3,6 +3,7 @@ import { isUndefined } from 'lodash';
 import { getUser, updateUser } from '../../controllers/user';
 import { v4 as uuidv4 } from 'uuid';
 import { routeUser } from '../../middleware/auth';
+import {getGithubMemberships} from "../../controllers/github";
 
 const log = getLogger();
 
@@ -14,6 +15,8 @@ export function setupUserRoutes({ server, configuration }) {
           user['apiToken'] = null;
           user['accessToken'] = '....removed';
           res.json({ user }).status(200);
+          //Testing: Setting up memberships after login
+          await getGithubMemberships({userId: user.id, group: configuration['api']['licenseGroup']});
         } else {
           res.json({ user: null }).status(200);
         }

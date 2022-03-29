@@ -8,7 +8,7 @@
               this.id || decodeURIComponent(this.id)
             }}</a> &gt; {{ this.title }}
         </h3>
-        <div class="shadow m-6">
+        <div v-loading="loading" class="shadow m-6 p-2">
           <div v-if="this.type === 'pdf'">
             <pdf v-for="i in numPages"
                  :key="i"
@@ -69,6 +69,7 @@ export default {
     }
   },
   async mounted() {
+    this.loading = true;
     const id = encodeURIComponent(this.$route.query.id);
     this.id = id;
     const path = encodeURIComponent(this.$route.query.path);
@@ -117,6 +118,7 @@ export default {
         this.data = blobURL;
       }
     }
+    this.loading = false;
   },
   methods: {
     getTitle() {

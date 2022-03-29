@@ -15,6 +15,7 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
       //crate.pushValue(fileItem, 'file', {'@id': fileItem['@id']});
       fileItem._root = root;
       fileItem._crateId = crateId;
+      fileItem.license = fileItem.license || item.license || parent.license;
       fileItem._parent = {
         name: item.name,
         '@id': item['@id'],
@@ -44,7 +45,7 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
         });
         if (fileObj) {
           if (await fs.stat(path.resolve(fileObj.filePath))) {
-            fileContent = await fs.readFile(path.resolve(fileObj.filePath, 'utf-8'));
+            fileContent = await fs.readFile(path.resolve(fileObj.filePath), 'utf-8');
             //addContent(item['hasFile'], fileItem['@id'], fileContent);
           } else {
             log.debug(`path: ${fileObj.filePath} does not resolve to a file`);

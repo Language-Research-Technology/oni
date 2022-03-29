@@ -1,4 +1,5 @@
 import { getLogger } from '../services';
+import {getUserMemberships} from "../controllers/userMembership";
 const log = getLogger();
 
 export function isAuthorized({ memberships, license, licenseConfiguration }) {
@@ -16,8 +17,27 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
       return false
     }
   } else {
-    log.debug('No license required');
+    log.debug(`Not required or not configured for ${license}`);
     return true;
   }
 }
 
+export async function checkIfAuthorized({userId, license, configuration}) {
+  let pass = false;
+  if (configuration['api']['licenses'] && license) {
+    //Doing this so, it works without any sort of user authorization for the collections that can be.
+    //The licenses are not checked if not in your configuration file.
+    let memberships = [];
+    if (userId) {
+      memberships = await getUserMemberships({where: { userId }});
+    }
+    pass = isAuthorized({
+      memberships,
+      license: license,
+      licenseConfiguration: configuration['api']['licenses']
+    });
+  } else {
+    pass = true;
+  }
+  return pass;
+}

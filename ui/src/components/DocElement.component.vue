@@ -7,7 +7,7 @@
       <div class="p-3">
         <div class=""
              v-if="!isString(this.value)" v-for="val in toArray(this.value)">
-          <div v-if="val['@id']">
+          <div v-if="val['@id']" v-loading="loading" >
             <doc-sub-element :crateId="this.crateId" :parent="this.parent"
                              :name="this.name"
                              :value="val" :type="this.type" :title="getTitle(val['name'])"
@@ -18,7 +18,7 @@
             <span v-else>{{ val }}</span>
           </div>
         </div>
-        <div v-else>
+        <div v-else v-loading="loading" >
           <doc-sub-element :crateId="this.crateId" :parent="this.parent"
                            :name="this.name" :value="this.value"
                            :type="this.type" :title="this.title"
@@ -41,6 +41,7 @@ export default {
   },
   props: ['index', 'id', 'crateId', 'parent', 'name', 'value', 'title', 'type', 'root'],
   mounted() {
+    this.loading = false;
   },
   methods: {
     toArray,
@@ -64,7 +65,9 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      loading: true
+    }
   }
 }
 </script>

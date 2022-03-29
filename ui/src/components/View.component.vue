@@ -13,8 +13,12 @@
         <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
           <h4 class="p-3 font-bold break-words">&nbsp;</h4>
         </el-col>
-        <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="20">
+        <el-col :xs="24" :sm="15" :md="8" :lg="5" :xl="5">
           <el-button v-on:click="goToFileUrl()">Open File</el-button>
+        </el-col>
+        <el-col :xs="24" :sm="15" :md="8" :lg="14" :xl="10">
+          <el-alert v-on:close="this.cannotOpenFile = false" title="Cannot Open File, request permissions or login"
+                    type="error" v-if="this.cannotOpenFile"/>
         </el-col>
       </el-row>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
@@ -47,20 +51,25 @@ export default {
       searchInput: '',
       crateId: '',
       metadata: null,
-      parent: {}
+      parent: {},
+      cannotOpenFile: false
     }
   },
   async mounted() {
-    const id = encodeURIComponent(this.$route.query.id)
-    const element = encodeURIComponent(this.$route.query.element);
-    let route = `/search/items?id=${id}`;
-    if (element) {
-      route += `&element=${element}`;
+    try {
+      const id = encodeURIComponent(this.$route.query.id)
+      const element = encodeURIComponent(this.$route.query.element);
+      let route = `/search/items?id=${id}`;
+      if (element && element != 'undefined') {
+        route += `&element=${element}`;
+      }
+      console.log(`Sending route: ${route}`);
+      let response = await this.$http.get({route: route});
+      const metadata = await response.json();
+      this.populate(metadata);
+    } catch(e) {
+      console.error(e);
     }
-    console.log(`Sending route: ${route}`);
-    let response = await this.$http.get({route: route});
-    const metadata = await response.json();
-    this.populate(metadata);
   },
   methods: {
     populate(metadata) {
@@ -93,18 +102,22 @@ export default {
       }
     },
     goToFileUrl() {
-      const crateId = this.crateId['@value'];
-      const filePath = this.metadata['@id'];
-      const name = first(this.metadata.name)?.['@value'];
-      const parent = first(this.metadata._parent);
-      const parentId = parent['@id'];
-      const parentName = first(parent['name'])?.['@value'];
-      const url = '/open?id=' + encodeURIComponent(crateId) +
-          '&path=' + encodeURIComponent(filePath) +
-          '&title=' + encodeURIComponent(name) +
-          '&parentId=' + encodeURIComponent(parentId) +
-          '&parentTitle=' + encodeURIComponent(parentName);
-      this.$router.push(url);
+      const crateId = this.crateId?.['@value'];
+      const filePath = this.metadata?.['@id'];
+      if (filePath && crateId) {
+        const name = first(this.metadata.name)?.['@value'];
+        const parent = first(this.metadata._parent);
+        const parentId = parent['@id'];
+        const parentName = first(parent['name'])?.['@value'];
+        const url = '/open?id=' + encodeURIComponent(crateId) +
+            '&path=' + encodeURIComponent(filePath) +
+            '&title=' + encodeURIComponent(name) +
+            '&parentId=' + encodeURIComponent(parentId) +
+            '&parentTitle=' + encodeURIComponent(parentName);
+        this.$router.push(url);
+      } else {
+        this.cannotOpenFile = true;
+      }
     }
   }
 }

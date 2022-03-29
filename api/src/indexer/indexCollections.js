@@ -49,8 +49,10 @@ export async function indexCollections({configuration, repository, client}) {
           root._crateId = col.crateId;
           root._containsTypes = [];
           root.conformsTo = 'Collection';
+          root.license = root.license || col.record.dataValues?.license;
           const _root = {
             '@id': root._crateId,
+            '@type': root['@type'],
             'name': root.name || ''
           }
           root._root = _root;
@@ -71,15 +73,15 @@ export async function indexCollections({configuration, repository, client}) {
               repository
             });
           } else {
-            // log.debug('Indexing objects');
-            // await indexObjects({
-            //   crateId: col.crateId,
-            //   client,
-            //   crate,
-            //   index,
-            //   root: _root,
-            //   repository
-            // });
+            log.debug('Indexing objects');
+            await indexObjects({
+              crateId: col.crateId,
+              client,
+              crate,
+              index,
+              root: _root,
+              repository
+            });
           }
         }
       }

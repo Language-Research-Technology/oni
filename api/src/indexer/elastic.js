@@ -44,7 +44,7 @@ export async function search({index, searchBody, explain = false}) {
   try {
     const {body} = await client.search({
       index: index,
-      scroll: '10m',
+      scroll: '30m',
       body: searchBody,
       explain: explain,
     });

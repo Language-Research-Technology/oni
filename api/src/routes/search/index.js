@@ -1,14 +1,23 @@
 import {search, scroll} from '../../indexer/elastic';
-import {getLogger, loadConfiguration} from '../../services';
-import {first} from 'lodash';
+import {getLogger, loadConfiguration, routeUser} from '../../services';
+import {first, pullAt} from 'lodash';
 import {boolQuery, aggsQueries} from "../../controllers/elastic";
+import {getUser} from "../../controllers/user";
+import {routeBrowse} from "../../middleware/auth";
+import {filterResults} from "../../services/elastic";
 
 const log = getLogger();
 
 export function setupSearchRoutes({server, configuration}) {
-  server.get("/search/:index", async (req, res, next) => {
+  //Usability: Do we want users to be authenticated or let users browse without? if so use routeUser
+  server.get("/search/:index", routeBrowse(async (req, res, next) => {
     try {
       log.debug('search/index');
+      let user = {};
+      if (req?.session?.user) {
+        user = await getUser({where: {id: req.session.user.id}});
+      }
+      let exactMatch = false;
       const {aggregations, highlightFields, fields} = configuration['api']['elastic'];
       let searchBody = {};
       let index = req.params?.index;
@@ -16,11 +25,11 @@ export function setupSearchRoutes({server, configuration}) {
       if (req.query['scroll']) {
         results = await scroll({scrollId: req.query['scroll']});
       } else if (req.query['id']) {
+        exactMatch = true;
         const id = req.query['id'].trim();
         searchBody.query = {match: {'@id': decodeURIComponent(id)}};
-        const result = await search({configuration, index, searchBody});
-        log.debug(`Total: ${result?.hits?.total?.value}`);
-        results = first(result?.hits?.hits);
+        results = await search({configuration, index, searchBody});
+        log.debug(`Total: ${results?.hits?.total?.value}`);
       } else {
         const searchQuery = req.query?.multi?.trim() || '';
         let filters = [];
@@ -33,11 +42,21 @@ export function setupSearchRoutes({server, configuration}) {
         log.debug(JSON.stringify({aggs: searchBody.aggs}));
         results = await search({configuration, index, searchBody, explain: false});
       }
-      res.send(results);
+      const userId = user?.id;
+      const filtered = await filterResults({userId, results, configuration});
+      if (exactMatch) {
+        const result = first(filtered?.hits?.hits) || {};
+        res.send(result);
+      } else {
+        res.send(filtered);
+      }
+      next();
     } catch (e) {
       console.log(e);
       res.send({error: 'Error searching index', message: e.message}).status(500);
+      next();
     }
-  });
+  })
+  );
 
 }

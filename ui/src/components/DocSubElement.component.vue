@@ -1,8 +1,9 @@
 <template>
+  <el-row v-loading="loading">
   <span v-if="Array.isArray(this.value)" v-for="v of this.value">
     <a href="v">OH: {{ v }}</a>
   </span>
-  <span v-else>
+  <span>
     <div v-if="this.value['@id']">
       <el-row :gutter="20" x-data="collapse" class="collapse">
         <el-col :span="24">
@@ -47,6 +48,7 @@
         </el-col>
       </el-row>
   </span>
+  </el-row>
 </template>
 <script>
 
@@ -78,10 +80,12 @@ export default {
     )
   },
   mounted() {
+    this.loading = false;
   },
   data() {
     return {
-      toggle: false
+      toggle: false,
+      loading: true
     }
   }
 }

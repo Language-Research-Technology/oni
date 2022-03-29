@@ -11,7 +11,8 @@ import {
 } from './record';
 import { getRecordCrate } from './recordCrate';
 import { getRecordItem } from './recordItem';
-import { routeBearer } from '../../middleware/auth';
+import {routeBearer, routeBrowse} from '../../middleware/auth';
+import {getUser} from "../../controllers/user";
 
 const log = getLogger();
 
@@ -89,25 +90,24 @@ export function setupObjectRoutes({ server, configuration, repository }) {
   );
 
   server.get('/object/open',
-      async function (req, res, next) {
+    routeBrowse(async function (req, res, next) {
         try {
           if (req.query.id && req.query.path) {
             req.query.id = decodeURIComponent(req.query.id);
             req.query.path = decodeURIComponent(req.query.path);
-            await getRecordItem({ req, res, next, configuration, passthrough: true, repository });
+            await getRecordItem({ req, res, next, configuration, passthrough: false, repository });
           } else if (req.query.id) {
             await getResolveParts({ req, res, next, configuration, select: [ 'parts' ], repository });
           } else {
             res.json({ message: 'id parameter value is required' }).status(400);
             next();
           }
-        } catch
-          (e) {
+        } catch (e) {
           log.error(e);
           res.json({ error: e['message'] }).status(500);
           next();
         }
-      }
+      })
   )
 }
 

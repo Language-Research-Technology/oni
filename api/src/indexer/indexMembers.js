@@ -15,6 +15,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._containsTypes = [];
         item.conformsTo = 'RepositoryCollection';
         item.partOf = {'@id': parent['@id']};
+        item.license = item.license || parent.license;
         await indexMembers({parent: item, crate, client, configuration, crateId, root, repository});
         //Bubble up types to the parent
         for (let t of crate.utils.asArray(item._containsTypes)) {
@@ -34,6 +35,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item.conformsTo = 'RepositoryObject';
         item.partOf = {'@id': parent['@id']};
         item._root = root;
+        item.license = item.license || parent.license;
         const normalObjectItem = crate.getNormalizedTree(item, 2);
         let {body} = await client.index({
           index: index,

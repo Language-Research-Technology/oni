@@ -29,18 +29,18 @@ export async function indexObjects({crateId, client, index, root, repository}) {
           item._root = root;
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
+          item.license = item.license || member.license || root.license;
           const normalItem = crate.getNormalizedTree(item, 2);
           let {body} = await client.index({
             index: index,
             body: normalItem
           });
-
           //Then get a file, same as:
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
           for (let hasFile of crate.utils.asArray(item['hasFile'])) {
             await indexFiles({
-              crateId: item['@id'], item, hasFile, crate, client,
-              index, root, repository
+              crateId: item['@id'], item, hasFile, crate,
+              client, index, root, repository
             });
           }
         } else {

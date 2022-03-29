@@ -18,6 +18,15 @@ export function routeBearer(handler) {
   return [ demandBearerUser, handler ];
 }
 
+/**
+ * Allow browse if there is not an user do not error, manage session when using
+ * @param handler
+ * @return {((function(*, *, *): Promise<*|undefined>)|*)[]}
+ */
+export function routeBrowse(handler) {
+  return [ softAuthenticateUser, handler]
+}
+
 export async function demandBearerUser(req, res, next) {
   if (!req.headers.authorization) {
     return next(new UnauthorizedError());
@@ -51,6 +60,33 @@ export async function demandAuthenticatedUser(req, res, next) {
     return next(new UnauthorizedError());
   }
   next();
+}
+
+/**
+ * Allow browse but test if there is a user, if it is return it in the session
+ * @param req
+ * @param res
+ * @param next
+ * @return {Promise<*>}
+ */
+export async function softAuthenticateUser(req, res, next) {
+  if (!req.headers.authorization) {
+    return next();
+  }else{
+    try {
+      const configuration = await loadConfiguration();
+      let user = await verifyToken({
+        token: req.headers.authorization.split("Bearer ")[1],
+        configuration,
+      });
+      req.session = {
+        user,
+      };
+    } catch (error) {
+      return next();
+    }
+    next();
+  }
 }
 
 export async function demandAdministrator({ req, res, next }) {

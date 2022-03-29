@@ -31,12 +31,14 @@ export async function bootstrapObject({configuration, repository, object}) {
   const root = crate.getRootDataset();
   if (root) {
     let lic;
-    if (root['license'] && root['license']['@id']) {
-      lic = root['license']['@id']
+    const rootLicense = first(root?.license) || root?.license;
+    if (rootLicense && rootLicense['@id']) {
+      lic = rootLicense['@id']
     } else {
       lic = license['default'];
     }
     const crateId = crate.getRootId();
+    console.log(`${crateId} license: ${lic}`);
     if (crateId !== './') {
       const rec = {
         crateId: crateId,

@@ -1,7 +1,7 @@
 import { getRecord, getFile } from '../../controllers/record';
 import fs from 'fs-extra';
 import { getLogger } from '../../services';
-import { licenseChecker, isAuthorized } from '../../services/license';
+import { checkIfAuthorized } from '../../services/license';
 import { getUserMemberships } from '../../controllers/userMembership';
 
 const log = getLogger();
@@ -13,14 +13,9 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
   let message = 'Not Found';
   if (record.data) {
     if (configuration['api']['licenses'] && record.data['license'] && !passthrough) {
-      const user = req['user'];
-      const userId = user.id
-      const memberships = await getUserMemberships({ where: { userId: userId } })
-      pass = isAuthorized({
-        memberships,
-        license: record.data['license'],
-        licenseConfiguration: configuration['api']['licenses']
-      });
+      const user =req?.session?.user ||  req?.user;
+      const userId = user?.id;
+      pass = await checkIfAuthorized({userId, license: record.data['license'], configuration});
     } else {
       pass = true;
     }
