@@ -33,9 +33,11 @@ export default class HTTPService {
     return encodeURI(route);
   }
 
-  async get({ route }) {
+  async get({ route, doNotEncode }) {
     let headers = this.getHeaders();
-    route = this.encodeRoute(route, "GET");
+    if(!doNotEncode) {
+      route = this.encodeRoute(route, "GET");
+    }
     let response = await fetch(`/api${ route }`, {
       method: "GET",
       headers,
