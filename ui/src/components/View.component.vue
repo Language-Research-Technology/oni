@@ -10,20 +10,19 @@
         <hr class="divider divider-gray pt-2"/>
       </div>
       <el-button-group>
-        <el-button v-if="this.searchRelated">
-          <el-link :href="this.searchRelated" :underline="false">
-            Related Items
+        <el-link v-if="this.searchRelated" :href="this.searchRelated" :underline="false">
+          <el-button>Related Items
             <el-icon class="el-icon--right">
               <Switch/>
             </el-icon>
-          </el-link>
-        </el-button>
-        <el-button v-if="this.parentLink">
-          <el-link :href="this.parentLink" :underline="false">Parent: {{ this.parentName || this.parentId }}</el-link>
-        </el-button>
-        <el-button v-if="this.isFile() && !this.cannotOpenFile">
-          <el-link :href="this.fileUrl" :underline="false">Preview File</el-link>
-        </el-button>
+          </el-button>
+        </el-link>
+        <el-link v-if="this.parentLink" :href="this.parentLink" :underline="false">
+          <el-button>Parent: {{ this.parentName || this.parentId }}</el-button>
+        </el-link>
+        <el-link v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
+          <el-button>Preview File</el-button>
+        </el-link>
         <el-button v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
       </el-button-group>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
