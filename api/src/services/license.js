@@ -17,7 +17,7 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
       return false
     }
   } else {
-    log.debug(`Not required or not configured for ${license}`);
+    log.silly(`Not required or not configured for ${license}`);
     return true;
   }
 }
