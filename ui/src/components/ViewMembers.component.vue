@@ -34,7 +34,7 @@ export default {
   async mounted() {
     try {
       await this.getMembersOf();
-      this.getFacetUrl();
+      this.setFacetUrl();
     } catch (e) {
       console.error(e);
     }
@@ -46,7 +46,6 @@ export default {
       const route = `/object?memberOf=${crateId['@value']}&conformsTo=${conformsTo}`;
       let response = await this.$http.get({route: route, doNotEncode: true});
       const metadata = await response.json();
-      console.log(metadata)
       if (metadata) {
         this.meta = metadata.data;
         this.total = metadata.total;

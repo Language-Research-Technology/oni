@@ -9,35 +9,51 @@
         </el-row>
         <hr class="divider divider-gray pt-2"/>
       </div>
-      <el-row v-if="this.isFile()">
-        <el-col :xs="24" :sm="8" :md="8" :lg="5" :xl="4">
-          <h4 class="p-3 font-bold break-words">&nbsp;</h4>
-        </el-col>
-        <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="16">
-          <el-button :href="setGoToFileUrl()">Open File</el-button>
-          <el-alert v-on:close="this.cannotOpenFile = false" title="Cannot Open File, request permissions or login"
-                    type="error" v-if="this.cannotOpenFile"/>
-        </el-col>
-      </el-row>
+      <el-button-group>
+        <el-button v-if="this.searchRelated">
+          <el-link :href="this.searchRelated" :underline="false">
+            Related Items
+            <el-icon class="el-icon--right">
+              <Switch/>
+            </el-icon>
+          </el-link>
+        </el-button>
+        <el-button v-if="this.parentLink">
+          <el-link :href="this.parentLink" :underline="false">Parent: {{ this.parentName || this.parentId }}</el-link>
+        </el-button>
+        <el-button v-if="this.isFile() && !this.cannotOpenFile">
+          <el-link :href="this.fileUrl" :underline="false">Preview File</el-link>
+        </el-button>
+        <el-button v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
+      </el-button-group>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
-      <view-members v-if="this.conformsTo==='Collection'" :crateId="this.crateId" :limitMembers=10
+      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                     :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
-      <view-members v-if="this.conformsTo==='Collection'" :crateId="this.crateId" :limitMembers=10
+      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                     :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>
+      <el-row>
+        &nbsp;
+      </el-row>
     </el-col>
   </el-row>
   <div v-else>
     <view-doc-error/>
   </div>
+  <request-dialog :dialogVisible="this.openDocModal" v-on:close="this.openDocModal = false"/>
 </template>
 
 <script>
 import 'element-plus/theme-chalk/display.css'
+import {Switch} from "@element-plus/icons-vue";
 import {first} from 'lodash';
 import {defineAsyncComponent} from 'vue';
 
 export default {
   components: {
+    Switch,
+    RequestDialog: defineAsyncComponent(() =>
+        import("@/components/RequestDialog.component.vue")
+    ),
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
     ),
@@ -58,7 +74,15 @@ export default {
       metadata: null,
       parent: {},
       cannotOpenFile: false,
-      conformsTo: ''
+      conformsTo: '',
+      fileUrl: '',
+      searchRelated: '',
+      parentId: '',
+      parentLink: '',
+      parentName: '',
+      error: '',
+      notAuthorized: false,
+      openDocModal: false
     }
   },
   async mounted() {
@@ -75,6 +99,9 @@ export default {
       const metadata = await response.json();
       this.populate(metadata);
       this.setGoToFileUrl();
+      this.setFacetUrl();
+      this.setParentLink();
+      this.getMembers();
     } catch (e) {
       console.error(e);
     }
@@ -85,12 +112,15 @@ export default {
         this.root = first(metadata._source._root);
         this.crateId = first(metadata._source._crateId);
         this.conformsTo = first(metadata._source.conformsTo)?.['@value'];
+        this.error = metadata._source.error;
+        this.setError();
         console.log(this.conformsTo);
         //TODO: Omit in the backend
         console.log(metadata._source);
         //Deleting hasPart and hasMember. This will be done by quering the API
         delete metadata._source.hasPart;
         delete metadata._source.hasMember;
+        delete metadata._source.error;
         this.metadata = metadata._source;
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
         //console.log(this.metadata)
@@ -114,23 +144,55 @@ export default {
       }
     },
     setGoToFileUrl() {
-      const crateId = this.crateId?.['@value'];
-      const filePath = this.metadata?.['@id'];
-      if (filePath && crateId) {
-        const name = first(this.metadata.name)?.['@value'];
-        const parent = first(this.metadata._parent);
-        const parentId = parent['@id'];
-        const parentName = first(parent['name'])?.['@value'];
-        const url = '/open?id=' + encodeURIComponent(crateId) +
-            '&path=' + encodeURIComponent(filePath) +
-            '&title=' + encodeURIComponent(name) +
-            '&parentId=' + encodeURIComponent(parentId) +
-            '&parentTitle=' + encodeURIComponent(parentName);
-        return url;
-      } else {
-        this.cannotOpenFile = true;
-        return '';
+      if (this.isFile()) {
+        const crateId = this.crateId?.['@value'];
+        const filePath = this.metadata?.['@id'];
+        const parent = first(this.metadata?._parent);
+        if (filePath && crateId && parent) {
+          const name = first(this.metadata.name)?.['@value'];
+          this.parentId = parent?.['@id'];
+          this.parentName = first(parent['name'])?.['@value'];
+          const url = '/open?id=' + encodeURIComponent(crateId) +
+              '&path=' + encodeURIComponent(filePath) +
+              '&title=' + encodeURIComponent(name) +
+              '&parentId=' + encodeURIComponent(this.parentId) +
+              '&parentTitle=' + encodeURIComponent(this.parentName);
+          this.fileUrl = url;
+        } else {
+          this.cannotOpenFile = true;
+          this.fileUrl = '';
+        }
       }
+    },
+    getMembers() {
+      console.log(this.conformsTo);
+      return this.conformsTo === 'Collection' || this.conformsTo === 'Dataset';
+    },
+    setFacetUrl() {
+      let route = '/search?f=';
+      //TODO: define search facet value from parent ??
+      const idSearch = this.crateId?.['@value'];
+      if (idSearch) {
+        const search = [];
+        search.push(idSearch);
+        const facet = JSON.stringify({'_root.@id': search});
+        this.searchRelated = route + encodeURIComponent(facet);
+      }
+    },
+    setParentLink() {
+      if (this.parentId) {
+        let route = '/view?id=';
+        this.parentLink = route + encodeURIComponent(this.parentId);
+      }
+    },
+    setError() {
+      switch (this.error) {
+        case 'not_authorized':
+          this.notAuthorized = true;
+      }
+    },
+    openRequestModal() {
+      this.openDocModal = true;
     }
   }
 }
