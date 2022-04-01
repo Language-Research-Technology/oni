@@ -27,9 +27,9 @@
       </el-button-group>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
       <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
-      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>
+                    :conformsToName="'Collections'" :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
+      <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
+                    :conformsToName="'Repository Objects'" :conformsTo="'RepositoryObject'"/>
       <el-row>
         &nbsp;
       </el-row>
@@ -61,6 +61,9 @@ export default {
     ),
     ViewMembers: defineAsyncComponent(() =>
         import('./ViewMembers.component.vue')
+    ),
+    ViewMembersSearch: defineAsyncComponent(() =>
+        import('./ViewMembersSearch.component.vue')
     ),
     ViewDocError: defineAsyncComponent(() =>
         import('./ViewDocError.component.vue')

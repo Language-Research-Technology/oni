@@ -14,7 +14,7 @@
       </el-col>
       <el-col :xs="24" :sm="15" :md="16" :lg="5" :xl="5">
         <div v-for="(value, name, i) in this.meta.slice(0, this.limitMembers)" :key="name">
-          <el-link :href="'/view?id=' + value.crateId">{{ value.record.name || value.memberOf }}</el-link>
+          <el-link :href="'/view?id=' + value._source['@id']">{{ value._source.name[0]?.['@value'] || value._source['@id'] }}</el-link>
         </div>
         <el-link v-if="this.showMore" :href="setFacetUrl()">Show More</el-link>
       </el-col>
@@ -43,20 +43,30 @@ export default {
     async getMembersOf() {
       const crateId = this.crateId;
       const conformsTo = this.conformsTo;
-      const route = `/object?memberOf=${crateId['@value']}&conformsTo=${conformsTo}`;
-      let response = await this.$http.get({route: route, doNotEncode: true});
-      const metadata = await response.json();
-      if (metadata) {
-        this.meta = metadata.data;
-        this.total = metadata.total;
+
+      //const route = `/object?memberOf=${crateId['@value']}&conformsTo=${conformsTo}`;
+      let route = `/search/items?filters=`;
+      const facet = JSON.stringify({
+        '_root.@id': [encodeURIComponent(this.crateId['@value'])],
+        '@type': [this.conformsTo]
+      });
+      route = route + facet;
+      let response = await this.$http.get({route: route});
+      const items = await response.json();
+      if (items?.hits?.hits.length > 0) {
+        this.meta = items?.hits?.hits;
+        this.total = items.hits?.total.value;
       }
       this.showMore = this.total > this.limitMembers;
     },
     setFacetUrl() {
       let route = '/search?f=';
       //TODO: define search facet value from parent ??
-      const facet = JSON.stringify({'_root.@id': [this.crateId['@value']]});
-      return route + encodeURIComponent(facet);
+      const facet = JSON.stringify({
+        '_root.@id': [encodeURIComponent(this.crateId['@value'])],
+        '@type': [this.conformsTo]
+      });
+      return route + facet;
     }
   },
   data() {
