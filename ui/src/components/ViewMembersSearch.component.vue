@@ -1,18 +1,18 @@
 <template>
   <div v-if="this.total > 0">
     <el-row>
-      <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
+      <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="5">
         <h4 class="p-3 font-bold break-words">{{ this.conformsToName }}</h4>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="5" :xl="5">
+      <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="19">
         <h4 class="p-3 font-bold break-words">Total {{ this.total }}</h4>
       </el-col>
     </el-row>
     <el-row>
-      <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
+      <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="5">
         <h4 class="p-3 font-bold break-words">&nbsp;</h4>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="5" :xl="5">
+      <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="19">
         <div v-for="(value, name, i) in this.meta.slice(0, this.limitMembers)" :key="name">
           <el-link :href="'/view?id=' + value._source['@id']">{{ value._source.name[0]?.['@value'] || value._source['@id'] }}</el-link>
         </div>

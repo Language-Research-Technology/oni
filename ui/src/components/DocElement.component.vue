@@ -1,9 +1,9 @@
 <template>
   <el-row :class="this.index % 2 == 0 ? 'bg-white': 'bg-gray-100'" :name="this.name">
-    <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
+    <el-col :xs="24" :sm="9" :md="8" :lg="4" :xl="4">
       <h4 class="p-3 font-bold break-words">{{ clean(this.name) }}</h4>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="20">
+    <el-col :xs="24" :sm="15" :md="16" :lg="20" :xl="20">
       <div class="p-3">
         <div class=""
              v-if="!isString(this.value)" v-for="val in toArray(this.value)">

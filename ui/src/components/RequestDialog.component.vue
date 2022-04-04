@@ -8,10 +8,8 @@
         <el-divider direction="vertical"/>
       </el-col>
       <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
-        <el-link href="/login">
-          <el-button>
-            Login
-          </el-button>
+        <el-link class="no-underline" href="/login">
+          <el-button>Login</el-button>
         </el-link>
       </el-col>
     </el-row>
