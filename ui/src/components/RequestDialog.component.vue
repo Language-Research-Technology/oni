@@ -2,7 +2,7 @@
   <el-dialog v-model="dialogVisible" v-on:close="this.closeDialog()" title="Request Access" width="40%" draggable>
     <el-row :gutter="10">
       <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" >
-      Contact: <br/><a class="underline" href="mailto:request-access@ldaca.edu.au">request-access@ldaca.edu.au</a>
+      Contact: <br/><a class="underline" :href="'mailto: '+ emailHelp">{{emailHelp}}</a>
       </el-col>
       <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
         <el-divider direction="vertical" />
@@ -30,7 +30,9 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      emailHelp: this.$store.state.configuration.ui.email.help || 'add-email@example.com',
+    }
   }
 }
 </script>
