@@ -26,7 +26,7 @@ export async function filterResults({userId, results, configuration}) {
       results.hits.hits[index]._source = {
         '@id': id,
         '@type': results.hits.hits[index]?._source['@type'],
-        name: results.hits.hits[index]?._source?.name,
+        //name: results.hits.hits[index]?._source?.name, // Do not include the name of the object, because it may contain sensitive information
         license: results.hits.hits[index]?._source?.license,
         error: 'not_authorized'
       }
