@@ -38,7 +38,7 @@ export async function bootstrapObject({configuration, repository, object}) {
       lic = license['default'];
     }
     const crateId = crate.getRootId();
-    console.log(`${crateId} license: ${lic}`);
+    //console.log(`${crateId} license: ${lic}`);
     if (crateId !== './') {
       const rec = {
         crateId: crateId,
@@ -47,7 +47,8 @@ export async function bootstrapObject({configuration, repository, object}) {
         description: first(root['description']) || root['description'],
         pairtreeId: object.pairtreeId
       }
-      log.debug(`Loading ${rec.crateId}`);
+      log.info(`Loading ${rec.crateId}`);
+      //log.info(JSON.stringify(root['conformsTo']));
       //index the types
       //if it claims to be a memberOf !! think of sydney speaks
       //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
@@ -66,28 +67,37 @@ export async function bootstrapObject({configuration, repository, object}) {
 }
 
 export async function initOCFL({configuration}) {
-  const ocfl = configuration.api.ocfl;
-  try {
-    const repository = await ocfltools.connectRepo({ocflRoot: ocfl.ocflPath, ocflScratch: ocfl.ocflScratch});
-    assert(await repository.isRepository(), 'Aborting: Bad OCFL repository');
-    repository.findObjects();
-    let objectsCount = 0;
-    repository.on("object", async object => {
-      await object.load();
-      objectsCount++;
-      log.debug(`Found: ${object.id}`);
-      await bootstrapObject({configuration, repository, object});
-    });
-    repository.on("finish", () => {
-      log.info('Finished loading repository');
-      return repository;
+  return new Promise(async (resolve, reject) => {
+    try {
+      const ocfl = configuration.api.ocfl;
+      const repository = await ocfltools.connectRepo({ocflRoot: ocfl.ocflPath, ocflScratch: ocfl.ocflScratch});
+      assert(await repository.isRepository(), 'Aborting: Bad OCFL repository');
+      repository.findObjects();
+      let objectsCount = 0;
+      repository.on("object", async object => {
+        await object.load();
+        objectsCount++;
+        log.info(`Found: ${objectsCount} : ${object.id}`);
+        await bootstrapObject({configuration, repository, object});
+      });
+      repository.on("done", () => {
+        process.nextTick(() => {
+          log.info('Finished walking repository');
+          resolve(objectsCount);
+        });
+      });
+      repository.on("error", (e) => {
+        log.error(e);
+        log.error('Error finding objects!');
+        reject(e);
+      });
       //TODO: Actually do something here instead of a timeout!
-    });
-    await new Promise((resolve) => setTimeout(resolve, 20000));
-    log.info(`Finished walking repository ${objectsCount} objects`);
-    return repository;
-  } catch (e) {
-    log.error('initOCFL error');
-    log.error(e);
-  }
+      //await new Promise((resolve) => setTimeout(resolve, 20000));
+      //return repository;
+    } catch (e) {
+      log.error('initOCFL error');
+      log.error(e);
+      reject(e);
+    }
+  });
 }

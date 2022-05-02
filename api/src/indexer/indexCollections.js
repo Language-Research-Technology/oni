@@ -21,6 +21,7 @@ export async function putCollectionMappings({configuration, client}) {
       body: mappings
     });
   } catch (e) {
+    log.error('putCollectionMappings');
     throw new Error(e);
   }
 }
@@ -37,13 +38,15 @@ export async function indexCollections({configuration, repository, client}) {
     for (let rootConformsTo of rootConformsTos) {
       const col = rootConformsTo['dataValues'];
       i++;
-      log.info(`${i}: ${col.crateId}`);
+      log.info(`Indexing: ${i}: ${col.crateId}`);
       const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration, repository});
       if (resolvedCrate.error) {
         log.error(`cannot resolve collection: ${col.crateId}`);
         log.error(resolvedCrate.error);
       } else {
-        const crate = new ROCrate(resolvedCrate);
+        const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+        const crate = new ROCrate(resolvedCrate, rocrateOpts);
+        //getRootDataset does not seem to work!!!
         const root = crate.getRootDataset();
         if (root) {
           root._crateId = col.crateId;

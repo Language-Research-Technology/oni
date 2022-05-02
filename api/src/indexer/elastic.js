@@ -12,7 +12,7 @@ export async function elasticInit({configuration}) {
       node: configuration.api.elastic.node,
       log: configuration.api.elastic.log
     });
-    log.debug('client init')
+    log.debug('init elastic client');
   } catch (e) {
     log.error(e.message);
   }
@@ -25,7 +25,7 @@ export async function elasticBootstrap({configuration}) {
     });
     await putCollectionMappings({configuration, client});
   } catch (e) {
-    log.error('------')
+    log.error('elasticBoostrap');
     log.error(e.message);
   }
 }

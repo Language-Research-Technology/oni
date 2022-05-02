@@ -161,9 +161,10 @@ export async function decodeHash({id}) {
 
 export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
-  log.silly('getRawCrate');
   const fileInfo = await ocfltools.getFileInfo({repository, crateId, filePath: 'ro-crate-metadata.json'});
-  const json = await fs.readJson(fileInfo.path);
+  const file = await fs.readFile(fileInfo.path, {encoding: 'utf-8'});
+  log.debug('file opened')
+  const json = JSON.parse(file);
   return json;
 }
 
@@ -178,6 +179,7 @@ export async function getUridCrate({host, crateId, typesTransform, version, repo
   });
   return newCrate;
 }
+
 
 export async function getFile({itemId, repository, filePath}) {
   try {

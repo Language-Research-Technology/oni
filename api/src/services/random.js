@@ -128,7 +128,7 @@ function dataFiles(sourceData, type) {
 
   return {
     "@id": fabulousId(),
-    "@type": "Dataset",
+    "@type": ["Dataset", "RepositoryCollection"],
     "name": "Files",
     "description": text(),
     "hasPart": hasFileParts

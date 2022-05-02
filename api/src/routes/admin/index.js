@@ -5,6 +5,11 @@ import {bootstrap} from "../../services/bootstrap";
 const log = getLogger();
 
 export function setupAdminRoutes({server, configuration, repository}) {
+
+  server.get("/admin/info", async (req, res, next) => {
+
+  });
+
   server.get("/admin/elastic/index", async (req, res, next) => {
     try {
       log.debug('running elastic indexer');

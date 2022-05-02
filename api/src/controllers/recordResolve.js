@@ -4,11 +4,13 @@ import {getRootMemberOfs} from './rootMemberOf';
 import {getLogger} from '../services';
 import {ocfltools} from "oni-ocfl";
 import * as fs from 'fs-extra';
+import assert from "assert";
 
 const log = getLogger();
 
 export async function recordResolve({id, getUrid, configuration, repository}) {
   try {
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
     const response = [];
     await resolveMembers({
       crateId: id,
@@ -22,14 +24,16 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
       return null;
     } else if (response.length === 1) {
       //It's only one don't resolve.
-      const rocrate = new ROCrate(response[0]);
+      log.debug('recordResolve:foundOneCrate');
+      const rocrate = new ROCrate(response[0], rocrateOpts);
       return rocrate.getJson();
     } else {
       //Merge all the ROCrates into one giant one.
+      log.debug('recordResolve:mergeAllCrates');
       const json = await getCrate({repository, crateId: id, configuration, getUrid});
-      const rocrate = new ROCrate(json);
+      const rocrate = new ROCrate(json, rocrateOpts);
       for (let c of response) {
-        const subcrate = new ROCrate(c);
+        const subcrate = new ROCrate(c, rocrateOpts);
         //TODO: below is commented out because we used to support './' as root ids. Not anymore
         //const rootNamedId = subcrate.getNamedIdentifier(configuration.api.identifier.main);
         //log.debug(`root Named Id: ${rootNamedId}`);
@@ -54,6 +58,7 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
 }
 
 async function resolveMembers({crateId, response, configuration, getUrid, repository}) {
+  log.debug('resolveMembers');
   let record = await getCrate({repository, crateId, configuration, getUrid});
   response.push(record);
   let memberOfs = await getRootMemberOfs({crateId});
@@ -73,16 +78,18 @@ async function resolveMembers({crateId, response, configuration, getUrid, reposi
 }
 
 export async function getCrate({repository, crateId, configuration, getUrid}) {
-  let record;
+  let crate;
   if (getUrid) {
-    record = await getUridCrate({
+    log.debug('recordResolve:getCrate');
+    crate = await getUridCrate({
       host: configuration.api.host,
       crateId,
       typesTransform: configuration.api.rocrate.dataTransform.types,
       repository
     });
   } else {
-    record = await getRawCrate({repository, crateId});
+    log.debug('recordResolve:getRawCrate');
+    crate = await getRawCrate({repository, crateId});
   }
-  return record;
+  return crate;
 }

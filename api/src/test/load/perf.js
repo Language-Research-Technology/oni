@@ -1,12 +1,13 @@
 require('regenerator-runtime/runtime');
 const path = require('path');
 const {languageProfileURI} = require("language-data-node-tools");
+const {generateArcpId} = require('oni-ocfl');
 
 const fs = require('fs-extra');
-const ROCrate = require('ro-crate').ROCrate;
+const {ROCrate} = require('ro-crate');
 
-const random = require('./services/random');
-const logger = require('./services');
+const random = require('../../services/random');
+const logger = require('../../services');
 
 const log = logger.getLogger();
 
@@ -60,12 +61,14 @@ async function randomCollections(n, sourceData) {
 
 async function createROCrate({ dest, collection, id, repoName }) {
   try {
-    const crate = new ROCrate();
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const crate = new ROCrate({}, rocrateOpts);
 
     const root = crate.getRootDataset();
     root.identifier = [
       { "@id": `_:local-id:${repoName}:arcp://name,${repoName}/${id}` }
     ]
+
     for (const prop of Object.keys(collection.root)) {
       root[prop] = collection.root[prop];
     }
@@ -76,19 +79,25 @@ async function createROCrate({ dest, collection, id, repoName }) {
       "name": repoName
     });
 
-    const metadataDescriptor = crate.getItem("ro-crate-metadata.json");
-    metadataDescriptor.conformsTo = crate.utils.asArray(metadataDescriptor.conformsTo)
-    metadataDescriptor.conformsTo.push({"@id": languageProfileURI("Collection")});
+    // const metadataDescriptor = crate.getItem("ro-crate-metadata.json");
+    // metadataDescriptor.conformsTo = crate.utils.asArray(metadataDescriptor.conformsTo)
+    //metadataDescriptor.conformsTo.push({"@id": languageProfileURI("Collection")});
+    crate.addProfile(languageProfileURI("Collection"));
+    root.conformsTo = [{"@id": languageProfileURI("Collection")}];
 
     for (const item of collection.elements) {
       crate.addItem(item);
     }
 
     const catalog = path.join(dest, id, 'ro-crate-metadata.json');
-    const context = { '@context': crate.defaults.context };
     await crate.resolveContext();
     await fs.mkdirp(path.join(dest, id));
-    await fs.writeFile(catalog, JSON.stringify(crate.json_ld, null, 2));
+
+    crate.rootId = crate.rootDataset['@id'] = generateArcpId(repoName, "collection", id);
+    const metadataDesc = crate.getItem(crate.defaults.roCrateMetadataID);
+    metadataDesc.about = crate.rootDataset;
+
+    await fs.writeFile(catalog, JSON.stringify(crate.getJson(), null, 2));
   } catch (e) {
     console.log(e);
     log.error('createROCrate');

@@ -8,7 +8,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
     const index = 'items';
     log.debug(`Indexing ${crateId} `);
     for (let item of crate.utils.asArray(parent.hasMember)) {
-      if (item['@type'] && item['@type'].includes('RepositoryCollection')) {
+      if (item['@type'] && (item['@type'].includes('RepositoryCollection') || item['@type'].includes('Dataset'))) {
         log.debug(`Indexing RepositoryCollection of ${item['@id']}`);
         item._root = root;
         item._crateId = crateId;
@@ -49,7 +49,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             }
           }
         }
-        if (item['hasFile']) log.info(`Getting files for ${crateId}`);
+        if (item['hasFile']) log.debug(`Getting files for ${crateId}`);
         for (let hasFile of crate.utils.asArray(item['hasFile'])) {
           await indexFiles({
             crateId: crateId, item, hasFile, parent, crate,

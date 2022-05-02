@@ -46,9 +46,15 @@ export function setupAuthRoutes({ server, configuration }) {
         next(new UnauthorizedError());
       } else {
         // TODO: Design group configuration
+        const user = req.session.user;
         const group = configuration['api']['licenseGroup'];
         // TODO: load dynamically the memberships functions
-        const memberships = await getGithubMemberships({ userId: req.session.user.id, group });
+        let memberships = [];
+        if(user?.provider === 'github') {
+          memberships = await getGithubMemberships({userId: user.id, group});
+        } else if(user?.provider === 'cilogon') {
+          memberships = await getCiLogonMemberships({userId: user.id, group})
+        }
         res.json({ memberships });
       }
     })
