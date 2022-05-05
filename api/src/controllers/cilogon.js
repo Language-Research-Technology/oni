@@ -1,16 +1,27 @@
 import {getUser} from "./user";
 import {createUserMemberships} from "./userMembership";
+import {getGroupMembership} from "../services/cilogon"
+import {getLogger} from "../services";
 
-export async function getCiLogonMemberships({ userId, group }) {
+const log = getLogger();
 
-  const user = await getUser({where: {id: userId}});
-  const groupMembership = await getCiLogonGroupMembership({
-    user: {
-      username: user.providerUsername,
-      accessToken: user.accessToken
-    }, group: group
-  })
-  let memberships = [];
-  await createUserMemberships({ memberships, user });
-  return memberships;
-};
+export async function getCiLogonMemberships({configuration, user, group}) {
+  try {
+    log.debug('getCiLogonMemberships');
+    const memberships = await getGroupMembership({
+      configuration,
+      user: {
+        username: user.providerUsername,
+        accessToken: user.accessToken
+      }
+    });
+    if (memberships.error) {
+      return {error: memberships.error}
+    } else {
+      await createUserMemberships({memberships, user});
+      return memberships;
+    }
+  } catch (e) {
+    return {error: e}
+  }
+}

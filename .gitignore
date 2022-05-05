@@ -11,3 +11,4 @@ api/test-data/perf/
 api/test-data/perf*
 !configuration/example-configuration.json
 configuration/*
+cilogon-token-response.json

@@ -16,7 +16,7 @@ export function setupUserRoutes({ server, configuration }) {
           user['accessToken'] = '....removed';
           res.json({ user }).status(200);
           //Testing: Setting up memberships after login
-          await getGithubMemberships({userId: user.id, group: configuration['api']['licenseGroup']});
+          //await getGithubMemberships({userId: user.id, group: configuration['api']['licenseGroup']});
         } else {
           res.json({ user: null }).status(200);
         }

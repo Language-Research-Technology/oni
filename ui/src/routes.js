@@ -1,6 +1,7 @@
 import ShellComponent from "@/components/Shell.component.vue";
 import UserComponent from "@/components/User.component.vue";
 import LoginComponent from "@/components/Login.component.vue";
+import LogoutComponent from "@/components/Logout.component.vue";
 import SearchComponent from "@/components/Search.component.vue";
 import ViewComponent from "@/components/View.component.vue";
 import OpenComponent from "@/components/Open.component.vue";
@@ -50,6 +51,10 @@ const routes = [
       path: "/login",
       name: "login",
       component: LoginComponent
+    }, {
+      path: "/logout",
+      name: "logout",
+      component: LogoutComponent
     } ],
   },
   {
@@ -59,7 +64,7 @@ const routes = [
   },
   {
     name: "callback-ci-login",
-    path: "/auth/ci/callback",
+    path: "/auth/cilogon/callback",
     component: CallbackOauthLogin,
   }
 ];

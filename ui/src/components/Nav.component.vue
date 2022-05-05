@@ -56,7 +56,7 @@ import {
   getLocalStorage,
   removeLocalStorage,
 } from "@/components/storage";
-import { isEmpty } from 'lodash';
+import {isEmpty} from 'lodash';
 
 export default {
   name: 'NavView',
@@ -66,22 +66,35 @@ export default {
     };
   },
   computed: {
-    current: function () {
+    current: async function () {
       return this.$route.path;
     }
   },
+  watch: {
+    //lazy watcher to detect if it has been emptied and its not freshly mounted
+    //TODO: not sure if we need both watchers and mounted to checkIfLoggedIn
+    '$store.state.user': {
+      async handler() {
+        console.log('lazy watch: isLoggedIn')
+        await this.checkIfLoggedIn();
+      },
+      flush: 'post',
+      immediate: true
+    }
+  },
   mounted() {
-    let isLoggedIn = getLocalStorage({ key: 'isLoggedIn' });
-    this.isLoggedIn = isLoggedIn;
+    this.$nextTick(async function () {
+      console.log('mounted: isLoggedIn')
+      await this.checkIfLoggedIn();
+    });
   },
   methods: {
+    async checkIfLoggedIn() {
+      this.isLoggedIn = getLocalStorage({ key: 'isLoggedIn' });
+      console.log(this.isLoggedIn);
+    },
     async logout() {
-      console.log(`Logout: ${ this.$store.state.user }`);
-      await this.$http.get({ route: "/logout" });
-      removeLocalStorage({ key: tokenSessionKey });
-      removeLocalStorage({ key: 'isLoggedIn' });
-      this.isLoggedIn = false;
-      await this.$router.push('/search');
+      await this.$router.push("/logout");
     }
   }
 };

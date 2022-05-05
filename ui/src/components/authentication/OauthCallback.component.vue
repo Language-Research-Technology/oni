@@ -30,13 +30,15 @@ export default {
       });
       if (response.status !== 200) {
         this.error = true;
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        this.$store.commit("setIsLoggedIn", false);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await this.$router.push("/login");
       } else {
         try {
           let { token } = await response.json();
           let user = JSON.parse(atob(token.split(".")[1]));
           this.$store.commit("setUserData", user);
+          this.$store.commit("setIsLoggedIn", true);
           putLocalStorage({ key: tokenSessionKey, data: { token } });
           await this.$router.push("/");
         } catch (e) {

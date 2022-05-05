@@ -8,7 +8,7 @@
           :key="provider.name"
           :disabled="provider.disabled"
           :provider="provider.name"
-          :buttonClass="provider.buttonClass"
+          :buttonStyle="provider.buttonStyle"
           :button-text="provider.text"
           :loginRoute="provider.loginRoute"
       />
