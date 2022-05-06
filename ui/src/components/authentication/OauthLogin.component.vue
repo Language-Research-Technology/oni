@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { loginSessionKey, putLocalStorage } from "@/components/storage";
+import { loginSessionKey, putLocalStorage } from "@/storage";
 
 export default {
   props: {

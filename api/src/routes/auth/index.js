@@ -52,18 +52,23 @@ export function setupAuthRoutes({server, configuration}) {
         let memberships = [];
         const user = await getUser({where: {id: req.session?.user?.id}});
         log.debug(`user?.provider ${user?.provider}`);
-        if (user?.provider === 'github') {
-          memberships = await getGithubMemberships({userId: user.id, group});
-        } else if (user?.provider === 'cilogon') {
-          memberships = await getCiLogonMemberships({configuration, user, group})
-        }
-        if (memberships.error) {
+        if (!user?.provider) {
           res.status(401);
-          res.json({error: memberships.error});
-          next(new UnauthorizedError());
+          res.json({error: "no provider sent when authorizing"});
         } else {
-          res.json({memberships});
-          next();
+          if (user?.provider === 'github') {
+            memberships = await getGithubMemberships({userId: user.id, group});
+          } else if (user?.provider === 'cilogon') {
+            memberships = await getCiLogonMemberships({configuration, user, group});
+          }
+          if (memberships.error) {
+            res.status(401);
+            res.json({error: memberships.error});
+            next(new UnauthorizedError());
+          } else {
+            res.json({memberships});
+            next();
+          }
         }
       }
     })

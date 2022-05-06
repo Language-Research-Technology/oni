@@ -9,7 +9,7 @@ import {
   putLocalStorage,
   getLocalStorage,
   removeLocalStorage,
-} from "@/components/storage";
+} from "@/storage";
 
 export default {
   data() {

@@ -43,7 +43,7 @@ export async function bootstrapObject({configuration, repository, object}) {
       const rec = {
         crateId: crateId,
         license: lic,
-        name: first(root['name']),
+        name: root['name'],
         description: first(root['description']) || root['description'],
         pairtreeId: object.pairtreeId
       }

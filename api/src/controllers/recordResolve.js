@@ -25,7 +25,8 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
     } else if (response.length === 1) {
       //It's only one don't resolve.
       log.debug('recordResolve:foundOneCrate');
-      const rocrate = new ROCrate(response[0], rocrateOpts);
+      const json = JSON.parse(response[0]);
+      const rocrate = new ROCrate(json, rocrateOpts);
       return rocrate.getJson();
     } else {
       //Merge all the ROCrates into one giant one.

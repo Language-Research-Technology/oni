@@ -25,12 +25,13 @@ export async function indexObjects({crateId, client, index, root, repository}) {
       const item = crate.getRootDataset();
       if (item) {
         if (item['@type'] && item['@type'].includes('RepositoryObject')) {
-          log.debug(`Indexing RepositoryObject of ${item['@id']}`);
-          item._root = root;
+          //log.debug(`Indexing RepositoryObject of ${item['@id']}`);
+          //item._root = root;
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
           item.license = item.license || member.license || root.license;
           const normalItem = crate.getNormalizedTree(item, 2);
+          normalItem._root = {"@value": root['@id']};
           let {body} = await client.index({
             index: index,
             body: normalItem

@@ -5,7 +5,7 @@ import {getLogger} from "../services";
 
 const log = getLogger();
 
-export async function getCiLogonMemberships({configuration, user, group}) {
+export async function getCiLogonMemberships({configuration, user}) {
   try {
     log.debug('getCiLogonMemberships');
     const memberships = await getGroupMembership({

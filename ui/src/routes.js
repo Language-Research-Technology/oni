@@ -16,7 +16,7 @@ import {
   putLocalStorage,
   getLocalStorage,
   removeLocalStorage,
-} from "@/components/storage";
+} from "@/storage";
 
 const routes = [
   {

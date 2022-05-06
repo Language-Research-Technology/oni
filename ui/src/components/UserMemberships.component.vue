@@ -39,6 +39,10 @@
 
 <script>
 
+import {
+  logoutService
+} from "@/services";
+
 export default {
   data() {
     return {
@@ -56,7 +60,8 @@ export default {
       this.loading = true;
       const response = await this.$http.get({route: "/auth/memberships"});
       if(response.status !== 200) {
-        await this.$router.push("/logout");
+        logoutService();
+        await this.$router.push("/login");
       } else {
         const {memberships} = await response.json();
         this.memberships = memberships;

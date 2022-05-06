@@ -26,6 +26,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
           }
         }
         const normalCollectionItem = crate.getNormalizedTree(item, 2);
+        normalCollectionItem.name = root['name'] || root['@id'];
         const {body} = await client.index({
           index: index,
           body: normalCollectionItem
@@ -37,6 +38,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._root = root;
         item.license = item.license || parent.license;
         const normalObjectItem = crate.getNormalizedTree(item, 2);
+        normalObjectItem.name = root['name'] || root['@id'];
         let {body} = await client.index({
           index: index,
           body: normalObjectItem
@@ -49,7 +51,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             }
           }
         }
-        if (item['hasFile']) log.debug(`Getting files for ${crateId}`);
+        //if (item['hasFile']) log.debug(`Getting files for ${crateId}`);
         for (let hasFile of crate.utils.asArray(item['hasFile'])) {
           await indexFiles({
             crateId: crateId, item, hasFile, parent, crate,

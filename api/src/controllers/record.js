@@ -163,7 +163,6 @@ export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
   const fileInfo = await ocfltools.getFileInfo({repository, crateId, filePath: 'ro-crate-metadata.json'});
   const file = await fs.readFile(fileInfo.path, {encoding: 'utf-8'});
-  log.debug('file opened')
   const json = JSON.parse(file);
   return json;
 }

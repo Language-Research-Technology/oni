@@ -46,7 +46,6 @@ export async function indexCollections({configuration, repository, client}) {
       } else {
         const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
         const crate = new ROCrate(resolvedCrate, rocrateOpts);
-        //getRootDataset does not seem to work!!!
         const root = crate.getRootDataset();
         if (root) {
           root._crateId = col.crateId;
@@ -60,6 +59,7 @@ export async function indexCollections({configuration, repository, client}) {
           }
           root._root = _root;
           const normalRoot = crate.getNormalizedTree(root, 2);
+          normalRoot.collection = _root['name'] || root['@id'];
           const {body} = await client.index({
             index: index,
             body: normalRoot

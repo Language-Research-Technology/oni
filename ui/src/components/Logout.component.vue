@@ -7,10 +7,10 @@
 </template>
 
 <script>
+
 import {
-  tokenSessionKey,
-  removeLocalStorage,
-} from "@/components/storage";
+  logoutService
+} from "@/services";
 
 export default {
   data() {
@@ -25,9 +25,7 @@ export default {
     async logout() {
       console.log(`Logout:`);
       console.log(this.$store.state.user)
-      delete this.$store.state.user;
-      removeLocalStorage({key: tokenSessionKey});
-      removeLocalStorage({key: 'isLoggedIn'});
+      logoutService();
       await this.$http.get({route: "/logout"});
     }
   }

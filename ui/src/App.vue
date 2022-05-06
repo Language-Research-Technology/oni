@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { tokenSessionKey, getLocalStorage } from "@/components/storage";
+import { tokenSessionKey, getLocalStorage } from "@/storage";
 
 export default {
   data() {

@@ -2,12 +2,13 @@ import fs from 'fs-extra';
 import * as path from 'path';
 import {getFile} from '../controllers/record';
 import {getLogger} from "../services";
+import { toArray } from "lodash";
 
 const log = getLogger();
 
 export async function indexFiles({crateId, item, hasFile, parent, crate, client, index, root, repository}) {
   try {
-    log.debug(`Get Files for ${hasFile['@id']}`);
+    //log.debug(`Get Files for ${hasFile['@id']}`);
     const fileItem = crate.getItem(hasFile['@id']);
     let fileContent = '';
     if (fileItem) {
@@ -22,7 +23,7 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
         '@type': item['@type']
       }
       if (fileItem.language) {
-        for (let fileItemLanguage of crate.utils.asArray(fileItem.language)) {
+        for (let fileItemLanguage of toArray(fileItem.language)) {
           const languageItem = crate.getItem(fileItemLanguage['@id']);
           if (languageItem) {
             crate.pushValue(item, 'language', languageItem);
@@ -34,21 +35,23 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
         }
       }
       //TODO find csvs too all text formats
-      const fileItemFormat = fileItem?.encodingFormat?.find((ef) => {
-        if (typeof ef === 'string') return ef.match('text/');
-      });
-      if (fileItemFormat) {
-        const fileObj = await getFile({
-          itemId: crateId,
-          repository,
-          filePath: fileItem['@id']
+      if (fileItem?.encodingFormat) {
+        const fileItemFormat = toArray(fileItem?.encodingFormat).find((ef) => {
+          if (typeof ef === 'string') return ef.match('text/');
         });
-        if (fileObj) {
-          if (await fs.stat(path.resolve(fileObj.filePath))) {
-            fileContent = await fs.readFile(path.resolve(fileObj.filePath), 'utf-8');
-            //addContent(item['hasFile'], fileItem['@id'], fileContent);
-          } else {
-            log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
+        if (fileItemFormat) {
+          const fileObj = await getFile({
+            itemId: crateId,
+            repository,
+            filePath: fileItem['@id']
+          });
+          if (fileObj) {
+            if (await fs.stat(path.resolve(fileObj.filePath))) {
+              fileContent = await fs.readFile(path.resolve(fileObj.filePath), 'utf-8');
+              //addContent(item['hasFile'], fileItem['@id'], fileContent);
+            } else {
+              log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
+            }
           }
         }
       }
