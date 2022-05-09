@@ -9,8 +9,10 @@
 <script>
 
 import {
-  logoutService
-} from "@/services";
+  tokenSessionKey,
+  removeLocalStorage,
+  getLocalStorage
+} from "@/storage";
 
 export default {
   data() {
@@ -24,8 +26,9 @@ export default {
   methods: {
     async logout() {
       console.log(`Logout:`);
-      console.log(this.$store.state.user)
-      logoutService();
+      delete this.$store.state.user;
+      removeLocalStorage({key: tokenSessionKey});
+      removeLocalStorage({key: 'isLoggedIn'});
       await this.$http.get({route: "/logout"});
     }
   }

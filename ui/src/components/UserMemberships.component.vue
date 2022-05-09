@@ -40,8 +40,10 @@
 <script>
 
 import {
-  logoutService
-} from "@/services";
+  tokenSessionKey,
+  removeLocalStorage,
+  getLocalStorage
+} from "@/storage";
 
 export default {
   data() {
@@ -60,7 +62,9 @@ export default {
       this.loading = true;
       const response = await this.$http.get({route: "/auth/memberships"});
       if(response.status !== 200) {
-        logoutService();
+        delete this.$store.state.user;
+        removeLocalStorage({key: tokenSessionKey});
+        removeLocalStorage({key: 'isLoggedIn'});
         await this.$router.push("/login");
       } else {
         const {memberships} = await response.json();

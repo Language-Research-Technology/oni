@@ -50,7 +50,11 @@
 </template>
 <script>
 
-import {isLoggedInService} from "../services";
+import {
+  tokenSessionKey,
+  removeLocalStorage,
+  getLocalStorage
+} from "@/storage";
 
 export default {
   name: 'NavView',
@@ -69,8 +73,7 @@ export default {
     //TODO: not sure if we need both watchers and mounted to checkIfLoggedIn
     '$store.state.user': {
       async handler() {
-        this.isLoggedIn = isLoggedInService();
-        console.log(`lazy watch: isLoggedIn: ${this.isLoggedIn}`);
+        this.isLoggedIn = getLocalStorage({key: 'isLoggedIn'});
       },
       flush: 'post',
       immediate: true
@@ -78,8 +81,7 @@ export default {
   },
   mounted() {
     this.$nextTick(async function () {
-      this.isLoggedIn = isLoggedInService();
-      console.log(`mounted: isLoggedIn: ${this.isLoggedIn}`);
+      this.isLoggedIn = getLocalStorage({key: 'isLoggedIn'});
     });
   },
   methods: {

@@ -4,10 +4,10 @@
       <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
         Contact: <br/><a class="underline" :href="'mailto: '+ emailHelp">{{ emailHelp }}</a>
       </el-col>
-      <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
+      <el-col v-if="!isLoggedIn" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
         <el-divider direction="vertical"/>
       </el-col>
-      <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
+      <el-col v-if="!isLoggedIn" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
         <router-link to="/login">
           <el-button>Login</el-button>
         </router-link>
@@ -22,6 +22,13 @@
 </template>
 
 <script>
+
+import {
+  tokenSessionKey,
+  removeLocalStorage,
+  getLocalStorage
+} from "@/storage";
+
 export default {
   props: ['dialogVisible'],
   methods: {
@@ -31,7 +38,19 @@ export default {
   },
   data() {
     return {
+      isLoggedIn: false,
       emailHelp: this.$store.state.configuration.ui.email.help || 'add-email@example.com',
+    }
+  },
+  watch: {
+    //lazy watcher to detect if it has been emptied and its not freshly mounted
+    //TODO: not sure if we need both watchers and mounted to checkIfLoggedIn
+    '$store.state.user': {
+      async handler() {
+        this.isLoggedIn = getLocalStorage({key: 'isLoggedIn'});
+      },
+      flush: 'post',
+      immediate: true
     }
   }
 }
