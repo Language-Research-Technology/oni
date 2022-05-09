@@ -5,6 +5,7 @@ import {getLogger} from '../services';
 import {ocfltools} from "oni-ocfl";
 import * as fs from 'fs-extra';
 import assert from "assert";
+import * as path from 'path';
 
 const log = getLogger();
 
@@ -24,13 +25,26 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
       return null;
     } else if (response.length === 1) {
       //It's only one don't resolve.
-      log.debug('recordResolve:foundOneCrate');
-      const json = JSON.parse(response[0]);
-      const rocrate = new ROCrate(json, rocrateOpts);
+      log.silly('recordResolve:foundOneCrate');
+      let rocrate;
+      try {
+        rocrate = new ROCrate(response[0], rocrateOpts);
+      } catch (e) {
+        log.error('________')
+        log.error(`${id} cannot be parsed`);
+        const logFolder = configuration.api?.logs?.logFolder || '/tmp/logs/oni';
+        if(!await fs.exists(logFolder)){
+          await fs.mkdir(logFolder);
+        }
+        log.error(`Verify rocrate in ${logFolder}`)
+        //console.log(JSON.stringify(response[0]));
+        await fs.writeFile(path.normalize(path.join(logFolder, id.replace(/[/\\?%*:|"<>]/g, '-') + '.json')), JSON.stringify(response[0], null, 2));
+        log.error('________')
+      }
       return rocrate.getJson();
     } else {
       //Merge all the ROCrates into one giant one.
-      log.debug('recordResolve:mergeAllCrates');
+      log.silly('recordResolve:mergeAllCrates');
       const json = await getCrate({repository, crateId: id, configuration, getUrid});
       const rocrate = new ROCrate(json, rocrateOpts);
       for (let c of response) {
@@ -59,7 +73,7 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
 }
 
 async function resolveMembers({crateId, response, configuration, getUrid, repository}) {
-  log.debug('resolveMembers');
+  log.silly('resolveMembers');
   let record = await getCrate({repository, crateId, configuration, getUrid});
   response.push(record);
   let memberOfs = await getRootMemberOfs({crateId});
@@ -81,7 +95,7 @@ async function resolveMembers({crateId, response, configuration, getUrid, reposi
 export async function getCrate({repository, crateId, configuration, getUrid}) {
   let crate;
   if (getUrid) {
-    log.debug('recordResolve:getCrate');
+    log.silly('recordResolve:getCrate');
     crate = await getUridCrate({
       host: configuration.api.host,
       crateId,
@@ -89,7 +103,7 @@ export async function getCrate({repository, crateId, configuration, getUrid}) {
       repository
     });
   } else {
-    log.debug('recordResolve:getRawCrate');
+    log.silly('recordResolve:getRawCrate');
     crate = await getRawCrate({repository, crateId});
   }
   return crate;

@@ -2,14 +2,16 @@ import fs from 'fs-extra';
 import * as path from 'path';
 import {getFile} from '../controllers/record';
 import {getLogger} from "../services";
-import { toArray } from "lodash";
+import {toArray} from "lodash";
 
 const log = getLogger();
 
 export async function indexFiles({crateId, item, hasFile, parent, crate, client, index, root, repository}) {
   try {
     //log.debug(`Get Files for ${hasFile['@id']}`);
-    const fileItem = crate.getItem(hasFile['@id']);
+    const fileId = hasFile['@id'];
+    const fileProxy = crate.getItem(fileId);
+    const fileItem = Object.assign({}, fileProxy);
     let fileContent = '';
     if (fileItem) {
       //Id already in fileItem
@@ -24,7 +26,8 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
       }
       if (fileItem.language) {
         for (let fileItemLanguage of toArray(fileItem.language)) {
-          const languageItem = crate.getItem(fileItemLanguage['@id']);
+          const languageItemProxy = crate.getItem(fileItemLanguage['@id']);
+          const languageItem = Object.assign({}, languageItemProxy);
           if (languageItem) {
             crate.pushValue(item, 'language', languageItem);
             if (parent) {
@@ -35,8 +38,15 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
         }
       }
       //TODO find csvs too all text formats
-      if (fileItem?.encodingFormat) {
-        const fileItemFormat = toArray(fileItem?.encodingFormat).find((ef) => {
+      if (fileItem['encodingFormat']) {
+        // let encodingArray = [];
+        // if (Array.isArray(fileItem['encodingFormat'])) {
+        //   encodingArray = fileItem['encodingFormat'];
+        // } else {
+        //   encodingArray.push(fileItem['encodingFormat']);
+        // }
+        const encodingArray = crate.utils.asArray(fileItem['encodingFormat']);
+        const fileItemFormat = encodingArray.find((ef) => {
           if (typeof ef === 'string') return ef.match('text/');
         });
         if (fileItemFormat) {
