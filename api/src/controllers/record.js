@@ -182,11 +182,9 @@ export async function getUridCrate({host, crateId, typesTransform, version, repo
 
 export async function getFile({itemId, repository, filePath}) {
   try {
-    log.debug(`getFile in repository with id: ${itemId} found in: ${filePath}`);
     const fileInfo = await ocfltools.getFileInfo({repository, crateId: itemId, filePath});
     if (fileInfo && fileInfo.path) {
       const filePath = fileInfo.path;
-      log.debug(filePath);
       const index = filePath.lastIndexOf("/");
       const fileName = filePath.substr(index);
       const ext = filePath.lastIndexOf(".");
@@ -194,7 +192,6 @@ export async function getFile({itemId, repository, filePath}) {
       if (ext) {
         extName = filePath.substr(ext);
       }
-      log.debug(`getFile: ${filePath}`);
       return {
         filename: fileName,
         filePath: filePath,
@@ -202,8 +199,10 @@ export async function getFile({itemId, repository, filePath}) {
       }
     } else {
       log.error(`File in repository with id: ${itemId} not found in: ${filePath}`);
+      log.error(`path: ${filePath}`);
     }
   } catch (e) {
-    log.error('getFile')
+    log.error(`getFile in repository with id: ${itemId} found in: ${filePath}`);
+    log.debug(`path: ${filePath}`);
   }
 }

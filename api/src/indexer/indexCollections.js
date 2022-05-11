@@ -31,15 +31,23 @@ export async function putCollectionMappings({configuration, client}) {
 export async function indexCollections({configuration, repository, client}) {
   log.debug('indexCollections');
   try {
-    const rootConformsTos = await getRootConformsTos({
+    let rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-      //crateId: 'arcp://name,farms-to-freeways/corpus/root' // Add a crateId to test the indexer.
+      //members: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
     });
+    //Use this block to test cases where a conformsTo conforms to another collection
+    // const rootConformsTos2 = await getRootConformsTos({
+    //   conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+    //   crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
+    // });
+    // if (rootConformsTos2.length > 0) {
+    //   rootConformsTos = rootConformsTos.concat(rootConformsTos2);
+    // }
     let i = 0;
     const index = 'items';
     log.info(`Trying to index: ${rootConformsTos.length}`);
     for (let rootConformsTo of rootConformsTos) {
-      const col = rootConformsTo['dataValues'];
+      const col = rootConformsTo['dataValues'] || rootConformsTo;
       i++;
       log.info(`Indexing: ${i}: ${col.crateId}`);
       const resolvedCrate = await recordResolve({id: col.crateId, getUrid: false, configuration, repository});
@@ -54,7 +62,8 @@ export async function indexCollections({configuration, repository, client}) {
           root._crateId = col.crateId;
           root._containsTypes = [];
           root.conformsTo = 'Collection';
-          root.license = root.license || col.record.dataValues?.license;
+          //TODO: better license checks
+          root.license = root.license || col.record.dataValues?.license || col.record?.license;
           const _root = {
             '@id': root._crateId,
             '@type': root['@type'],

@@ -27,7 +27,8 @@ export default {
   },
   methods: {
     display(value, name) {
-      if (name.startsWith('_text')) {
+      //TODO: Is this the right place to remove the things that we dont want displayed?
+      if (name.startsWith('_')) {
         return false;
       } else return !isEmpty(value);
 
