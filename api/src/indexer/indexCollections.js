@@ -33,7 +33,7 @@ export async function indexCollections({configuration, repository, client}) {
   try {
     const rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-      crateId: 'arcp://name,farms-to-freeways/corpus/root' // Add a crateId to test the indexer.
+      //crateId: 'arcp://name,farms-to-freeways/corpus/root' // Add a crateId to test the indexer.
     });
     let i = 0;
     const index = 'items';
@@ -89,7 +89,7 @@ export async function indexCollections({configuration, repository, client}) {
               root: _root,
               repository
             });
-          } else { 
+          } else {
             log.debug('Indexing objects');
             await indexObjects({
               crateId: col.crateId,
