@@ -39,12 +39,6 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
       }
       //TODO find csvs too all text formats
       if (fileItem['encodingFormat']) {
-        // let encodingArray = [];
-        // if (Array.isArray(fileItem['encodingFormat'])) {
-        //   encodingArray = fileItem['encodingFormat'];
-        // } else {
-        //   encodingArray.push(fileItem['encodingFormat']);
-        // }
         const encodingArray = crate.utils.asArray(fileItem['encodingFormat']);
         const fileItemFormat = encodingArray.find((ef) => {
           if (typeof ef === 'string') return ef.match('text/');
@@ -65,12 +59,25 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
           }
         }
       }
-      const normalFileItem = crate.getNormalizedTree(fileItem, 2);
+      const normalFileItem = crate.getNormalizedTree(fileItem, 1);
+      //TODO: Maybe search for stream pipes in elastic`
       normalFileItem['_text'] = fileContent;
-      const {body} = await client.index({
-        index: index,
-        body: normalFileItem
-      });
+      normalFileItem._root = {'@id': root['@id'], name: root.name}
+      try {
+        const {body} = await client.index({
+          index: index,
+          body: Object.assign({}, normalFileItem)
+        });
+      } catch (e) {
+        log.debug('Index normalFileItem')
+        //log.debug(JSON.stringify(normalFileItem));
+        const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
+        if (!await fs.exists(logFolder)) {
+          await fs.mkdir(logFolder);
+        }
+        log.error(`Verify rocrate in ${logFolder}`)
+        await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalFileItem.json')), JSON.stringify(normalFileItem, null, 2));
+      }
     } else {
       log.warn(`No files for ${hasFile['@id']}`);
     }

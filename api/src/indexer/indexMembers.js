@@ -1,5 +1,7 @@
 import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
+import path from "path";
+import * as fs from 'fs-extra';
 
 const log = getLogger();
 
@@ -8,7 +10,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
     const index = 'items';
     log.debug(`Indexing ${crateId} `);
     for (let item of crate.utils.asArray(parent.hasMember)) {
-      if (item['@type'] && (item['@type'].includes('RepositoryCollection') || item['@type'].includes('Dataset'))) {
+      if (item['@type'] && item['@type'].includes('RepositoryCollection')) {
         log.debug(`Indexing RepositoryCollection of ${item['@id']}`);
         item._root = root;
         item._crateId = crateId;
@@ -25,29 +27,56 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             }
           }
         }
-        const normalCollectionItem = crate.getNormalizedTree(item, 2);
-        normalCollectionItem.name = root['name'] || root['@id'];
-        const {body} = await client.index({
-          index: index,
-          body: normalCollectionItem
-        });
+        root.name = root['name'] || root['@id'];
+        const normalCollectionItem = crate.getNormalizedTree(item, 1);
+        normalCollectionItem._root = {'@id': root['@id'], name: root.name}
+        try {
+          const {body} = await client.index({
+            index: index,
+            body: Object.assign({}, normalCollectionItem)
+          });
+        } catch (e) {
+          log.error('Index normalCollectionItem');
+          //log.debug(JSON.stringify(normalFileItem));
+          const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
+          if (!await fs.exists(logFolder)) {
+            await fs.mkdir(logFolder);
+          }
+          log.error(`Verify rocrate in ${logFolder}`)
+          await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalCollectionItem.json')), JSON.stringify(normalCollectionItem, null, 2));
+        }
       } else if (item['@type'] && item['@type'].includes('RepositoryObject')) {
         item._crateId = crateId;
         item.conformsTo = 'RepositoryObject';
         item.partOf = {'@id': parent['@id']};
         item._root = root;
         item.license = item.license || parent.license;
-        const normalObjectItem = crate.getNormalizedTree(item, 2);
-        normalObjectItem.name = root['name'] || root['@id'];
-        let {body} = await client.index({
-          index: index,
-          body: normalObjectItem
-        });
+        item.name = item['name'] || item['@id'];
+        const normalObjectItem = crate.getNormalizedTree(item, 1);
+        normalObjectItem._root = {'@id': root['@id'], name: root.name}
+        try {
+          const {body} = await client.index({
+            index: index,
+            body: Object.assign({}, normalObjectItem)
+          });
+        } catch (e) {
+          log.error('Index normalObjectItem');
+          log.error(JSON.stringify(normalObjectItem));
+          const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
+          if (!await fs.exists(logFolder)) {
+            await fs.mkdir(logFolder);
+          }
+          log.error(`Verify rocrate in ${logFolder}`)
+          await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalObjectItem.json')), JSON.stringify(normalObjectItem, null, 2));
+        }
         // Add a parent for the @type: File
-        for (let type of crate.utils.asArray(item['@type'])) {
+        for (let typeProxy of crate.utils.asArray(item['@type'])) {
+          const type = Object.assign({}, typeProxy)
           if (type !== 'RepositoryObject') {
-            if (!parent._containsTypes.includes(type)) {
-              crate.pushValue(parent, '_containsTypes', type);
+            if(Array.isArray(parent._containsTypes)) {
+              if (!parent._containsTypes.includes(type)) {
+                crate.pushValue(parent, '_containsTypes', type);
+              }
             }
           }
         }

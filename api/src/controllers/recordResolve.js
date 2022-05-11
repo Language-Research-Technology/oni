@@ -32,7 +32,7 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
       } catch (e) {
         log.error('________')
         log.error(`${id} cannot be parsed`);
-        const logFolder = configuration.api?.logs?.logFolder || '/tmp/logs/oni';
+        const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
         if(!await fs.exists(logFolder)){
           await fs.mkdir(logFolder);
         }

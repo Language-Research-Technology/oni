@@ -5,6 +5,8 @@ import {recordResolve} from '../controllers/recordResolve';
 import {getLogger} from "../services";
 import {indexObjects} from "./indexObjects";
 import {indexMembers} from "./indexMembers";
+import path from "path";
+import * as fs from 'fs-extra';
 
 const log = getLogger();
 
@@ -30,7 +32,8 @@ export async function indexCollections({configuration, repository, client}) {
   log.debug('indexCollections');
   try {
     const rootConformsTos = await getRootConformsTos({
-      conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection'
+      conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+      crateId: 'arcp://name,farms-to-freeways/corpus/root' // Add a crateId to test the indexer.
     });
     let i = 0;
     const index = 'items';
@@ -57,13 +60,24 @@ export async function indexCollections({configuration, repository, client}) {
             '@type': root['@type'],
             'name': root.name || ''
           }
-          root._root = _root;
+          //root._root = _root;
+          //root.collection = _root['name'] || root['@id'];
           const normalRoot = crate.getNormalizedTree(root, 2);
-          normalRoot.collection = _root['name'] || root['@id'];
-          const {body} = await client.index({
-            index: index,
-            body: normalRoot
-          });
+          normalRoot._root = {'@id': root['@id'], name: root.name}
+          try {
+            const {body} = await client.index({
+              index: index,
+              body: Object.assign({}, normalRoot)
+            });
+          } catch (e) {
+            log.error('index normalRoot');
+            const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
+            if (!await fs.exists(logFolder)) {
+              await fs.mkdir(logFolder);
+            }
+            log.error(`Verify rocrate in ${logFolder}`)
+            await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalRoot.json')), JSON.stringify(normalRoot, null, 2));
+          }
           if (root.hasMember && root.hasMember.length > 0) {
             log.debug(`Indexing Members of root`);
             await indexMembers({
@@ -75,7 +89,7 @@ export async function indexCollections({configuration, repository, client}) {
               root: _root,
               repository
             });
-          } else {
+          } else { 
             log.debug('Indexing objects');
             await indexObjects({
               crateId: col.crateId,
