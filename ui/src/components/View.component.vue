@@ -23,22 +23,36 @@
         <el-link v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
           <el-button>Preview File</el-button>
         </el-link>
+        <el-link v-loading="this.loading" v-if="this.isFile() && !this.cannotOpenFile" :underline="false"
+                 v-on:click="this.downloadFileUrl()">
+          <el-button>Download</el-button>
+        </el-link>
         <el-button v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
       </el-button-group>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
       <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsToName="'Collections'" :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
+                    :conformsToName="'Collections'"
+                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
       <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsToName="'Repository Objects'" :conformsTo="'RepositoryObject'"/>
+                           :conformsToName="'Repository Objects'" :conformsTo="'RepositoryObject'"/>
       <el-row>
         &nbsp;
       </el-row>
+
     </el-col>
   </el-row>
   <div v-else>
     <view-doc-error/>
   </div>
   <request-dialog :dialogVisible="this.openDocModal" v-on:close="this.openDocModal = false"/>
+  <el-dialog v-model="errorDialogVisible" width="30%" center>
+    <span>{{ this.errorDialogText }}</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="errorDialogVisible = false">Close</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -84,7 +98,10 @@ export default {
       parentName: '',
       error: '',
       notAuthorized: false,
-      openDocModal: false
+      openDocModal: false,
+      loading: false,
+      errorDialogVisible: false,
+      errorDialogText: ''
     }
   },
   async mounted() {
@@ -105,6 +122,10 @@ export default {
       this.setParentLink();
       this.getMembers();
     } catch (e) {
+      this.errorDialogVisible = true;
+      this.errorDialogTitle = 'Error';
+      this.errorDialogText = e.message;
+      this.loading = false;
       console.error(e);
     }
   },
@@ -163,6 +184,43 @@ export default {
         } else {
           this.cannotOpenFile = true;
           this.fileUrl = '';
+        }
+      }
+    },
+    async downloadFileUrl() {
+      if (this.isFile()) {
+        try {
+          this.loading = true;
+          const crateId = this.crateId?.['@value'];
+          const filePath = this.metadata?.['@id'];
+          if (filePath && crateId) {
+            let url = `/object/open?id=${encodeURIComponent(crateId)}&path=${encodeURIComponent(filePath)}`;
+            const link = document.createElement("a");
+            link.download = filePath;
+            let response = await this.$http.get({route: url});
+            if (response.status !== 200) {
+              this.errorDialogVisible = true;
+              this.errorDialogTitle = 'Download Error';
+              this.errorDialogText = response.statusText;
+            } else {
+              const data = await response.blob();
+              link.href = window.URL.createObjectURL(data);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(link.href);
+            }
+          } else {
+            this.errorDialogVisible = true;
+            this.errorDialogTitle = 'Download Error';
+            this.errorDialogText = 'No path found for that file';
+          }
+          this.loading = false;
+        } catch (e) {
+          this.errorDialogVisible = true;
+          this.errorDialogTitle = 'Download Error';
+          this.errorDialogText = e.message;
+          this.loading = false;
         }
       }
     },

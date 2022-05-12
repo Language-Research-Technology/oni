@@ -65,7 +65,8 @@ export default {
       id: '',
       name: '',
       parent: '',
-      parentTitle: ''
+      parentTitle: '',
+      loading: false
     }
   },
   async mounted() {

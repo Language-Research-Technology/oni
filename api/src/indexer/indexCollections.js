@@ -33,15 +33,17 @@ export async function indexCollections({configuration, repository, client}) {
   try {
     let rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+      //members: 'arcp://name,farms-to-freeways/corpus/root'
       //members: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
     });
     //Use this block to test cases where a conformsTo conforms to another collection
-    // const rootConformsTos2 = await getRootConformsTos({
+    // const rootConformsToCrateId = await getRootConformsTos({
     //   conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-    //   crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
+    //   crateId: 'arcp://name,farms-to-freeways/corpus/root'
+    //   //crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
     // });
-    // if (rootConformsTos2.length > 0) {
-    //   rootConformsTos = rootConformsTos.concat(rootConformsTos2);
+    // if (rootConformsToCrateId.length > 0) {
+    //   rootConformsTos = rootConformsTos.concat(rootConformsToCrateId);
     // }
     let i = 0;
     const index = 'items';

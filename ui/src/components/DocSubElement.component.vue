@@ -42,9 +42,9 @@
     <!--TODO: convert the following to vue router-->
       <el-row v-else v-if="this.value">
         <el-col :span="24">
-                <a class="break-words underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-                   :href="getURL()">
-        {{ this.value }}</a>
+                <a class="break-words text-blue-600 hover:text-blue-800 visited:text-purple-600"
+                   :href="getURL()" >
+                  <el-button :type="'default'">Search Link</el-button></a>
         </el-col>
       </el-row>
   </span>

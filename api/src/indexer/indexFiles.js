@@ -60,7 +60,7 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
         }
       }
       const normalFileItem = crate.getNormalizedTree(fileItem, 1);
-      //TODO: Maybe search for stream pipes in elastic`
+      //TODO: Maybe search for stream pipes in elastic
       normalFileItem['_text'] = fileContent;
       normalFileItem._root = {'@id': root['@id'], name: root.name}
       try {
