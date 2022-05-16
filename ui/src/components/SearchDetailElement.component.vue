@@ -22,7 +22,7 @@
         </button>
       </div>
     </el-row>
-    <el-row :align="'middle'">
+    <el-row :align="'middle'" v-if="languages">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
         <span>Languages:&nbsp;</span>
       </p>
@@ -33,20 +33,8 @@
         </button>
       </div>
     </el-row>
-    <el-row :align="'middle'">
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        <span>From:&nbsp;</span>
-      </p>
-      <div class="flex flex-wrap" v-if="root">
-        <button
-            class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
-            v-for="r of root">
-          <router-link :to="getFilter({field: '_root.@id', id: r['@id']})">{{ first(r.name)?.['@value'] }}</router-link>
-        </button>
-      </div>
-    </el-row>
     <el-row :align="'middle'" v-if="memberOf">
-      <p> Related: {{ first(memberOf)?.['@id'] }}</p>
+      <p>Member Of: <a :href="getFilter({field: '_root.@id', id: first(memberOf)?.['@id']})"><el-button>{{ first(memberOf)?.['@id'] }}</el-button></a></p>
     </el-row>
     <el-row :align="'middle'" v-if="highlight">
       <ul>
@@ -55,6 +43,7 @@
             class="p-2"></li>
       </ul>
     </el-row>
+    <br/>
     <hr class="divide-y divide-gray-500"/>
   </div>
 </template>

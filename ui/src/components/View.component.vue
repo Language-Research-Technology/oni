@@ -33,6 +33,7 @@
       <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                     :conformsToName="'Collections'"
                     :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
+      <!--                    :conformsTo="'RepositoryCollection'"/>-->
       <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                            :conformsToName="'Repository Objects'" :conformsTo="'RepositoryObject'"/>
       <el-row>
@@ -228,7 +229,7 @@ export default {
     },
     getMembers() {
       console.log(this.conformsTo);
-      return this.conformsTo === 'Collection' || this.conformsTo === 'Dataset';
+      return this.conformsTo === 'Collection' || this.conformsTo === 'RepositoryCollection' || this.conformsTo === 'Dataset';
     },
     setFacetUrl() {
       let route = '/search?f=';
