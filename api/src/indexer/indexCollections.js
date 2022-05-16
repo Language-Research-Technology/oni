@@ -10,20 +10,26 @@ import * as fs from 'fs-extra';
 
 const log = getLogger();
 
-export async function putCollectionMappings({configuration, client}) {
+export async function configureMappings({configuration, client}) {
 
   //TODO: move this to config
   try {
-    const elastic = configuration['api']['elastic']
-    const mappings = {
-      mappings: elastic['mappings']
-    };
-    const {body} = await client.indices.create({
-      index: 'items',
-      body: mappings
+    const elastic = configuration['api']['elastic'];
+    await client.indices.create({
+      index: elastic['index'],
+      body: {mappings: elastic['mappings']}
     });
+    await client.indices.putSettings({
+      index: elastic['index'],
+      body: {mapping: {total_fields: {limit: elastic['mappingFieldLimit'] || 1000}}}
+    })
+    if (elastic?.log === 'debug') {
+      const config = await client.cluster.getSettings();
+      log.debug(JSON.stringify(config));
+    }
   } catch (e) {
-    log.error('putCollectionMappings');
+    log.error('configureMappings');
+    log.error(JSON.stringify(e.message));
     throw new Error(e);
   }
 }
@@ -46,7 +52,8 @@ export async function indexCollections({configuration, repository, client}) {
     //   rootConformsTos = rootConformsTos.concat(rootConformsToCrateId);
     // }
     let i = 0;
-    const index = 'items';
+    const elastic = configuration['api']['elastic'];
+    const index = elastic['index'];
     log.info(`Trying to index: ${rootConformsTos.length}`);
     for (let rootConformsTo of rootConformsTos) {
       const col = rootConformsTo['dataValues'] || rootConformsTo;
@@ -73,7 +80,7 @@ export async function indexCollections({configuration, repository, client}) {
           }
           //root._root = _root;
           //root.collection = _root['name'] || root['@id'];
-          const normalRoot = crate.getNormalizedTree(root, 2);
+          const normalRoot = crate.getTree({root, depth: 2, allowCycle: false});
           normalRoot._root = {'@id': root['@id'], name: root.name}
           try {
             const {body} = await client.index({
@@ -108,7 +115,8 @@ export async function indexCollections({configuration, repository, client}) {
               crate,
               index,
               root: _root,
-              repository
+              repository,
+              configuration
             });
           }
         }

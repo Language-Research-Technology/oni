@@ -1,6 +1,6 @@
 import {getLogger} from '../services';
 import {Client} from '@elastic/elasticsearch';
-import {indexCollections, putCollectionMappings} from './indexCollections';
+import {configureMappings, indexCollections} from './indexCollections';
 import {inspect} from '../services/utils';
 
 const log = getLogger();
@@ -10,9 +10,22 @@ export async function elasticInit({configuration}) {
   try {
     client = new Client({
       node: configuration.api.elastic.node,
-      log: configuration.api.elastic.log
     });
     log.debug('init elastic client');
+    if (configuration.api?.elastic?.log === 'debug') {
+      //For details about observability in elastic index, an event emitter is attached to log the responses
+      //ES 7.x -> https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.17/observability.html
+      client.on('response', (err, result) => {
+        if (err) {
+          const error = {
+            type: err.meta.body.type,
+            message: err.message,
+            meta: err.meta?.body?.error?.caused_by
+          };
+          log.error(JSON.stringify(error));
+        }
+      });
+    }
   } catch (e) {
     log.error(e.message);
   }
@@ -23,7 +36,7 @@ export async function elasticBootstrap({configuration}) {
     await client.indices.delete({
       index: '*'
     });
-    await putCollectionMappings({configuration, client});
+    await configureMappings({configuration, client});
   } catch (e) {
     log.error('elasticBoostrap');
     log.error(e.message);

@@ -23,7 +23,12 @@ export function setupSearchRoutes({server, configuration}) {
       let index = req.params?.index;
       let results;
       if (req.query['scroll']) {
-        results = await scroll({scrollId: req.query['scroll']});
+        try {
+          results = await scroll({scrollId: req.query['scroll']});
+        } catch (e) {
+          res.status(401);
+          res.send({error_type: 'scroll_error', error: 'Error scrolling', message: e.message});
+        }
       } else if (req.query['id']) {
         exactMatch = true;
         const id = req.query['id'].trim();
@@ -53,7 +58,8 @@ export function setupSearchRoutes({server, configuration}) {
       next();
     } catch (e) {
       console.log(e);
-      res.send({error: 'Error searching index', message: e.message}).status(500);
+      res.status(500);
+      res.send({error: 'Error searching index', message: e.message});
       next();
     }
   })

@@ -6,12 +6,11 @@ import {toArray} from "lodash";
 
 const log = getLogger();
 
-export async function indexFiles({crateId, item, hasFile, parent, crate, client, index, root, repository}) {
+export async function indexFiles({crateId,item,hasFile,parent,crate,client,index,root,repository,configuration}) {
   try {
     //log.debug(`Get Files for ${hasFile['@id']}`);
     const fileId = hasFile['@id'];
-    const fileProxy = crate.getItem(fileId);
-    const fileItem = Object.assign({}, fileProxy);
+    const fileItem = crate.getItem(fileId);
     let fileContent = '';
     if (fileItem) {
       //Id already in fileItem
@@ -26,8 +25,7 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
       }
       if (fileItem.language) {
         for (let fileItemLanguage of toArray(fileItem.language)) {
-          const languageItemProxy = crate.getItem(fileItemLanguage['@id']);
-          const languageItem = Object.assign({}, languageItemProxy);
+          const languageItem = crate.getItem(fileItemLanguage['@id']);
           if (languageItem) {
             crate.pushValue(item, 'language', languageItem);
             if (parent) {
@@ -59,24 +57,27 @@ export async function indexFiles({crateId, item, hasFile, parent, crate, client,
           }
         }
       }
-      const normalFileItem = crate.getNormalizedTree(fileItem, 1);
-      //TODO: Maybe search for stream pipes in elastic
-      normalFileItem['_text'] = fileContent;
-      normalFileItem._root = {'@id': root['@id'], name: root.name}
+      let normalFileItem;
       try {
+        normalFileItem = crate.getTree({root: fileItem, depth: 1, allowCycle: false});
+        //TODO: Maybe search for stream pipes in elastic
+        normalFileItem['_text'] = fileContent;
+        normalFileItem._root = {'@id': root['@id'], name: root.name};
         const {body} = await client.index({
           index: index,
           body: Object.assign({}, normalFileItem)
         });
       } catch (e) {
+        log.error(e);
         log.debug('Index normalFileItem')
-        //log.debug(JSON.stringify(normalFileItem));
+        console.log(fileItem);
         const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
         if (!await fs.exists(logFolder)) {
           await fs.mkdir(logFolder);
         }
-        log.error(`Verify rocrate in ${logFolder}`)
-        await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalFileItem.json')), JSON.stringify(normalFileItem, null, 2));
+        const fileName = path.normalize(path.join(logFolder, crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalFileItem.json'));
+        log.error(`Verify rocrate in ${logFolder} for ${fileName}`);
+        await fs.writeFile(fileName, JSON.stringify(normalFileItem, null, 2));
       }
     } else {
       log.warn(`No files for ${hasFile['@id']}`);

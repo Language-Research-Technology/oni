@@ -150,12 +150,14 @@ export default {
       }
     },
     isFile() {
-      const type = this.metadata['@type'];
-      if (Array.isArray(type)) {
-        return type.find((t) => t.toLowerCase() === 'file')
-      } else if (typeof type === 'string') {
-        return type.toLowerCase() === 'file';
-      } else return false;
+      if(this.metadata) {
+        const type = this.metadata['@type'];
+        if (Array.isArray(type)) {
+          return type.find((t) => t.toLowerCase() === 'file')
+        } else if (typeof type === 'string') {
+          return type.toLowerCase() === 'file';
+        } else return false;
+      }else return false;
     },
     getTitle() {
       const title = first(this.metadata['name'])?.['@value'];

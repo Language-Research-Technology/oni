@@ -11,7 +11,7 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
     });
     //If just for debugging!
     if (foundAuthorization) {
-      log.debug(`Found Authorization: ${ foundAuthorization['group'] }`);
+      log.silly(`Found Authorization: ${ foundAuthorization['group'] }`);
       return true;
     } else {
       return false

@@ -179,7 +179,6 @@ async function getUserToken({configuration, provider, token}) {
     if (conf['useFormData']) {
       log.debug(`useFormData: ${conf['useFormData']}`);
       const formData = new FormData();
-      console.log(token['access_token'])
       formData.append('access_token', token['access_token'] || 'NA');
       response = await fetch(conf.user, {
         method: 'POST',

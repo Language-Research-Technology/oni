@@ -8,7 +8,7 @@ import * as fs from 'fs-extra';
 
 const log = getLogger();
 
-export async function indexObjects({crateId, client, index, root, repository}) {
+export async function indexObjects({crateId, client, index, root, repository, configuration}) {
   try {
     //This is the same as doing
     // http://localhost:9000/api/object?conformsTo=https://github.com/Language-Research-Technology/ro-crate-profile%23Object&memberOf=<<crateId>>
@@ -33,7 +33,7 @@ export async function indexObjects({crateId, client, index, root, repository}) {
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
           item.license = item.license || member.license || root.license;
-          const normalItem = crate.getNormalizedTree(item, 1);
+          const normalItem = crate.getTree({ root: item, depth: 2, allowCycle: false });
           //normalItem._root = {"@value": root['@id']};
           normalItem._root = {'@id': root['@id'], name: root.name}
           try {
@@ -48,8 +48,9 @@ export async function indexObjects({crateId, client, index, root, repository}) {
             if (!await fs.exists(logFolder)) {
               await fs.mkdir(logFolder);
             }
-            log.error(`Verify rocrate in ${logFolder}`)
-            await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalItem.json')), JSON.stringify(normalItem, null, 2));
+            const fileName = path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalItem.json'));
+            log.error(`Verify rocrate in ${logFolder} for ${fileName}`);
+            await fs.writeFile(fileName, JSON.stringify(normalItem, null, 2));
           }
           //Then get a file, same as:
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
@@ -57,7 +58,7 @@ export async function indexObjects({crateId, client, index, root, repository}) {
             const hasFile = Object.assign({}, hasFileProxy);
             await indexFiles({
               crateId: item['@id'], item, hasFile, crate,
-              client, index, root, repository
+              client, index, root, repository, configuration
             });
           }
         } else {

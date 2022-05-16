@@ -28,7 +28,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
           }
         }
         root.name = root['name'] || root['@id'];
-        const normalCollectionItem = crate.getNormalizedTree(item, 1);
+        const normalCollectionItem = crate.getTree({ root: item, depth: 1, allowCycle: false });
         normalCollectionItem._root = {'@id': root['@id'], name: root.name}
         try {
           const {body} = await client.index({
@@ -43,7 +43,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             await fs.mkdir(logFolder);
           }
           log.error(`Verify rocrate in ${logFolder}`)
-          await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalCollectionItem.json')), JSON.stringify(normalCollectionItem, null, 2));
+          await fs.writeFile(path.normalize(path.join(logFolder, crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalCollectionItem.json')), JSON.stringify(normalCollectionItem, null, 2));
         }
       } else if (item['@type'] && item['@type'].includes('RepositoryObject')) {
         item._crateId = crateId;
@@ -52,8 +52,8 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._root = root;
         item.license = item.license || parent.license;
         item.name = item['name'] || item['@id'];
-        const normalObjectItem = crate.getNormalizedTree(item, 1);
-        normalObjectItem._root = {'@id': root['@id'], name: root.name}
+        const normalObjectItem = crate.getTree({ root: item, depth: 2, allowCycle: false });
+        normalObjectItem._root = {'@id': root['@id'], name: root.name};
         try {
           const {body} = await client.index({
             index: index,
@@ -61,13 +61,14 @@ export async function indexMembers({parent, crate, client, configuration, crateI
           });
         } catch (e) {
           log.error('Index normalObjectItem');
-          log.error(JSON.stringify(normalObjectItem));
+          log.error(e);
           const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
           if (!await fs.exists(logFolder)) {
             await fs.mkdir(logFolder);
           }
-          log.error(`Verify rocrate in ${logFolder}`)
-          await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalObjectItem.json')), JSON.stringify(normalObjectItem, null, 2));
+          const fileName = path.normalize(path.join(logFolder, crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalObjectItem.json'));
+          log.error(`Verify rocrate in ${logFolder} for ${fileName}`);
+          await fs.writeFile(fileName, JSON.stringify(normalObjectItem, null, 2));
         }
         // Add a parent for the @type: File
         for (let typeProxy of crate.utils.asArray(item['@type'])) {
@@ -84,7 +85,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         for (let hasFile of crate.utils.asArray(item['hasFile'])) {
           await indexFiles({
             crateId: crateId, item, hasFile, parent, crate,
-            client, index, root, repository
+            client, index, root, repository, configuration
           });
         }
       } else {
