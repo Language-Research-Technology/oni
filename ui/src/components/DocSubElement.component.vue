@@ -1,10 +1,10 @@
 <template>
-  <el-row v-loading="loading">
-  <span v-if="Array.isArray(this.value)" v-for="v of this.value">
+  <el-row class="md:container w-full" >
+  <span v-if="Array.isArray(this.value)" v-for="v of this.value" v-loading="loading">
     <a href="v">OH: {{ v }}</a>
   </span>
-  <span>
-    <div v-if="this.value['@id']">
+    <span class="md:container w-full">
+    <div class="md:container w-full" v-if="this.value['@id']" v-loading="loading">
       <el-row :gutter="20" x-data="collapse" class="collapse">
         <el-col :span="24">
       <button class="flex items-center w-full space-x-3 text-xl select-none text-left"
@@ -28,7 +28,7 @@
                x-ref="content"
                aria-labelledby="collapse-1-button">
         <el-row v-for="(value, name, i) in this.value" :key="this.name">
-          <el-col :span="24">
+          <el-col :span="24" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
           <doc-element :crateId="this.crateId"
                        :name="name" :value="value" :type="this.value['@type']"
                        :title="this.title" :parent="this.value"
@@ -39,12 +39,12 @@
           </el-col>
      </el-row>
     </div>
-    <!--TODO: convert the following to vue router-->
+      <!--TODO: convert the following to vue router-->
       <el-row v-else v-if="this.value">
-        <el-col :span="24">
-                <a class="break-words text-blue-600 hover:text-blue-800 visited:text-purple-600"
-                   :href="getURL()" >
-                  <el-button :type="'default'">Search Link</el-button></a>
+        <el-col :span="24" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+          <a :href="getURL()">
+            <el-button :type="'default'">Search Link</el-button>
+          </a>
         </el-col>
       </el-row>
   </span>
@@ -79,13 +79,16 @@ export default {
         import('./DocElement.component.vue')
     )
   },
+  created() {
+    this.loading = true;
+  },
   mounted() {
     this.loading = false;
   },
   data() {
     return {
       toggle: false,
-      loading: true
+      loading: false
     }
   }
 }

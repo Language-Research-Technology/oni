@@ -65,7 +65,7 @@ export async function indexFiles({crateId,item,hasFile,parent,crate,client,index
         normalFileItem._root = {'@id': root['@id'], name: root.name};
         const {body} = await client.index({
           index: index,
-          body: Object.assign({}, normalFileItem)
+          body: normalFileItem
         });
       } catch (e) {
         log.error(e);

@@ -3,28 +3,27 @@
     <el-col :xs="24" :sm="9" :md="8" :lg="4" :xl="4">
       <h4 class="p-3 font-bold break-words">{{ clean(this.name) }}</h4>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="16" :lg="20" :xl="20">
-      <div class="p-3">
-        <div class=""
-             v-if="!isString(this.value)" v-for="val in toArray(this.value)">
-          <div v-if="val['@id']" v-loading="loading" >
-            <doc-sub-element :crateId="this.crateId" :parent="this.parent"
-                             :name="this.name"
-                             :value="val" :type="this.type" :title="getTitle(val['name'])"
-                             :index="this.index" :root="this.root"/>
-          </div>
-          <div v-else>
-            <span v-if="val['@value']">{{ val['@value'] }}</span>
-            <span v-else>{{ val }}</span>
-          </div>
+    <el-col :span="24"
+            :xs="24" :sm="15" :md="16" :lg="20" :xl="20"
+            class="p-3">
+      <span v-if="!isString(this.value)" v-for="val in toArray(this.value)">
+        <div v-if="val['@id']">
+          <doc-sub-element
+              :crateId="this.crateId" :parent="this.parent"
+              :name="this.name"
+              :value="val" :type="this.type" :title="getTitle(val['name'])"
+              :index="this.index" :root="this.root"/>
         </div>
-        <div v-else v-loading="loading" >
-          <doc-sub-element :crateId="this.crateId" :parent="this.parent"
-                           :name="this.name" :value="this.value"
-                           :type="this.type" :title="this.title"
-                           :index="this.index" :root="this.root"/>
+        <div v-else>
+          <span v-if="val['@value']">{{ val['@value'] }}</span>
+          <span v-else>{{ val }}</span>
         </div>
-      </div>
+      </span>
+      <doc-sub-element v-else
+                       :crateId="this.crateId" :parent="this.parent"
+                       :name="this.name" :value="this.value"
+                       :type="this.type" :title="this.title"
+                       :index="this.index" :root="this.root"/>
     </el-col>
   </el-row>
 </template>

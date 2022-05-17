@@ -57,7 +57,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         try {
           const {body} = await client.index({
             index: index,
-            body: Object.assign({}, normalObjectItem)
+            body: normalObjectItem
           });
         } catch (e) {
           log.error('Index normalObjectItem');

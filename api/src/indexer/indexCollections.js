@@ -85,7 +85,7 @@ export async function indexCollections({configuration, repository, client}) {
           try {
             const {body} = await client.index({
               index: index,
-              body: Object.assign({}, normalRoot)
+              body: normalRoot
             });
           } catch (e) {
             log.error('index normalRoot');

@@ -39,7 +39,7 @@ export async function indexObjects({crateId, client, index, root, repository, co
           try {
             let {body} = await client.index({
               index: index,
-              body: Object.assign({}, normalItem)
+              body: normalItem
             });
           } catch (e) {
             log.error('Index RepositoryObject normalItem');
