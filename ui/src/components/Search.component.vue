@@ -68,6 +68,7 @@
               :memberOf="item._source?.memberOf"
               :highlight="item?.highlight"
               :root="item._source?._root"
+              :parent="item._source?._parent"
           />
         </div>
         <div v-if="!this.items.length > 0">

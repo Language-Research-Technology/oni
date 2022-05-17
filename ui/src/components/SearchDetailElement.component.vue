@@ -34,7 +34,24 @@
       </div>
     </el-row>
     <el-row :align="'middle'" v-if="memberOf">
-      <p>Member Of: <a :href="getFilter({field: '_root.@id', id: first(memberOf)?.['@id']})"><el-button>{{ first(memberOf)?.['@id'] }}</el-button></a></p>
+      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+        <span>Member Of:&nbsp;</span>
+      </p>
+      <div class="flex flex-wrap">
+        <a :href="getFilter({field: '_root.@id', id: first(memberOf)?.['@id']})">
+        <el-button>{{ first(memberOf)?.['@id'] }}</el-button>
+      </a>
+      </div>
+    </el-row>
+    <el-row :align="'middle'" v-if="parent">
+      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+        <span>From:&nbsp;</span>
+      </p>
+      <div class="flex flex-wrap">
+        <a :href="'/view?id=' + encodeURIComponent(this.parentId)">
+        <el-button>{{ this.parentName }}</el-button>
+      </a>
+      </div>
     </el-row>
     <el-row :align="'middle'" v-if="highlight">
       <ul>
@@ -61,10 +78,14 @@ export default {
     languages: {},
     memberOf: {},
     root: {},
-    highlight: {}
+    highlight: {},
+    parent: {}
   },
   data() {
-    return {}
+    return {
+      parentId: '',
+      parentName: ''
+    }
   },
   methods: {
     first,
@@ -82,12 +103,22 @@ export default {
         return `/search?f=${filterEncoded}`;
       }
     },
+    getParent() {
+      const parent = first(this.parent);
+      if (parent) {
+        this.parentId = parent?.['@id'];
+        this.parentName = first(parent?.name)?.['@value'] || this.parentId;
+      }
+    },
     mergeQueryFilters({filters, filter}) {
       let decodedFilters = decodeURIComponent(filters);
       decodedFilters = JSON.parse(decodedFilters);
       const merged = merge(decodedFilters, filter);
       return encodeURIComponent(JSON.stringify(merged));
     }
+  },
+  beforeMount() {
+    this.getParent();
   }
 }
 </script>

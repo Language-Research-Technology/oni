@@ -6,7 +6,11 @@ import {toArray} from "lodash";
 
 const log = getLogger();
 
-export async function indexFiles({crateId,item,hasFile,parent,crate,client,index,root,repository,configuration}) {
+export async function indexFiles({
+                                   crateId, item, hasFile, parent,
+                                   crate, client, index, root,
+                                   repository, configuration
+                                 }) {
   try {
     //log.debug(`Get Files for ${hasFile['@id']}`);
     const fileId = hasFile['@id'];
@@ -36,32 +40,36 @@ export async function indexFiles({crateId,item,hasFile,parent,crate,client,index
         }
       }
       //TODO find csvs too all text formats
-      if (fileItem['encodingFormat']) {
-        const encodingArray = crate.utils.asArray(fileItem['encodingFormat']);
-        const fileItemFormat = encodingArray.find((ef) => {
-          if (typeof ef === 'string') return ef.match('text/');
-        });
-        if (fileItemFormat) {
-          const fileObj = await getFile({
-            itemId: crateId,
-            repository,
-            filePath: fileItem['@id']
-          });
-          if (fileObj) {
-            if (await fs.stat(path.resolve(fileObj.filePath))) {
-              fileContent = await fs.readFile(path.resolve(fileObj.filePath), 'utf-8');
-              //addContent(item['hasFile'], fileItem['@id'], fileContent);
-            } else {
-              log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
-            }
-          }
-        }
-      }
+      //Do a reverse if there is an indexableText add the content.
       let normalFileItem;
       try {
         normalFileItem = crate.getTree({root: fileItem, depth: 1, allowCycle: false});
         //TODO: Maybe search for stream pipes in elastic
-        normalFileItem['_text'] = fileContent;
+        const reverse = fileItem['@reverse'];
+        if (reverse && reverse['indexableText']) {
+          if (fileItem['encodingFormat']) {
+            const encodingArray = crate.utils.asArray(fileItem['encodingFormat']);
+            const fileItemFormat = encodingArray.find((ef) => {
+              if (typeof ef === 'string') return ef.match('text/');
+            });
+            if (fileItemFormat) {
+              const fileObj = await getFile({
+                itemId: crateId,
+                repository,
+                filePath: fileItem['@id']
+              });
+              if (fileObj) {
+                if (await fs.stat(path.resolve(fileObj.filePath))) {
+                  fileContent = await fs.readFile(path.resolve(fileObj.filePath), 'utf-8');
+                  //addContent(item['hasFile'], fileItem['@id'], fileContent);
+                  normalFileItem['_text'] = fileContent;
+                } else {
+                  log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
+                }
+              }
+            }
+          }
+        }
         normalFileItem._root = {'@id': root['@id'], name: root.name};
         const {body} = await client.index({
           index: index,
@@ -82,7 +90,7 @@ export async function indexFiles({crateId,item,hasFile,parent,crate,client,index
     } else {
       log.warn(`No files for ${hasFile['@id']}`);
     }
-  } catch (e) {
+  } catch(e) {
     log.error(e);
   }
 }

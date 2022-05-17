@@ -24,8 +24,7 @@ export async function indexObjects({crateId, client, index, root, repository, co
       //TODO: add version
       const rawCrate = await getRawCrate({repository, crateId: member['crateId']});
       const crate = new ROCrate(rawCrate);
-      const itemProxy = crate.getRootDataset();
-      const item = Object.assign({}, itemProxy);
+      const item = crate.getRootDataset();
       if (item) {
         if (item['@type'] && item['@type'].includes('RepositoryObject')) {
           //log.debug(`Indexing RepositoryObject of ${item['@id']}`);
@@ -54,8 +53,7 @@ export async function indexObjects({crateId, client, index, root, repository, co
           }
           //Then get a file, same as:
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
-          for (let hasFileProxy of crate.utils.asArray(item['hasFile'])) {
-            const hasFile = Object.assign({}, hasFileProxy);
+          for (let hasFile of crate.utils.asArray(item['hasFile'])) {
             await indexFiles({
               crateId: item['@id'], item, hasFile, crate,
               client, index, root, repository, configuration

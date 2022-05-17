@@ -5,6 +5,7 @@ import {ocfltools} from "oni-ocfl";
 import {transformURIs} from "../services/ro-crate-utils";
 import {castArray} from 'lodash';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 
 const log = getLogger();
 
@@ -185,12 +186,11 @@ export async function getFile({itemId, repository, filePath}) {
     const fileInfo = await ocfltools.getFileInfo({repository, crateId: itemId, filePath});
     if (fileInfo && fileInfo.path) {
       const filePath = fileInfo.path;
-      const index = filePath.lastIndexOf("/");
-      const fileName = filePath.substr(index);
-      const ext = filePath.lastIndexOf(".");
+      const fileName = path.basename(filePath);
+      const ext = path.extname(fileName);
       let extName;
       if (ext) {
-        extName = filePath.substr(ext);
+        extName = ext;
       }
       return {
         filename: fileName,

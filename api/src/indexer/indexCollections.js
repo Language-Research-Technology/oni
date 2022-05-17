@@ -39,18 +39,20 @@ export async function indexCollections({configuration, repository, client}) {
   try {
     let rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+      //members: 'arcp://name,cooee-corpus/corpus/root'
       //members: 'arcp://name,farms-to-freeways/corpus/root'
       //members: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
     });
     //Use this block to test cases where a conformsTo conforms to another collection
-    // const rootConformsToCrateId = await getRootConformsTos({
-    //   conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-    //   crateId: 'arcp://name,farms-to-freeways/corpus/root'
-    //   //crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
-    // });
-    // if (rootConformsToCrateId.length > 0) {
-    //   rootConformsTos = rootConformsTos.concat(rootConformsToCrateId);
-    // }
+    const rootConformsToCrateId = await getRootConformsTos({
+      conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+      //crateId: 'arcp://name,cooee-corpus/corpus/root',
+      //crateId: 'arcp://name,farms-to-freeways/corpus/root'
+      //crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
+    });
+    if (rootConformsToCrateId.length > 0) {
+      rootConformsTos = rootConformsTos.concat(rootConformsToCrateId);
+    }
     let i = 0;
     const elastic = configuration['api']['elastic'];
     const index = elastic['index'];
