@@ -33,7 +33,7 @@ export async function bootstrapObject({configuration, repository, object}) {
     let lic;
     const rootLicense = first(root?.license) || root?.license;
     if (rootLicense && rootLicense['@id']) {
-      lic = rootLicense['@id']
+      lic = rootLicense['@id'];
     } else {
       lic = license['default'];
     }
@@ -44,7 +44,7 @@ export async function bootstrapObject({configuration, repository, object}) {
         crateId: crateId,
         license: lic,
         name: root['name'],
-        description: first(root['description']) || root['description'],
+        description: root['description'] || '',
         pairtreeId: object.pairtreeId
       }
       log.info(`Loading ${rec.crateId}`);

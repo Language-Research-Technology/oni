@@ -1,5 +1,5 @@
 <template>
-  <el-row>
+  <el-row v-loading="this.loading">
     <el-col :span="24">
       <div v-for="(value, name, i) in meta" :key="name">
         <doc-element v-if="display(value, name)" :crateId="this.crateId" :parent="value"
@@ -24,6 +24,7 @@ export default {
     )
   },
   mounted() {
+    this.loading = false;
   },
   methods: {
     display(value, name) {
@@ -37,7 +38,8 @@ export default {
   data() {
     return {
       title: '',
-      type: ''
+      type: '',
+      loading: true
     }
   }
 }

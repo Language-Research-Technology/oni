@@ -2,6 +2,7 @@ import { getLogger } from '../../services';
 import { isUndefined } from 'lodash';
 import {
   getRecordConformsTo,
+  getRecordMemberOfTop,
   getAllRecords,
   getRecordSingle,
   getRecordMembers,
@@ -29,6 +30,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
     } else if (!isUndefined(req.query.conformsTo)) {
       //memberOf=null & conformsTo=collectionProfileURI -> All TOP level collections
       await getRecordConformsTo({ req, res, next });
+    } else if(req.query.id && !isUndefined(req.query.memberOfTopLevel)) {
+      await getRecordMemberOfTop({req, res, next});
     } else if (req.query.id) {
       await getRecordSingle({ req, res, next });
     } else {

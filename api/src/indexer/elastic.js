@@ -18,8 +18,8 @@ export async function elasticInit({configuration}) {
       client.on('response', (err, result) => {
         if (err) {
           const error = {
-            type: err.meta.body.type,
-            message: err.message,
+            type: err?.meta?.body?.type,
+            message: err?.message,
             meta: err.meta?.body?.error?.caused_by
           };
           log.error(JSON.stringify(error));

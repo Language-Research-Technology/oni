@@ -8,11 +8,11 @@ import * as fs from 'fs-extra';
 
 const log = getLogger();
 
-export async function indexObjects({crateId, client, index, root, repository, configuration}) {
+export async function indexObjects({crateId, client, index, root, parent, repository, configuration}) {
   try {
     //This is the same as doing
     // http://localhost:9000/api/object?conformsTo=https://github.com/Language-Research-Technology/ro-crate-profile%23Object&memberOf=<<crateId>>
-    const members = await getRootConformsTos({
+    let members = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Object',
       members: crateId
     });
@@ -32,9 +32,12 @@ export async function indexObjects({crateId, client, index, root, repository, co
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
           item.license = item.license || member.license || root.license;
-          const normalItem = crate.getTree({ root: item, depth: 2, allowCycle: false });
+          const normalItem = crate.getTree({root: item, depth: 2, allowCycle: false});
           //normalItem._root = {"@value": root['@id']};
-          normalItem._root = {'@id': root['@id'], name: root.name}
+          if (parent) {
+            normalItem._memberOf = parent;
+          }
+          normalItem._root = root;
           try {
             let {body} = await client.index({
               index: index,
@@ -47,7 +50,7 @@ export async function indexObjects({crateId, client, index, root, repository, co
             if (!await fs.exists(logFolder)) {
               await fs.mkdir(logFolder);
             }
-            const fileName = path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalItem.json'));
+            const fileName = path.normalize(path.join(logFolder, member.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalItem.json'));
             log.error(`Verify rocrate in ${logFolder} for ${fileName}`);
             await fs.writeFile(fileName, JSON.stringify(normalItem, null, 2));
           }

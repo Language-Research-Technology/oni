@@ -20,10 +20,10 @@
         </div>
       </span>
       <doc-sub-element v-else
-                       :crateId="this.crateId" :parent="this.parent"
-                       :name="this.name" :value="this.value"
-                       :type="this.type" :title="this.title"
-                       :index="this.index" :root="this.root"/>
+                     :crateId="this.crateId" :parent="this.parent"
+                     :name="this.name" :value="this.value"
+                     :type="this.type" :title="this.title"
+                     :index="this.index" :root="this.root"/>
     </el-col>
   </el-row>
 </template>

@@ -34,7 +34,13 @@ export async function getAllRootConformsTos({offset = 0, limit = 10}) {
 export async function getRootConformsTos({conforms, members, crateId}) {
 
   try {
-    if (members == 'false' || isUndefined(members) || members === '') {
+    let queryMembers = false;
+    if (members === null) {
+      queryMembers = false;
+    } else queryMembers = !!(members == 'false' || isUndefined(members) || members === '');
+    log.debug(`Check Members: ${queryMembers}`);
+    // if members is undefined use this
+    if (queryMembers) {
       const where = {
         conformsTo: conforms
       }
@@ -51,7 +57,30 @@ export async function getRootConformsTos({conforms, members, crateId}) {
       });
       return conformsTo;
     } else {
-      const results = await models.sequelize.query(`
+      if (members === null) {
+        const results = await models.sequelize.query(`
+        SELECT c."conformsTo",
+               m."crateId",
+               m."memberOf",
+               r."license"     as "record.license",
+               r."name"        as "record.name",
+               r."description" as "record.description"
+        FROM public."records" as r,
+             public."rootMemberOfs" as m,
+             public."rootConformsTos" as c
+        WHERE c."conformsTo" = :conforms
+          AND m."memberOf" IS null
+          AND c."recordId" = r."id"
+          AND m."recordId" = r."id"
+        --ORDER BY m."crateId" ASC LIMIT 100 
+        `, {
+          replacements: {conforms: conforms},
+          type: models.Sequelize.QueryTypes.SELECT,
+          nest: true // This in order to return a similar result as when members is false. And cheaper
+        });
+        return results;
+      } else {
+        const results = await models.sequelize.query(`
         SELECT c."conformsTo",
                m."crateId",
                m."memberOf",
@@ -67,11 +96,12 @@ export async function getRootConformsTos({conforms, members, crateId}) {
           AND m."recordId" = r."id"
         --ORDER BY m."crateId" ASC LIMIT 100 
       `, {
-        replacements: {members: members, conforms: conforms},
-        type: models.Sequelize.QueryTypes.SELECT,
-        nest: true // This in order to return a similar result as when members is false. And cheaper
-      });
-      return results;
+          replacements: {members: members, conforms: conforms},
+          type: models.Sequelize.QueryTypes.SELECT,
+          nest: true // This in order to return a similar result as when members is false. And cheaper
+        });
+        return results;
+      }
     }
   } catch (e) {
     log.error(e);

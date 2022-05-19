@@ -19,7 +19,7 @@ export async function indexFiles({
     if (fileItem) {
       //Id already in fileItem
       //crate.pushValue(fileItem, 'file', {'@id': fileItem['@id']});
-      fileItem._root = root;
+      //fileItem._memberOf = root;
       fileItem._crateId = crateId;
       fileItem.license = fileItem.license || item.license || parent.license;
       fileItem._parent = {
@@ -44,6 +44,7 @@ export async function indexFiles({
       let normalFileItem;
       try {
         normalFileItem = crate.getTree({root: fileItem, depth: 1, allowCycle: false});
+        normalFileItem._root = root;
         //TODO: Maybe search for stream pipes in elastic
         const reverse = fileItem['@reverse'];
         if (reverse && reverse['indexableText']) {

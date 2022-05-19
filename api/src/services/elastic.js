@@ -32,6 +32,8 @@ export async function filterResults({userId, results, configuration}) {
         results.hits.hits[index]._source = {
           '@id': id,
           '@type': source['@type'] || null,
+          '_memberOf': source['_memberOf'] || null,
+          '_parent': source['_parent'] || null,
           name: source?.name, //TODO: add pseudonym to names
           license: source?.license,
           error: 'not_authorized'

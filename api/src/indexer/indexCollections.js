@@ -5,8 +5,11 @@ import {recordResolve} from '../controllers/recordResolve';
 import {getLogger} from "../services";
 import {indexObjects} from "./indexObjects";
 import {indexMembers} from "./indexMembers";
+import {indexSubCollections} from "./indexSubCollections";
+
 import path from "path";
 import * as fs from 'fs-extra';
+import {first} from 'lodash';
 
 const log = getLogger();
 
@@ -39,22 +42,8 @@ export async function indexCollections({configuration, repository, client}) {
   try {
     let rootConformsTos = await getRootConformsTos({
       conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-      //members: 'arcp://name,multilingual.gov.au/corpus/root'
-      //members: 'arcp://name,cooee-corpus/corpus/root'
-      //members: 'arcp://name,farms-to-freeways/corpus/root'
-      //members: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
+      members: null
     });
-    //Use this block to test cases where a conformsTo conforms to another collection
-    // const rootConformsToCrateId = await getRootConformsTos({
-    //   conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
-    //   //crateId: 'arcp://name,multilingual.gov.au/corpus/root'
-    //   //crateId: 'arcp://name,cooee-corpus/corpus/root',
-    //   //crateId: 'arcp://name,farms-to-freeways/corpus/root'
-    //   //crateId: 'arcp://name,sydney-speaks/corpus/root' // Add a crateId to test the indexer.
-    // });
-    // if (rootConformsToCrateId.length > 0) {
-    //   rootConformsTos = rootConformsTos.concat(rootConformsToCrateId);
-    // }
     let i = 0;
     const elastic = configuration['api']['elastic'];
     const index = elastic['index'];
@@ -70,22 +59,29 @@ export async function indexCollections({configuration, repository, client}) {
       } else {
         const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
         const crate = new ROCrate(resolvedCrate, rocrateOpts);
-        const root = crate.getRootDataset();
-        if (root) {
-          root._crateId = col.crateId;
-          root._containsTypes = [];
-          root.conformsTo = 'Collection';
-          //TODO: better license checks
-          root.license = root.license || col.record.dataValues?.license || col.record?.license;
-          const _root = {
-            '@id': root._crateId,
-            '@type': root['@type'],
-            'name': root.name || ''
+        const repoCollectionRoot = crate.getRootDataset();
+        if (repoCollectionRoot) {
+          const memberOf = col['memberOf'];
+          if(!memberOf) {
+            repoCollectionRoot._isTopLevel = true;
           }
-          //root._root = _root;
+          repoCollectionRoot._memberOf = memberOf;
+          repoCollectionRoot._crateId = col.crateId;
+          repoCollectionRoot._containsTypes = [];
+          repoCollectionRoot.conformsTo = 'Collection';
+          //TODO: better license checks
+          repoCollectionRoot.license = repoCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
+          const _root = {
+            '@id': first(repoCollectionRoot._crateId),
+            '@type': repoCollectionRoot['@type'],
+            'name': [{'@value': first(repoCollectionRoot.name)}]
+          }
+          if(repoCollectionRoot._isTopLevel) {
+            _root.isTopLevel = true;
+          }
           //root.collection = _root['name'] || root['@id'];
-          const normalRoot = crate.getTree({root, depth: 2, allowCycle: false});
-          normalRoot._root = {'@id': root['@id'], name: root.name}
+          const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});
+          normalRoot._root = _root;
           try {
             const {body} = await client.index({
               index: index,
@@ -100,10 +96,10 @@ export async function indexCollections({configuration, repository, client}) {
             log.error(`Verify rocrate in ${logFolder}`)
             await fs.writeFile(path.normalize(path.join(logFolder, col.crateId.replace(/[/\\?%*:|"<>]/g, '-') + '_normalRoot.json')), JSON.stringify(normalRoot, null, 2));
           }
-          if (root.hasMember && root.hasMember.length > 0) {
+          if (repoCollectionRoot.hasMember && repoCollectionRoot.hasMember.length > 0) {
             log.debug(`Indexing Members of root`);
             await indexMembers({
-              parent: root,
+              parent: repoCollectionRoot,
               crate,
               client,
               configuration,
@@ -113,6 +109,7 @@ export async function indexCollections({configuration, repository, client}) {
             });
           } else {
             log.debug('Indexing objects');
+            await indexSubCollections({crateId: col.crateId, client, index, root: _root, repository, configuration});
             await indexObjects({
               crateId: col.crateId,
               client,

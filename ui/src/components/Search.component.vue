@@ -65,7 +65,7 @@
               :conformsTo="item.conformsTo"
               :types="item._source?.['@type']"
               :languages="item._source?.['language']"
-              :memberOf="item._source?.memberOf"
+              :_memberOf="item._source?._memberOf"
               :highlight="item?.highlight"
               :root="item._source?._root"
               :parent="item._source?._parent"

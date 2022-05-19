@@ -1,19 +1,19 @@
 <template>
-  <div v-if="this.total > 0">
-    <el-row>
+  <div v-if="this.total > 0" class="md:container w-full">
+    <el-row class="md:container w-full">
       <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
         <h4 class="p-3 font-bold break-words">{{ this.conformsToName }}</h4>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="5" :xl="5">
+      <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="20">
         <h4 class="p-3 font-bold break-words">Total {{ this.total }}</h4>
       </el-col>
     </el-row>
-    <el-row>
+    <el-row class="md:container w-full">
       <el-col :xs="24" :sm="9" :md="8" :lg="5" :xl="4">
         <h4 class="p-3 font-bold break-words">&nbsp;</h4>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="5" :xl="5">
-        <div v-for="(value, name, i) in this.meta.slice(0, this.limitMembers)" :key="name">
+      <el-col :span="24" :xs="24" :sm="15" :md="16" :lg="19" :xl="20">
+        <div class="md:container w-full" v-for="(value, name, i) in this.meta.slice(0, this.limitMembers)" :key="name">
           <el-link :href="'/view?id=' + value.crateId">{{ value.record.name || value.memberOf }}</el-link>
         </div>
         <el-link v-if="this.showMore" :href="setFacetUrl()">Show More</el-link>
@@ -55,7 +55,7 @@ export default {
     setFacetUrl() {
       let route = '/search?f=';
       //TODO: define search facet value from parent ??
-      const facet = JSON.stringify({'_root.@id': [this.crateId['@value']]});
+      const facet = JSON.stringify({'_memberOf.@id': [this.crateId['@value']]});
       return route + encodeURIComponent(facet);
     }
   },

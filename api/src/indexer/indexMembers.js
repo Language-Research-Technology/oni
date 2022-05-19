@@ -12,7 +12,6 @@ export async function indexMembers({parent, crate, client, configuration, crateI
     for (let item of crate.utils.asArray(parent.hasMember)) {
       if (item['@type'] && item['@type'].includes('RepositoryCollection')) {
         log.debug(`Indexing RepositoryCollection of ${item['@id']}`);
-        item._root = root;
         item._crateId = crateId;
         item._containsTypes = [];
         item.conformsTo = 'RepositoryCollection';
@@ -27,9 +26,8 @@ export async function indexMembers({parent, crate, client, configuration, crateI
             }
           }
         }
-        root.name = root['name'] || root['@id'];
-        const normalCollectionItem = crate.getTree({ root: item, depth: 1, allowCycle: false });
-        normalCollectionItem._root = {'@id': root['@id'], name: root.name}
+        const normalCollectionItem = crate.getTree({root: item, depth: 1, allowCycle: false});
+        normalCollectionItem._root = root;
         try {
           const {body} = await client.index({
             index: index,
@@ -49,11 +47,11 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._crateId = crateId;
         item.conformsTo = 'RepositoryObject';
         item.partOf = {'@id': parent['@id']};
-        item._root = root;
         item.license = item.license || parent.license;
         item.name = item['name'] || item['@id'];
-        const normalObjectItem = crate.getTree({ root: item, depth: 2, allowCycle: false });
-        normalObjectItem._root = {'@id': root['@id'], name: root.name};
+        const normalObjectItem = crate.getTree({root: item, depth: 2, allowCycle: false});
+        normalObjectItem._root = root;
+        normalObjectItem._memberOf = root;
         try {
           const {body} = await client.index({
             index: index,
@@ -74,7 +72,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         for (let typeProxy of crate.utils.asArray(item['@type'])) {
           const type = Object.assign({}, typeProxy)
           if (type !== 'RepositoryObject') {
-            if(Array.isArray(parent._containsTypes)) {
+            if (Array.isArray(parent._containsTypes)) {
               if (!parent._containsTypes.includes(type)) {
                 crate.pushValue(parent, '_containsTypes', type);
               }

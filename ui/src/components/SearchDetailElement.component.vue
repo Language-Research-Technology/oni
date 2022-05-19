@@ -33,13 +33,13 @@
         </button>
       </div>
     </el-row>
-    <el-row :align="'middle'" v-if="memberOf">
+    <el-row :align="'middle'" v-if="_memberOf">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
         <span>Member Of:&nbsp;</span>
       </p>
       <div class="flex flex-wrap">
-        <a :href="getFilter({field: '_root.@id', id: first(memberOf)?.['@id']})">
-        <el-button>{{ first(memberOf)?.['@id'] }}</el-button>
+        <a :href="'/view?id=' + _memberOf?.['@id']">
+        <el-button>{{ first(_memberOf?.name)?.['@value'] || _memberOf?.['@id'] }}</el-button>
       </a>
       </div>
     </el-row>
@@ -48,8 +48,8 @@
         <span>From:&nbsp;</span>
       </p>
       <div class="flex flex-wrap">
-        <a :href="'/view?id=' + encodeURIComponent(this.parentId)">
-        <el-button>{{ this.parentName }}</el-button>
+        <a v-for="p of parent" :href="'/view?id=' + encodeURIComponent(p?.['@id'])">
+          <el-button>{{ first(p?.name)?.['@value'] || p?.['@id'] }}</el-button>
       </a>
       </div>
     </el-row>
@@ -65,7 +65,7 @@
   </div>
 </template>
 <script>
-import {first, merge} from 'lodash';
+import {first, merge, toArray} from 'lodash';
 
 export default {
   components: {},
@@ -76,7 +76,7 @@ export default {
     conformsTo: '',
     types: {},
     languages: {},
-    memberOf: {},
+    _memberOf: {},
     root: {},
     highlight: {},
     parent: {}
@@ -89,6 +89,7 @@ export default {
   },
   methods: {
     first,
+    toArray,
     getFilter({field, id}) {
       const filter = {};
       filter[field] = [id];
@@ -103,22 +104,12 @@ export default {
         return `/search?f=${filterEncoded}`;
       }
     },
-    getParent() {
-      const parent = first(this.parent);
-      if (parent) {
-        this.parentId = parent?.['@id'];
-        this.parentName = first(parent?.name)?.['@value'] || this.parentId;
-      }
-    },
     mergeQueryFilters({filters, filter}) {
       let decodedFilters = decodeURIComponent(filters);
       decodedFilters = JSON.parse(decodedFilters);
       const merged = merge(decodedFilters, filter);
       return encodeURIComponent(JSON.stringify(merged));
     }
-  },
-  beforeMount() {
-    this.getParent();
   }
 }
 </script>
