@@ -32,7 +32,7 @@ export async function indexObjects({crateId, client, index, root, parent, reposi
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
           item.license = item.license || member.license || root.license;
-          const normalItem = crate.getTree({root: item, depth: 2, allowCycle: false});
+          const normalItem = crate.getTree({root: item, depth: 1, allowCycle: false});
           //normalItem._root = {"@value": root['@id']};
           if (parent) {
             normalItem._memberOf = parent;
@@ -44,7 +44,7 @@ export async function indexObjects({crateId, client, index, root, parent, reposi
               body: normalItem
             });
           } catch (e) {
-            log.error('Index RepositoryObject normalItem');
+            log.error('IndexObjects normalItem');
             //log.debug(JSON.stringify(normalFileItem));
             const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
             if (!await fs.exists(logFolder)) {
@@ -56,9 +56,9 @@ export async function indexObjects({crateId, client, index, root, parent, reposi
           }
           //Then get a file, same as:
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
-          for (let hasFile of crate.utils.asArray(item['hasFile'])) {
+          for (let hasPart of crate.utils.asArray(item['hasPart'])) {
             await indexFiles({
-              crateId: item['@id'], item, hasFile, crate,
+              crateId: item['@id'], item, hasPart, crate,
               client, index, root, repository, configuration
             });
           }

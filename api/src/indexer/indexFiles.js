@@ -7,13 +7,13 @@ import {toArray} from "lodash";
 const log = getLogger();
 
 export async function indexFiles({
-                                   crateId, item, hasFile, parent,
+                                   crateId, item, hasPart, parent,
                                    crate, client, index, root,
                                    repository, configuration
                                  }) {
   try {
     //log.debug(`Get Files for ${hasFile['@id']}`);
-    const fileId = hasFile['@id'];
+    const fileId = hasPart['@id'];
     const fileItem = crate.getItem(fileId);
     let fileContent = '';
     if (fileItem) {
@@ -89,7 +89,7 @@ export async function indexFiles({
         await fs.writeFile(fileName, JSON.stringify(normalFileItem, null, 2));
       }
     } else {
-      log.warn(`No files for ${hasFile['@id']}`);
+      log.warn(`No files for ${hasPart['@id']}`);
     }
   } catch(e) {
     log.error(e);
