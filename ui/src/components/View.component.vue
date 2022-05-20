@@ -11,7 +11,7 @@
       </div>
       <el-button-group>
         <el-link v-if="this.searchRelated" :href="this.searchRelated" :underline="false">
-          <el-button>Related Items
+          <el-button>Member of {{ first(this._memberOf['name'])?.['@value'] }}
             <el-icon class="el-icon--right">
               <Switch/>
             </el-icon>
@@ -107,7 +107,8 @@ export default {
       openDocModal: false,
       loading: false,
       errorDialogVisible: false,
-      errorDialogText: ''
+      errorDialogText: '',
+      _memberOf: null
     }
   },
   async mounted() {
@@ -136,6 +137,7 @@ export default {
     }
   },
   methods: {
+    first,
     populate(metadata) {
       if (metadata?._source) {
         this.root = first(metadata._source._root);
@@ -151,6 +153,7 @@ export default {
         delete metadata._source.hasMember;
         delete metadata._source.error;
         this.metadata = metadata._source;
+        this._memberOf = this.metadata._memberOf;
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
         //console.log(this.metadata)
       }
@@ -239,7 +242,7 @@ export default {
     setFacetUrl() {
       let route = '/search?f=';
       //TODO: define search facet value from parent ??
-      const idSearch = this.crateId?.['@value'];
+      const idSearch = this._memberOf?.['@id'];
       if (idSearch) {
         const search = [];
         search.push(idSearch);
