@@ -29,6 +29,8 @@ export function setupRoutes({ server, configuration, repository }) {
 
   server.get('/configuration', async (req, res, next) => {
     let configuration = await loadConfiguration();
+    const ui = configuration.ui;
+    ui.aggregations = configuration?.api?.elastic?.aggregations;
     res.send({ ui: configuration.ui });
     next();
   });

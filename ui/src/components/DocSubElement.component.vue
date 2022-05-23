@@ -21,7 +21,7 @@
              stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
-        <span>{{ getTitle() }}</span>
+        <span><p class="text-base">{{ getTitle() }}</p></span>
       </button>
       <section v-show="toggle"
                class="transition-all duration-300 ease-out w-full"

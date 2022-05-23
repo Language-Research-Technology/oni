@@ -15,7 +15,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._crateId = crateId;
         item._containsTypes = [];
         item.conformsTo = 'RepositoryCollection';
-        item.partOf = {'@id': parent['@id']};
+        //item.partOf = {'@id': parent['@id']};
         item.license = item.license || parent.license;
         await indexMembers({parent: item, crate, client, configuration, crateId, root, repository});
         //Bubble up types to the parent
@@ -46,7 +46,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
       } else if (item['@type'] && item['@type'].includes('RepositoryObject')) {
         item._crateId = crateId;
         item.conformsTo = 'RepositoryObject';
-        item.partOf = {'@id': parent['@id']};
+        //item.partOf = {'@id': parent['@id']};
         item.license = item.license || parent.license;
         item.name = item['name'] || item['@id'];
         const normalObjectItem = crate.getTree({root: item, depth: 1, allowCycle: false});

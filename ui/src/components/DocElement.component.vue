@@ -15,8 +15,8 @@
               :index="this.index" :root="this.root"/>
         </div>
         <div v-else>
-          <span v-if="val['@value']">{{ val['@value'] }}</span>
-          <span v-else>{{ val }}</span>
+          <span v-if="val['@value']"><p class="text-base">{{ val['@value'] }}</p></span>
+          <span v-else><p class="text-base">{{ val }}</p></span>
         </div>
       </span>
       <doc-sub-element v-else

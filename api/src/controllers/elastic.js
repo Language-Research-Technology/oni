@@ -55,7 +55,7 @@ function composeTermAgg(name, fields, agg) {
 }
 
 function composeTermAggs(name, field, agg) {
-  return agg.agg(esb.termsAggregation(name, field));
+  return agg.agg(esb.termsAggregation(name, field).size(1000));
 }
 
 export function aggsQueries({aggregations}) {
@@ -64,11 +64,11 @@ export function aggsQueries({aggregations}) {
   for (let aO of aggregations) {
     if (aO.path) {
       aggsArray.push(
-        composeTermAggs('values', aO.field, esb.nestedAggregation(aO.name, aO.path))
+        composeTermAggs('values', aO.field, esb.nestedAggregation(aO.name, aO.path).size(1000))
       );
     } else {
       aggsArray.push(
-        esb.termsAggregation(aO.name, aO.field)
+        esb.termsAggregation(aO.name, aO.field).size(1000)
       );
     }
   }

@@ -44,7 +44,7 @@ export function setupSearchRoutes({server, configuration}) {
         }
         searchBody = boolQuery({searchQuery, fields, filters, highlightFields});
         searchBody.aggs = aggsQueries({aggregations});
-        log.debug(JSON.stringify({aggs: searchBody.aggs}));
+        //log.debug(JSON.stringify({aggs: searchBody}));
         results = await search({configuration, index, searchBody, explain: false});
       }
       const userId = user?.id;
