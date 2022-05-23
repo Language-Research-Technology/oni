@@ -23,20 +23,21 @@
               </li>
             </ul>
           </div>
-          <div class="flex w-full" v-for="(aggs, aggsName, index) of aggregations" :key="aggsName">
-            <ul v-if="aggs?.buckets?.length > 0" class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
+          <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
+            <ul v-if="aggs?.buckets?.length > 0"
+                class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
               <li class="border-b-2">
                 <button class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
-                  {{index}} : {{ aggs.display }}
+                  {{ aggs.display }}
                 </button>
               </li>
               <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
-              <search-aggs :buckets="aggs.buckets" :aggsName="aggsName" :ref="aggsName"/>
+              <search-aggs :buckets="aggs.buckets" :aggsName="aggs.name" :ref="aggs.name"/>
             </ul>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0">
+      <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0"  v-loading="this.loading">
         <div class="sticky top-20 z-10 bg-white pb-5">
           <el-row v-if="totals" :align="'middle'">
             <div class="divide-solid divide-y-2 divide-red-700 py-4">
@@ -95,7 +96,7 @@
 
 <script>
 
-import {first, isEmpty, orderBy} from 'lodash';
+import {first, isEmpty, orderBy, toArray} from 'lodash';
 import {CloseBold} from "@element-plus/icons-vue";
 import {defineAsyncComponent, toRaw} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
@@ -119,7 +120,8 @@ export default {
       aggregations: {},
       filters: {},
       clear: false,
-      filterButton: []
+      filterButton: [],
+      loading: false
     };
   },
   updated() {
@@ -128,18 +130,25 @@ export default {
   },
   watch: {
     async '$route.query'() {
+      this.loading = true;
       if (this.$route.query.f) {
         await this.updateFilters();
+        this.loading = false;
       } else {
+        this.loading = true;
         await this.search();
+        this.loading = false;
       }
     }
   },
   async mounted() {
+    this.loading = true;
     if (this.$route.query.f) {
       await this.updateFilters();
+      this.loading = false
     } else {
       await this.search();
+      this.loading = false;
     }
   },
   methods: {
@@ -204,12 +213,13 @@ export default {
     },
     populateAggregations(aggregations) {
       const a = {};
+      //Note: below is converted to an ordered array not an object.
       for (let agg of Object.keys(aggregations)) {
         const aggInfo = this.$store.state.configuration.ui.aggregations;
         const info = aggInfo.find((a) => a['name'] === agg);
-        const display = info.display;
-        const order = info.order;
-        const name = info.name;
+        const display = info?.display;
+        const order = info?.order;
+        const name = info?.name;
         a[agg] = {
           buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets,
           display: display || agg,
@@ -217,8 +227,7 @@ export default {
           name: name || agg
         };
       }
-      return a;
-      //return orderBy(a, 'order');
+      return orderBy(a, 'order');
     },
     async getNext() {
       let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
@@ -245,11 +254,12 @@ export default {
       window.scrollTo(0, 0);
     },
     async clearAggregations() {
-      for (let agg of Object.keys(this.aggregations)) {
+      for (let agg of this.aggregations) {
         //TODO: ask cos this may be silly?!?
         //this.$refs[agg][0].clear();
-        if(this.$refs[agg]) {
-          for (let r of this.$refs[agg]) {
+        const name = agg?.name;
+        if (this.$refs[name]) {
+          for (let r of this.$refs[name]) {
             r.clear();
           }
         }

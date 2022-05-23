@@ -1,5 +1,5 @@
 <template>
-  <el-row :class="this.index % 2 == 0 ? 'bg-white': 'bg-gray-100'" :name="this.name">
+  <el-row :class="this.index % 2 == 0 ? 'bg-white': 'bg-indigo-50'" :name="this.name">
     <el-col :xs="24" :sm="9" :md="8" :lg="4" :xl="4">
       <h4 class="p-3 font-bold break-words">{{ clean(this.name) }}</h4>
     </el-col>
