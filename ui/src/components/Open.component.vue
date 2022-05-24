@@ -20,7 +20,11 @@
             </pdf>
           </div>
           <div class="p-4 break-words" v-else-if="this.type === 'txt'">
-            {{ this.data }}
+            <el-table v-if="this.loadCsv" :data="this.csv.data" style="width: 100%">
+              <el-table-column v-for="guessedColumn of this.csv.cols"
+                               :prop="guessedColumn" :label="guessedColumn"></el-table-column>
+            </el-table>
+            <div v-else>{{ this.data }}</div>
           </div>
           <div class="p-4" v-else-if="this.type === 'audio'">
             <audio controls>
@@ -46,7 +50,7 @@
 <script>
 import 'element-plus/theme-chalk/display.css'
 import pdf from 'vue3-pdf';
-import {first} from 'lodash';
+import {first, isUndefined} from 'lodash';
 import {VideoPlay} from "@element-plus/icons-vue";
 
 export default {
@@ -66,6 +70,8 @@ export default {
       name: '',
       parent: '',
       parentTitle: '',
+      loadCsv: false,
+      csv: {},
       loading: false
     }
   },
@@ -97,17 +103,43 @@ export default {
     if (path && (path.endsWith(".txt") || path.endsWith(".csv") || path.endsWith(".eaf"))) {
       this.type = 'txt';
       this.data = await response.text();
+      if (path.endsWith(".csv")) {
+        try {
+          const parsedCsv = this.$papa.parse(this.data);
+          if (parsedCsv?.data && parsedCsv?.data?.length > 1) {
+            //Guess that the first elements are the headers. Then shift the array.
+            this.csv.cols = first(parsedCsv.data);
+            parsedCsv.data.shift();
+            this.csv.data = parsedCsv.data.map((r) => {
+              const row = {};
+              for (let [index, col] of this.csv.cols.entries()) {
+                if (isUndefined(col) || col === "") {
+                  col = '__nocolumn__';
+                }
+                row[col] = r[index];
+              }
+              return row;
+            });
+            this.loadCsv = true;
+          } else {
+            this.loadCsv = false;
+          }
+        } catch (e) {
+          console.log('cannot automatically convert to csv.');
+          console.log(e);
+        }
+      }
     } else {
       this.data = await response.blob();
       const blobURL = window.URL.createObjectURL(this.data);
       if (path && (path.endsWith(".mp3") || path.endsWith(".wav"))) {
         this.type = 'audio';
         this.data = blobURL;
-      } else if(path && path.endsWith(".mp4")){
+      } else if (path && path.endsWith(".mp4")) {
         this.type = 'video';
         this.sourceType = 'video/mp4';
         this.data = blobURL;
-      }else if (path && path.endsWith(".pdf")) {
+      } else if (path && path.endsWith(".pdf")) {
         this.type = 'pdf';
         this.pdfdata = pdf.createLoadingTask(blobURL);
         this.pdfdata.promise.then(pdf => {

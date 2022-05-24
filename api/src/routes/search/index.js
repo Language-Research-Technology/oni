@@ -50,7 +50,6 @@ export function setupSearchRoutes({server, configuration}) {
       const userId = user?.id;
       const filtered = await filterResults({userId, results, configuration});
       if (exactMatch) {
-        log.debug(JSON.stringify(filtered?.hits?.hits));
         const result = first(filtered?.hits?.hits) || {};
         res.send(result);
       } else {

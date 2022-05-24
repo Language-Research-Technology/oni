@@ -14,6 +14,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import log from "loglevel";
 import prefix from "loglevel-plugin-prefix";
+import VuePapaParse from 'vue-papa-parse'
 
 const level = process.env.NODE_ENV === "development" ? "debug" : "warn";
 log.setLevel(level);
@@ -33,6 +34,7 @@ import HTTPService from "./http.service";
     app.use(store);
     app.use(router);
     app.use(ElementPlus);
+    app.use(VuePapaParse);
     app.config.globalProperties.$http = new HTTPService({ router, loginPath: "/login" });
     app.config.globalProperties.$log = log;
     app.mount("#app");

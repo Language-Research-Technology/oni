@@ -67,7 +67,7 @@ export async function indexCollections({configuration, repository, client}) {
             repoCollectionRoot._isTopLevel = true;
           } else {
             log.error(`${col.crateId} if member of ${col['memberOf']}`);
-          } 
+          }
           repoCollectionRoot._crateId = col.crateId;
           repoCollectionRoot._containsTypes = [];
           repoCollectionRoot.conformsTo = 'Collection';
