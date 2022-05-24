@@ -9,9 +9,9 @@
         </el-row>
         <hr class="divider divider-gray pt-2"/>
       </div>
-      <el-button-group>
-        <el-link v-if="this.searchRelated" :href="this.searchRelated" :underline="false">
-          <el-button>Member of {{ first(this._memberOf['name'])?.['@value'] }}
+      <el-button-group v-if="this.searchRelated">
+        <el-link v-for="mO of this.searchRelated" :href="mO.search" :underline="false">
+          <el-button>Member of &nbsp;<strong>{{ mO.name }}</strong>
             <el-icon class="el-icon--right">
               <Switch/>
             </el-icon>
@@ -33,10 +33,10 @@
       <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                     :conformsToName="'Collections'"
                     :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
-      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsToName="'Objects'"
+<!--      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10-->
+<!--                    :conformsToName="'Objects'"-->
 
-                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>
+<!--                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>-->
 
       <!--                    :conformsTo="'RepositoryCollection'"/>-->
       <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
@@ -98,7 +98,7 @@ export default {
       cannotOpenFile: false,
       conformsTo: '',
       fileUrl: '',
-      searchRelated: '',
+      searchRelated: [],
       parentId: '',
       parentLink: '',
       parentName: '',
@@ -159,14 +159,14 @@ export default {
       }
     },
     isFile() {
-      if(this.metadata) {
+      if (this.metadata) {
         const type = this.metadata['@type'];
         if (Array.isArray(type)) {
           return type.find((t) => t.toLowerCase() === 'file')
         } else if (typeof type === 'string') {
           return type.toLowerCase() === 'file';
         } else return false;
-      }else return false;
+      } else return false;
     },
     getTitle() {
       const title = first(this.metadata['name'])?.['@value'];
@@ -240,14 +240,19 @@ export default {
       return this.conformsTo === 'SubCollection' || this.conformsTo === 'Collection' || this.conformsTo === 'RepositoryCollection' || this.conformsTo === 'Dataset';
     },
     setFacetUrl() {
-      let route = '/search?f=';
-      //TODO: define search facet value from parent ??
-      const idSearch = this._memberOf?.['@id'];
-      if (idSearch) {
-        const search = [];
-        search.push(idSearch);
-        const facet = JSON.stringify({'_memberOf.@id': search});
-        this.searchRelated = route + encodeURIComponent(facet);
+      if (Array.isArray(this._memberOf)) {
+        let route = '/search?f=';
+        //TODO: define search facet value from parent ??
+        for (let mO of this._memberOf) {
+          const search = [];
+          search.push(mO['@id']);
+          const facet = JSON.stringify({'_memberOf.@id': search});
+          const name = mO['name'];
+          this.searchRelated.push({
+            name: first(name)?.['@value'] || mO['@id'],
+            search: route + encodeURIComponent(facet)
+          });
+        }
       }
     },
     setParentLink() {

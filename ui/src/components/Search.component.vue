@@ -152,6 +152,7 @@ export default {
     }
   },
   methods: {
+    toArray,
     first,
     async updateFilters() {
       try {

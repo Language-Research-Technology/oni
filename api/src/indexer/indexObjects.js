@@ -5,10 +5,11 @@ import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
 import path from "path";
 import * as fs from 'fs-extra';
+import {toArray} from "lodash";
 
 const log = getLogger();
 
-export async function indexObjects({crateId, client, index, root, parent, repository, configuration}) {
+export async function indexObjects({crateId, client, index, root, parent, _memberOf, repository, configuration}) {
   try {
     //This is the same as doing
     // http://localhost:9000/api/object?conformsTo=https://github.com/Language-Research-Technology/ro-crate-profile%23Object&memberOf=<<crateId>>
@@ -33,10 +34,8 @@ export async function indexObjects({crateId, client, index, root, parent, reposi
           item.conformsTo = 'RepositoryObject';
           item.license = item.license || member.license || root.license;
           const normalItem = crate.getTree({root: item, depth: 1, allowCycle: false});
+          normalItem._memberOf = _memberOf;
           //normalItem._root = {"@value": root['@id']};
-          if (parent) {
-            normalItem._memberOf = parent;
-          }
           normalItem._root = root;
           try {
             let {body} = await client.index({
@@ -59,7 +58,8 @@ export async function indexObjects({crateId, client, index, root, parent, reposi
           for (let hasPart of crate.utils.asArray(item['hasPart'])) {
             await indexFiles({
               crateId: item['@id'], item, hasPart, crate,
-              client, index, root, repository, configuration
+              client, index, root, repository, configuration,
+              _memberOf
             });
           }
         } else {

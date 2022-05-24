@@ -9,7 +9,8 @@ const log = getLogger();
 export async function indexFiles({
                                    crateId, item, hasPart, parent,
                                    crate, client, index, root,
-                                   repository, configuration
+                                   repository, configuration,
+                                   _memberOf
                                  }) {
   try {
     //log.debug(`Get Files for ${hasFile['@id']}`);
@@ -19,7 +20,7 @@ export async function indexFiles({
     if (fileItem) {
       //Id already in fileItem
       //crate.pushValue(fileItem, 'file', {'@id': fileItem['@id']});
-      //fileItem._memberOf = root;
+
       fileItem._crateId = crateId;
       fileItem.license = fileItem.license || item.license || parent.license;
       fileItem._parent = {
@@ -45,6 +46,8 @@ export async function indexFiles({
       try {
         normalFileItem = crate.getTree({root: fileItem, depth: 1, allowCycle: false});
         normalFileItem._root = root;
+        normalFileItem._memberOf = _memberOf;
+        //normalFileItem._memberOf = root;
         //TODO: Maybe search for stream pipes in elastic
         const reverse = fileItem['@reverse'];
         if (reverse && reverse['indexableText']) {
@@ -71,7 +74,7 @@ export async function indexFiles({
             }
           }
         }
-        normalFileItem._root = {'@id': root['@id'], name: root.name};
+        normalFileItem._root = root;
         const {body} = await client.index({
           index: index,
           body: normalFileItem
@@ -91,7 +94,7 @@ export async function indexFiles({
     } else {
       log.warn(`No files for ${hasPart['@id']}`);
     }
-  } catch(e) {
+  } catch (e) {
     log.error(e);
   }
 }

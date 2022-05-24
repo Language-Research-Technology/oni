@@ -2,10 +2,11 @@ import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
 import path from "path";
 import * as fs from 'fs-extra';
+import {toArray} from "lodash";
 
 const log = getLogger();
 
-export async function indexMembers({parent, crate, client, configuration, crateId, root, repository}) {
+export async function indexMembers({parent, crate, client, configuration, crateId, root, _memberOf, repository}) {
   try {
     const index = 'items';
     log.debug(`Indexing ${crateId} `);
@@ -28,6 +29,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         }
         const normalCollectionItem = crate.getTree({root: item, depth: 1, allowCycle: false});
         normalCollectionItem._root = root;
+        normalCollectionItem._memberOf = _memberOf;
         try {
           const {body} = await client.index({
             index: index,
@@ -50,8 +52,8 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item.license = item.license || parent.license;
         item.name = item['name'] || item['@id'];
         const normalObjectItem = crate.getTree({root: item, depth: 1, allowCycle: false});
+        normalObjectItem._memberOf = _memberOf;
         normalObjectItem._root = root;
-        normalObjectItem._memberOf = root;
         try {
           const {body} = await client.index({
             index: index,
@@ -83,7 +85,8 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         for (let hasPart of crate.utils.asArray(item['hasPart'])) {
           await indexFiles({
             crateId: crateId, item, hasPart, parent, crate,
-            client, index, root, repository, configuration
+            client, index, root, repository, configuration,
+            _memberOf
           });
         }
       } else {

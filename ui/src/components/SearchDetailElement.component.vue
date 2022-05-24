@@ -1,7 +1,7 @@
 <template>
   <div><!-- Wrapping an empty div because of multiple roots with v-for-->
     <el-row :align="'middle'">
-      <h5 class="mb-2 text-2xl font-medium dark:text-white">
+      <h5 class="text-2xl font-medium dark:text-white">
         <a :href="href"
            class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-all">{{ this.name || this.id }}</a>
       </h5>
@@ -13,44 +13,53 @@
     </el-row>
     <el-row :align="'middle'">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        <span>Contains:&nbsp;</span>
+        Contains:&nbsp;
       </p>
       <div class="flex flex-wrap">
-        <button
-            class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
+        <button class="text-sm  m-2 text-gray-400 dark:text-gray-300"
             v-for="type of types">{{ type }}
         </button>
       </div>
     </el-row>
     <el-row :align="'middle'" v-if="languages">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        <span>Languages:&nbsp;</span>
+       Languages:
       </p>
       <div class="flex flex-wrap">
-        <button
-            class="text-sm px-2 pb-1 pt-1 m-2 text-gray-400 dark:text-gray-300 border border-gray-300 rounded shadow"
+        <button class="text-sm m-2 text-gray-400 dark:text-gray-300 "
             v-for="language of languages">{{ first(language.name)?.['@value'] }}
         </button>
       </div>
     </el-row>
-    <el-row :align="'middle'" v-if="_memberOf">
+    <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0"
+            class="pt-2">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        <span>Member Of:&nbsp;</span>
+        Member Of:&nbsp;
       </p>
       <div class="flex flex-wrap">
-        <a :href="'/view?id=' + _memberOf?.['@id']">
-        <el-button>{{ first(_memberOf?.name)?.['@value'] || _memberOf?.['@id'] }}</el-button>
-      </a>
+        <a v-for="mO of _memberOf" :href="'/view?id=' + mO?.['@id']">
+          <el-button>{{ first(mO?.name)?.['@value'] || mO?.['@id'] }}</el-button>
+        </a>
       </div>
     </el-row>
-    <el-row :align="'middle'" v-if="parent">
+    <el-row :align="'middle'" v-if="Array.isArray(parent) && parent.length > 0"
+            class="pt-2">
       <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        <span>From:&nbsp;</span>
+        From:&nbsp;
       </p>
       <div class="flex flex-wrap">
         <a v-for="p of parent" :href="'/view?id=' + encodeURIComponent(p?.['@id'])">
           <el-button>{{ first(p?.name)?.['@value'] || p?.['@id'] }}</el-button>
-      </a>
+        </a>
+      </div>
+      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white"
+         v-if="!Array.isArray(_memberOf)">
+        &nbsp;In:&nbsp;
+      </p>
+      <div class="flex flex-wrap" v-if="!Array.isArray(_memberOf)">
+        <a :href="'/view?id=' + encodeURIComponent(root?.['@id'])">
+          <el-button>{{ first(first(root)?.name)?.['@value'] || first(root)?.['@id'] }}</el-button>
+        </a>
       </div>
     </el-row>
     <el-row :align="'middle'" v-if="highlight">

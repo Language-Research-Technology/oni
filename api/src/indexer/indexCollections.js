@@ -9,7 +9,8 @@ import {indexSubCollections} from "./indexSubCollections";
 
 import path from "path";
 import * as fs from 'fs-extra';
-import {first} from 'lodash';
+import {first, toArray} from 'lodash';
+import {getRootMemberOfs} from "../controllers/rootMemberOf";
 
 const log = getLogger();
 
@@ -62,21 +63,22 @@ export async function indexCollections({configuration, repository, client}) {
         const repoCollectionRoot = crate.getRootDataset();
         if (repoCollectionRoot) {
           const memberOf = col['memberOf'];
-          if(!memberOf) {
+          if (!memberOf) {
             repoCollectionRoot._isTopLevel = true;
-          }
-          repoCollectionRoot._memberOf = memberOf;
+          } else {
+            log.error(`${col.crateId} if member of ${col['memberOf']}`);
+          } 
           repoCollectionRoot._crateId = col.crateId;
           repoCollectionRoot._containsTypes = [];
           repoCollectionRoot.conformsTo = 'Collection';
           //TODO: better license checks
           repoCollectionRoot.license = repoCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
-          const _root = {
+          const _root = [{
             '@id': first(repoCollectionRoot._crateId),
             '@type': repoCollectionRoot['@type'],
             'name': [{'@value': first(repoCollectionRoot.name)}]
-          }
-          if(repoCollectionRoot._isTopLevel) {
+          }];
+          if (repoCollectionRoot._isTopLevel) {
             _root.isTopLevel = true;
           }
           //root.collection = _root['name'] || root['@id'];
@@ -105,17 +107,17 @@ export async function indexCollections({configuration, repository, client}) {
               configuration,
               crateId: col.crateId,
               root: _root,
+              _memberOf: _root.concat(),
               repository
             });
           } else {
-            log.debug('Indexing objects');
-            await indexSubCollections({crateId: col.crateId, client, index, root: _root, repository, configuration});
-            await indexObjects({
+            log.debug('Indexing SubCollections and objects');
+            await indexSubCollections({
               crateId: col.crateId,
               client,
-              crate,
               index,
               root: _root,
+              _memberOf: _root.concat(),
               repository,
               configuration
             });
