@@ -41,13 +41,9 @@ export default {
   },
   methods: {
     async getMembersOf() {
-      const crateId = this.crateId;
-      const conformsTo = this.conformsTo;
-
-      //const route = `/object?memberOf=${crateId['@value']}&conformsTo=${conformsTo}`;
       let route = `/search/items?filters=`;
       const facet = JSON.stringify({
-        '_root.@id': [encodeURIComponent(this.crateId['@value'])],
+        '_memberOf.@id': [encodeURIComponent(this.crateId['@value'])],
         '@type': [this.conformsTo]
       });
       route = route + facet;
@@ -63,7 +59,7 @@ export default {
       let route = '/search?f=';
       //TODO: define search facet value from parent ??
       const facet = JSON.stringify({
-        '_root.@id': [encodeURIComponent(this.crateId['@value'])],
+        '_memberOf.@id': [encodeURIComponent(this.crateId['@value'])],
         '@type': [this.conformsTo]
       });
       return route + facet;

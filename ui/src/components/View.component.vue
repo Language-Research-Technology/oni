@@ -9,34 +9,46 @@
         </el-row>
         <hr class="divider divider-gray pt-2"/>
       </div>
-      <el-button-group v-if="this.searchRelated">
-        <el-link v-for="mO of this.searchRelated" :href="mO.search" :underline="false">
-          <el-button>Member of &nbsp;<strong>{{ mO.name }}</strong>
-            <el-icon class="el-icon--right">
-              <Switch/>
+      <el-row>
+        <el-button-group v-if="this.searchRelated">
+          <el-link class="m-2" v-for="mO of this.searchRelated" :href="mO.search" :underline="false">
+            <el-button>Member of &nbsp;<strong>{{ mO.name }}</strong>
+              <el-icon class="el-icon--right">
+                <Switch/>
+              </el-icon>
+            </el-button>
+          </el-link>
+          <el-link class="m-2" v-if="this.parentLink" :href="this.parentLink" :underline="false">
+            <el-button>Parent: {{ this.parentName || this.parentId }}</el-button>
+          </el-link>
+        </el-button-group>
+      </el-row>
+      <el-row>
+        <hr class="divider divider-gray pt-2"/>
+      </el-row>
+      <el-row>
+        <el-button-group class="m-2">
+          <el-link class="mr-2" v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
+            <el-button type="default" class="px-2">Preview File</el-button>
+          </el-link>
+          <el-link class="mr-2" v-loading="this.loading" v-if="this.isFile() && !this.cannotOpenFile" :underline="false"
+                   v-on:click="this.downloadFileUrl()">
+            <el-button type="default">Download&nbsp;<el-icon>
+              <Download/>
             </el-icon>
-          </el-button>
-        </el-link>
-        <el-link v-if="this.parentLink" :href="this.parentLink" :underline="false">
-          <el-button>Parent: {{ this.parentName || this.parentId }}</el-button>
-        </el-link>
-        <el-link v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
-          <el-button>Preview File</el-button>
-        </el-link>
-        <el-link v-loading="this.loading" v-if="this.isFile() && !this.cannotOpenFile" :underline="false"
-                 v-on:click="this.downloadFileUrl()">
-          <el-button>Download</el-button>
-        </el-link>
-        <el-button v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
-      </el-button-group>
+            </el-button>
+          </el-link>
+          <el-button type="default" v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
+        </el-button-group>
+      </el-row>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
       <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
                     :conformsToName="'Collections'"
                     :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
-<!--      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10-->
-<!--                    :conformsToName="'Objects'"-->
+      <!--      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10-->
+      <!--                    :conformsToName="'Objects'"-->
 
-<!--                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>-->
+      <!--                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>-->
 
       <!--                    :conformsTo="'RepositoryCollection'"/>-->
       <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
@@ -48,9 +60,11 @@
     </el-col>
   </el-row>
   <div v-else>
-    <view-doc-error/>
+    <view-doc-error v-loading="this.loading"/>
   </div>
-  <request-dialog :dialogVisible="this.openDocModal" v-on:close="this.openDocModal = false"/>
+  <request-dialog :dialogVisible="this.openDocModal" :enrollmentUrl="this.enrollment.url"
+                  :enrollmentLabel="this.enrollment.label || 'To request access follow this link'"
+                  v-on:close="this.openDocModal = false"/>
   <el-dialog v-model="errorDialogVisible" width="30%" center>
     <span>{{ this.errorDialogText }}</span>
     <template #footer>
@@ -63,13 +77,14 @@
 
 <script>
 import 'element-plus/theme-chalk/display.css'
-import {Switch} from "@element-plus/icons-vue";
+import {Switch, Download} from "@element-plus/icons-vue";
 import {first} from 'lodash';
 import {defineAsyncComponent} from 'vue';
 
 export default {
   components: {
     Switch,
+    Download,
     RequestDialog: defineAsyncComponent(() =>
         import("@/components/RequestDialog.component.vue")
     ),
@@ -104,6 +119,10 @@ export default {
       parentName: '',
       error: '',
       notAuthorized: false,
+      _access: {},
+      enrollment: {
+        url: '', label: ''
+      },
       openDocModal: false,
       loading: false,
       errorDialogVisible: false,
@@ -154,6 +173,10 @@ export default {
         delete metadata._source.error;
         this.metadata = metadata._source;
         this._memberOf = this.metadata._memberOf;
+        this._access = this.metadata._access;
+        if(this._access && !this._access.hasAccess) {
+          this.getEnrollment();
+        }
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
         //console.log(this.metadata)
       }
@@ -269,6 +292,18 @@ export default {
     },
     openRequestModal() {
       this.openDocModal = true;
+    },
+    getEnrollment() {
+      if (this.$store.state.configuration.ui.licenses) {
+        const license = this.$store.state.configuration.ui.licenses.find((l) => {
+          if (l.group === this._access.group) {
+            return l.enrollment;
+          }
+        });
+        this.enrollment = license.enrollment;
+      } else {
+        this.errorDialogText = 'No licenses configured';
+      }
     }
   }
 }

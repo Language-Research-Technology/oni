@@ -17,15 +17,15 @@ export async function filterResults({userId, results, configuration}) {
   const itemsToFilter = [];
   for (let index = 0; index < results?.hits?.hits.length; index++) {
     const license = first(results.hits.hits[index]?._source?.license);
-    let pass;
+    let pass = {hasAccess: false};
     const id = results?.hits?.hits[index]?._source['@id'];
     if (!license) {
       log.warn(`No license information found for ${id}`);
-      pass = true;
+      pass.hasAccess = true;
     } else {
       log.silly(`Checking authorization for ${id} with license: ${license['@id']}`);
       pass = await checkIfAuthorized({userId, license: license['@id'], configuration});
-      if (!pass) {
+      if (!pass.hasAccess) {
         log.silly(`Not authorized for ${id} with license: ${license['@id']}`);
         //What to do? Do we mutate the array adding a not authorized
         const source = results.hits.hits[index]?._source;
@@ -36,7 +36,8 @@ export async function filterResults({userId, results, configuration}) {
           '_parent': source['_parent'] || null,
           name: source?.name, //TODO: add pseudonym to names
           license: source?.license,
-          error: 'not_authorized'
+          error: 'not_authorized',
+          _access: pass
         }
         //What to do? Ask Peter; Do we remove the item of the search result with this and pullAt
         //itemsToFilter.push(index);

@@ -12,18 +12,18 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
     //If just for debugging!
     if (foundAuthorization) {
       log.silly(`Found Authorization: ${ foundAuthorization['group'] }`);
-      return true;
+      return {hasAccess: true, group: needsLicense['group']};
     } else {
-      return false
+      return {hasAccess: false, group: needsLicense['group']};
     }
   } else {
     log.silly(`Not required or not configured for ${license}`);
-    return true;
+    return {hasAccess: true};
   }
 }
 
 export async function checkIfAuthorized({userId, license, configuration}) {
-  let pass = false;
+  let access = {hasAccess: false};
   if (configuration['api']['licenses'] && license) {
     //Doing this so, it works without any sort of user authorization for the collections that can be.
     //The licenses are not checked if not in your configuration file.
@@ -31,13 +31,13 @@ export async function checkIfAuthorized({userId, license, configuration}) {
     if (userId) {
       memberships = await getUserMemberships({where: { userId }});
     }
-    pass = isAuthorized({
+    access = isAuthorized({
       memberships,
       license: license,
       licenseConfiguration: configuration['api']['licenses']
     });
   } else {
-    pass = true;
+    access.hasAccess = true;
   }
-  return pass;
+  return access;
 }

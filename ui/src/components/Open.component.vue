@@ -2,12 +2,20 @@
   <el-row :justify="'center'" class="bg-gray-50">
     <el-col :span="20">
       <div class="container max-w-screen-lg mx-auto">
-        <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
-          <a class="break-words underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-             :href="'/view?id=' + encodeURIComponent(this.id)">{{
-              this.id || decodeURIComponent(this.id)
-            }}</a> &gt; {{ this.title }}
-        </h3>
+        <el-row>
+          <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20">
+            <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
+              <a class="break-words no-underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+                 :href="'/view?id=' + encodeURIComponent(this.path)">
+                <i class="fa fa-1x fa-arrow-left"></i> File Metadata
+              </a>
+              <span>{{ this.parentTitle || decodeURIComponent(this.path) }}</span>
+            </h3>
+          </el-col>
+          <el-col :xs="24" :sm="9" :md="8" :lg="6" :xl="4">
+            <!-- TODO add a download widget here-->
+          </el-col>
+        </el-row>
         <div v-loading="loading" class="shadow m-6 p-2">
           <div v-if="this.type === 'pdf'">
             <pdf v-for="i in numPages"
@@ -67,6 +75,8 @@ export default {
       type: 'text',
       sourceType: '',
       id: '',
+      parentId: '',
+      path: '',
       name: '',
       parent: '',
       parentTitle: '',
@@ -79,10 +89,11 @@ export default {
     this.loading = true;
     const id = encodeURIComponent(this.$route.query.id);
     this.id = id;
-    const path = encodeURIComponent(this.$route.query.path);
+    this.parentId = encodeURIComponent(this.$route.query.parentId);
+    this.path = this.$route.query.path;
     let route = `/object/open?id=${id}`;
-    if (path) {
-      route += `&path=${path}`;
+    if (this.path != '') {
+      route += `&path=${this.path}`;
     }
     console.log(route);
     let response = await this.$http.get({route: route});
@@ -99,11 +110,10 @@ export default {
       this.parentTitle = parentTitle;
     }
     //TODO: Ask for MIME types
-
-    if (path && (path.endsWith(".txt") || path.endsWith(".csv") || path.endsWith(".eaf"))) {
+    if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf"))) {
       this.type = 'txt';
       this.data = await response.text();
-      if (path.endsWith(".csv")) {
+      if (this.path.endsWith(".csv")) {
         try {
           const parsedCsv = this.$papa.parse(this.data);
           if (parsedCsv?.data && parsedCsv?.data?.length > 1) {
@@ -132,14 +142,14 @@ export default {
     } else {
       this.data = await response.blob();
       const blobURL = window.URL.createObjectURL(this.data);
-      if (path && (path.endsWith(".mp3") || path.endsWith(".wav"))) {
+      if (this.path && (this.path.endsWith(".mp3") || this.path.endsWith(".wav"))) {
         this.type = 'audio';
         this.data = blobURL;
-      } else if (path && path.endsWith(".mp4")) {
+      } else if (this.path && this.path.endsWith(".mp4")) {
         this.type = 'video';
         this.sourceType = 'video/mp4';
         this.data = blobURL;
-      } else if (path && path.endsWith(".pdf")) {
+      } else if (this.path && this.path.endsWith(".pdf")) {
         this.type = 'pdf';
         this.pdfdata = pdf.createLoadingTask(blobURL);
         this.pdfdata.promise.then(pdf => {

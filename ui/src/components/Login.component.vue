@@ -1,8 +1,8 @@
 <template>
   <div class="w-full h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-gray-200 w-96 h-auto rounded-lg pt-8 pb-8 px-8 flex flex-col items-center">
+    <div class="bg-gray-200 w-96 h-auto rounded-lg pt-8 pb-8 px-8 flex flex-col items-center drop-shadow-md">
       <label class="font-light text-4xl mb-4">{{ siteName }}<span class='font-bold'>{{ siteNameX }}</span></label>
-      <label class="text-gray-800 mb-4">Sign in via</label>
+      <br/>
       <oauth-login-component
           v-for="provider of loginProviders"
           :key="provider.name"

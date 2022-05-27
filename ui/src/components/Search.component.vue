@@ -41,7 +41,7 @@
         <div class="sticky top-20 z-10 bg-white pb-5">
           <el-row v-if="totals" :align="'middle'">
             <div class="divide-solid divide-y-2 divide-red-700 py-4">
-              <div>Found {{ this.totals['value'] || 0 }} results</div>
+              <div>Found {{ this.totals['value'] || 0 }} well described items</div>
               <div></div>
             </div>
           </el-row>

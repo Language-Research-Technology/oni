@@ -2,7 +2,7 @@ import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
 import path from "path";
 import * as fs from 'fs-extra';
-import {toArray} from "lodash";
+import {first, toArray, isEqual} from "lodash";
 
 const log = getLogger();
 
@@ -18,7 +18,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item.conformsTo = 'RepositoryCollection';
         //item.partOf = {'@id': parent['@id']};
         item.license = item.license || parent.license;
-        await indexMembers({parent: item, crate, client, configuration, crateId, root, repository});
+        await indexMembers({parent: item, crate, client, configuration, crateId, root, _memberOf, repository});
         //Bubble up types to the parent
         for (let t of crate.utils.asArray(item._containsTypes)) {
           if (t !== 'RepositoryObject') {
@@ -52,7 +52,18 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item.license = item.license || parent.license;
         item.name = item['name'] || item['@id'];
         const normalObjectItem = crate.getTree({root: item, depth: 1, allowCycle: false});
-        normalObjectItem._memberOf = _memberOf;
+        const normalParent = [{
+          '@id': parent['@id'],
+          '@type': parent['@type'],
+          name: [{'@value': first(parent['name'])}]
+        }];
+        //normalObjectItem._memberOf = _memberOf; //_memberOf.concat(parentMemberOf); //If I do this then another collection of different type is indexed. ASK PETER
+        //TODO: this below seems unnecessary. What can we do? We are relying
+        if (isEqual(_memberOf, normalParent)) {
+          normalObjectItem._memberOf = _memberOf;
+        } else {
+          normalObjectItem._memberOf = _memberOf.concat(normalParent);
+        }
         normalObjectItem._root = root;
         try {
           const {body} = await client.index({

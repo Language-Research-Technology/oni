@@ -31,6 +31,7 @@ export function setupRoutes({ server, configuration, repository }) {
     let configuration = await loadConfiguration();
     const ui = configuration.ui;
     ui.aggregations = configuration?.api?.elastic?.aggregations;
+    ui.licenses = configuration?.api?.licenses;
     res.send({ ui: configuration.ui });
     next();
   });
