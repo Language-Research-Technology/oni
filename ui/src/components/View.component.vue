@@ -64,6 +64,7 @@
   </div>
   <request-dialog :dialogVisible="this.openDocModal" :enrollmentUrl="this.enrollment.url"
                   :enrollmentLabel="this.enrollment.label || 'To request access follow this link'"
+                  :enrollmentClass="this.enrollment.class || 'underline text-blue-600 hover:text-blue-800 visited:text-purple-600 text-center'"
                   v-on:close="this.openDocModal = false"/>
   <el-dialog v-model="errorDialogVisible" width="30%" center>
     <span>{{ this.errorDialogText }}</span>

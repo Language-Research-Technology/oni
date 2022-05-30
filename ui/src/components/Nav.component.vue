@@ -73,6 +73,8 @@ export default {
     //TODO: not sure if we need both watchers and mounted to checkIfLoggedIn
     '$store.state.user': {
       async handler() {
+        console.log('testing is logged in');
+        console.log(getLocalStorage({key: 'isLoggedIn'}));
         this.isLoggedIn = getLocalStorage({key: 'isLoggedIn'});
       },
       flush: 'post',

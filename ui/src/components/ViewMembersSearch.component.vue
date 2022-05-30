@@ -59,10 +59,10 @@ export default {
       let route = '/search?f=';
       //TODO: define search facet value from parent ??
       const facet = JSON.stringify({
-        '_memberOf.@id': [encodeURIComponent(this.crateId['@value'])],
+        '_memberOf.@id': [this.crateId['@value']],
         '@type': [this.conformsTo]
       });
-      return route + facet;
+      return route + encodeURIComponent(facet);
     }
   },
   data() {

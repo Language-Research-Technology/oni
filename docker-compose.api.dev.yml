@@ -25,7 +25,7 @@ services:
             - "5432:5432"
 
 #    ui:
-#        image: node:14-buster
+#        image: node:18-buster
 #        hostname: ui
 #        tty: true
 #        environment:

@@ -3,10 +3,12 @@
     <el-row :gutter="10" :justify="'center'">
       <el-row v-if="isLoggedIn">
         <el-row>
-          <el-link v-if="this.enrollmentUrl" :href="this.enrollmentUrl" target="_blank">{{
+          <a v-if="this.enrollmentUrl" :href="this.enrollmentUrl"
+                   target="_blank" :class="this.enrollmentClass"
+                   :underline="false">{{
               this.enrollmentLabel
             }}
-          </el-link>
+          </a>
           <p v-else>No enrolment url has been configured, please configure it</p>
         </el-row>
         <br/>
@@ -15,15 +17,17 @@
       <el-row v-else>
         <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
           <el-row>
-            <el-link v-if="this.enrollmentUrl" :href="this.enrollmentUrl" target="_blank">{{
+            <a v-if="this.enrollmentUrl" :href="this.enrollmentUrl"
+                     target="_blank" :class="this.enrollmentClass"
+                     :underline="false">{{
                 this.enrollmentLabel
               }}
-            </el-link>
+            </a>
             <p v-else>No enrolment url has been configured, please configure it</p>
           </el-row>
           <br/>
         </el-col>
-        <el-col class="p-2"  v-if="!isLoggedIn" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
+        <el-col class="p-2" v-if="!isLoggedIn" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
           <el-divider direction="vertical"/>
         </el-col>
         <el-col v-if="!isLoggedIn" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
@@ -57,7 +61,7 @@ import {
 } from "@/storage";
 
 export default {
-  props: ['dialogVisible', 'enrollmentUrl', 'enrollmentLabel'],
+  props: ['dialogVisible', 'enrollmentUrl', 'enrollmentLabel', 'enrollmentClass'],
   methods: {
     closeDialog() {
       this.$emit('close');

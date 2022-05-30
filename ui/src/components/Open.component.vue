@@ -57,7 +57,7 @@
 
 <script>
 import 'element-plus/theme-chalk/display.css'
-import pdf from 'vue3-pdf';
+import pdf from '@jbtje/vue3pdf'
 import {first, isUndefined} from 'lodash';
 import {VideoPlay} from "@element-plus/icons-vue";
 

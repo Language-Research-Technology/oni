@@ -1,4 +1,4 @@
-FROM node:14-buster AS api-builder
+FROM node:18-buster AS api-builder
 LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oniapi"
 WORKDIR /srv
 COPY api/ /srv/

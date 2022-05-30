@@ -87,7 +87,11 @@ async function onAuthRequired(to, from, next) {
   if (to.meta?.requiresAuth) {
     console.log(`requires Auth ${ to.path }`);
     try {
-      if (isAuthed.status === 401 && from.path !== "/login") return next({ path: "/login" });
+      if (isAuthed.status === 401 && from.path !== "/login"){
+        removeLocalStorage({ key: 'user'});
+        removeLocalStorage({ key: 'isLoggedIn'});
+        return next({ path: "/login" });
+      }
     } catch (error) {
       if (from.path !== "/login") return next({ path: "/login" });
     }
