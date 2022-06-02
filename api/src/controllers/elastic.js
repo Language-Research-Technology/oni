@@ -1,7 +1,7 @@
 import {inspect} from '../services/utils';
 import * as esb from 'elastic-builder';
 import {getLogger} from "../services";
-import {isEmpty} from "lodash";
+import {first, isEmpty} from "lodash";
 
 const log = getLogger();
 
@@ -9,11 +9,22 @@ export function boolQuery({searchQuery, fields, filters, highlightFields}) {
   log.debug('bool query');
   const filterTerms = [];
   let boolQueryObj;
-
+  log.debug(JSON.stringify(filters));
   for (let bucket of Object.keys(filters)) {
-    if (filters[bucket].length > 0) {
-      //TODO: send if whether keyword is needed
-      filterTerms.push(esb.termsQuery(bucket.concat('.keyword'), filters[bucket]))
+    if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
+      //TODO: send the type of field in the filters
+      let field = '';
+      let type;
+      if (!filters[bucket]?.t) {
+        field = bucket.concat('.keyword');
+      } else {
+        type = filters[bucket]?.t;
+        field = bucket.concat('.' + type);
+      }
+      let values = filters[bucket]?.v || filters[bucket];
+
+      log.debug(values)
+      filterTerms.push(esb.termsQuery(field, values))
     }
   }
   if (isEmpty(searchQuery) && filterTerms.length > 0) {

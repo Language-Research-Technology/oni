@@ -31,7 +31,8 @@ export async function indexSubCollections({configuration, repository, client, cr
           if (repoSubCollectionRoot['@type'] && repoSubCollectionRoot['@type'].includes('RepositoryCollection')) {
             repoSubCollectionRoot._crateId = col.crateId;
             repoSubCollectionRoot._containsTypes = [];
-            repoSubCollectionRoot.conformsTo = 'SubCollection';
+            repoSubCollectionRoot.conformsTo = 'RepositoryCollection';
+            repoSubCollectionRoot._isTopLevel = 'true';
             //TODO: better license checks
             repoSubCollectionRoot.license = repoSubCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
             const normalRoot = crate.getTree({root: repoSubCollectionRoot, depth: 2, allowCycle: false});

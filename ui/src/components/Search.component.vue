@@ -37,73 +37,107 @@
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0"  v-loading="this.loading">
-        <div class="sticky top-20 z-10 bg-white pb-5">
-          <el-row v-if="totals" :align="'middle'">
+      <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20" :span="20" :offset="0" v-loading="this.loading">
+        <div>
+          <div class="sticky top-20 z-10 bg-white pb-5">
+            <el-row v-if="totals" :align="'middle'">
+              <div class="divide-solid divide-y-2 divide-red-700 py-4">
+                <div v-if="this.totals['value'] > 0 && !this.isStart">
+                  {{ this.collectionTotals }} Collection{{ this.collectionTotals === 1 ? '' : 's' }} with
+                  {{ this.totals['value'] || 0 }} well described items
+                </div>
+                <div></div>
+              </div>
+            </el-row>
+            <el-row :align="'middle'">
+              <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey"
+                               v-model="this.filters">
+                <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
+                           @click="this.clearFilterX({f, filterKey})">
+                  {{ f }}
+                  <el-icon class="el-icon--right">
+                    <CloseBold/>
+                  </el-icon>
+                </el-button>
+              </el-button-group>
+            </el-row>
+          </div>
+          <div v-if="this.isStart">
+            <div v-if="this.showTopCollections">
+              <top-collections :collections="this.collections"/>
+              <el-row>
+                <el-link v-if="this.collectionTotals > this.collections.length"
+                         @click="getNextCollections(this.collectionScrollId);this.newSearch=false;">more collections
+                </el-link>
+              </el-row>
+            </div>
+          </div>
+
+          <div v-if="this.showRepositoryCollections">
+            <repo-collections :collections="this.collections"/>
+            <el-row>
+              <el-link v-if="this.collectionTotals > this.collections.length"
+                       @click="getNextCollections(this.collectionScrollId);this.newSearch=false;">more collections
+              </el-link>
+            </el-row>
+          </div>
+          <el-row :align="'middle'">
             <div class="divide-solid divide-y-2 divide-red-700 py-4">
-              <div>Found {{ this.totals['value'] || 0 }} well described items</div>
+              <div>Items:</div>
               <div></div>
             </div>
           </el-row>
-          <el-row :align="'middle'">
-            <el-button-group v-for="(filter, filterKey) of this.filters" :key="filterKey"
-                             v-model="this.filters">
-              <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
-                         @click="this.clearFilterX({f, filterKey})">
-                {{ f }}
-                <el-icon class="el-icon--right">
-                  <CloseBold/>
-                </el-icon>
-              </el-button>
-            </el-button-group>
+          <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
+            <search-detail-element
+                :id="item._source['@id']"
+                :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
+                :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
+                :conformsTo="item.conformsTo"
+                :types="item._source?.['@type']"
+                :languages="item._source?.['language']"
+                :_memberOf="item._source?._memberOf"
+                :highlight="item?.highlight"
+                :root="item._source?._root"
+                :parent="item._source?._parent"
+            />
+          </div>
+          <div v-if="!this.items.length > 0">
+            <el-row class="pb-4 items-center">
+              <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
+                No items were found with that search input
+              </h5>
+            </el-row>
+            <el-row>
+              <p class="text-center">
+                <el-button type="primary" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
+              </p>
+            </el-row>
+          </div>
+          <el-row :gutter="2" v-if="this.more && !this.isStart" class="flex justify-center p-6">
+            <el-button @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i>&nbsp;VIEW MORE
+            </el-button>
           </el-row>
         </div>
-        <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
-          <search-detail-element
-              :id="item._source['@id']"
-              :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
-              :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
-              :conformsTo="item.conformsTo"
-              :types="item._source?.['@type']"
-              :languages="item._source?.['language']"
-              :_memberOf="item._source?._memberOf"
-              :highlight="item?.highlight"
-              :root="item._source?._root"
-              :parent="item._source?._parent"
-          />
-        </div>
-        <div v-if="!this.items.length > 0">
-          <el-row class="pb-4 items-center">
-            <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
-              No items were found with that search input
-            </h5>
-          </el-row>
-          <el-row>
-            <p class="text-center">
-              <el-button type="primary" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
-            </p>
-          </el-row>
-        </div>
-        <el-row :gutter="2" v-if="this.more" class="flex justify-center p-6">
-          <el-button @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i>&nbsp;VIEW MORE
-          </el-button>
-        </el-row>
-
       </el-col>
     </el-row>
   </div>
 </template>
 
+
 <script>
 
-import {first, isEmpty, orderBy, toArray} from 'lodash';
+import {first, isEmpty, orderBy, toArray, find} from 'lodash';
 import {CloseBold} from "@element-plus/icons-vue";
 import {defineAsyncComponent, toRaw} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
+import TopCollections from "./TopCollections.component.vue";
+import RepoCollections from "./RepoCollections.component.vue";
 
 export default {
   components: {
+    TopCollections,
+    RepoCollections,
     SearchDetailElement,
     SearchAggs,
     CloseBold,
@@ -118,38 +152,47 @@ export default {
       totals: {},
       more: false,
       aggregations: {},
+      memberOfBuckets: [],
       filters: {},
       clear: false,
       filterButton: [],
-      loading: false
+      loading: false,
+      top: {},
+      showTopCollections: false,
+      showRepositoryCollections: false,
+      collections: [],
+      collectionTotals: 0,
+      collectionScrollId: '',
+      isStart: false,
+      newSearch: true,
+      isBrowse: false
     };
   },
   updated() {
-    // console.log(`Search Input: ${this.searchInput}`);
-    // console.log(`Search Query: ${this.$route.query.q}`);
   },
   watch: {
     async '$route.query'() {
       this.loading = true;
       if (this.$route.query.f) {
         await this.updateFilters();
-        this.loading = false;
       } else {
-        this.loading = true;
         await this.search();
-        this.loading = false;
       }
+      await this.searchTopCollections();
+      this.loading = false;
     }
   },
   async mounted() {
     this.loading = true;
     if (this.$route.query.f) {
       await this.updateFilters();
-      this.loading = false
+      //not await maybe all the routes can be not awaited?
+      this.updateRoutes();
     } else {
       await this.search();
-      this.loading = false;
     }
+    await this.searchTopCollections();
+    this.loading = false;
   },
   methods: {
     toArray,
@@ -163,7 +206,7 @@ export default {
             this.filters[key] = val;
           }
           await this.search();
-          await this.updateFiltersRoute();
+          //await this.updateRoutes();
         }
       } catch (e) {
         console.error(e);
@@ -173,24 +216,29 @@ export default {
       if (this.filters[filterKey]) {
         this.filters[filterKey].splice(this.filters[filterKey].indexOf(f), 1);
       }
-      await this.updateFiltersRoute();
+      await this.updateRoutes();
     },
-    async updateFiltersRoute() {
-      let filters = toRaw(this.filters);
-      filters = encodeURIComponent(JSON.stringify(filters));
-      await this.$router.push({path: 'search', query: {q: this.$route.query.q, f: filters}});
+    async updateRoutes() {
+      let filters;
+      const query = {q: this.$route.query.q}
+      if (this.filters) {
+        filters = toRaw(this.filters);
+        filters = encodeURIComponent(JSON.stringify(filters));
+        query.f = filters;
+      }
+      await this.$router.push({path: 'search', query, replace: true});
     },
     async bucketSelected({checkedBuckets, id}) {
       // this.filters[id] = checkedBuckets.map((k) => {
       //   return {key: k}
       // });
       this.filters[id] = checkedBuckets;
-      await this.updateFiltersRoute();
+      await this.updateRoutes();
     },
     populate({items, scrollId, newSearch}) {
-      console.log(toRaw(items));
       if (newSearch) {
         this.items = [];
+        this.newSearch = true;
         this.scrollToTop();
       }
       if (items['_scroll_id']) {
@@ -210,6 +258,7 @@ export default {
       }
       if (items['aggregations']) {
         this.aggregations = this.populateAggregations(items['aggregations']);
+        this.memberOfBuckets = items['aggregations']?.['_memberOf.name.@value'];
       }
     },
     populateAggregations(aggregations) {
@@ -243,8 +292,15 @@ export default {
       this.searchInput = '';
       this.$route.query.q = '';
       this.$route.query.f = '';
+      this.$route.query.t = '';
       this.filterButton = [];
+      this.isStart = true;
+      this.isBrowse = false;
       //this.filters = [];
+      await this.searchAll();
+    },
+    async searchAll() {
+      this.isStart = false;
       await this.$router.push({path: 'search'});
       let response = await this.$http.get({route: `/search/items`});
       const items = await response.json();
@@ -292,7 +348,53 @@ export default {
       let response = await this.$http.get({route: searchRoute});
       this.items = await response.json();
       this.populate({items: this.items, newSearch: true});
-    }
+    },
+    async searchTopCollections() {
+      const memberOfAgg = this.memberOfBuckets;
+      const membersOf = toRaw(memberOfAgg.buckets);
+      const hasFilters = find(this.filters, f => f.length > 0);
+      this.isStart = isEmpty(hasFilters) && isEmpty(this.searchQuery);
+      if (membersOf && membersOf.length > 0) {
+        this.top = {
+          'name.@value': [...membersOf.map(e => e.key)],
+          '@type': ['Dataset', 'RepositoryCollection']
+        };
+        if (this.isStart) {
+          this.top['_isRoot.@value'] = ['true'];
+          //TODO: change the routes to send types like the line below
+          //this.top = {'_isRoot.@value': {v: ['true'], t: 'keyword'}};
+        }
+        this.top = JSON.stringify(this.top);
+        await this.getNextCollections();
+        if (this.collections.length > 0) {
+          if (this.isStart && !this.isBrowse) {
+            this.showTopCollections = true;
+            this.showRepositoryCollections = false;
+          } else {
+            this.showRepositoryCollections = true;
+            this.showTopCollections = false;
+          }
+        }
+      }
+    },
+    async getNextCollections(scrollId) {
+      let searchRoute = `/search/items`;
+      searchRoute += `?filters=${encodeURIComponent(this.top)}`;
+      if (scrollId) {
+        searchRoute += `&scroll=${scrollId}`;
+      }
+      let response = await this.$http.get({route: searchRoute});
+      const items = await response.json();
+      this.collectionTotals = items?.['hits']?.['total']?.['value'];
+      this.collectionScrollId = items?.['_scroll_id'];
+      const thisItems = items?.['hits']?.['hits'];
+      const rawItems = toRaw(thisItems);
+      if (this.newSearch) {
+        this.collections = orderBy(rawItems, '_source._isRoot');
+      } else {
+        this.collections = this.collections.concat(orderBy(rawItems, '_source._isRoot'));
+      }
+    },
   }
 };
 </script>

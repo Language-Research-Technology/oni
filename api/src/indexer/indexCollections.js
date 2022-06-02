@@ -64,13 +64,14 @@ export async function indexCollections({configuration, repository, client}) {
         if (repoCollectionRoot) {
           const memberOf = col['memberOf'];
           if (!memberOf) {
-            repoCollectionRoot._isTopLevel = true;
+            repoCollectionRoot._isTopLevel = 'true';
           } else {
             log.error(`${col.crateId} if member of ${col['memberOf']}`);
           }
           repoCollectionRoot._crateId = col.crateId;
           repoCollectionRoot._containsTypes = [];
           repoCollectionRoot.conformsTo = 'Collection';
+          repoCollectionRoot._isRoot = 'true';
           //TODO: better license checks
           repoCollectionRoot.license = repoCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
           const _root = [{
@@ -79,7 +80,7 @@ export async function indexCollections({configuration, repository, client}) {
             'name': [{'@value': first(repoCollectionRoot.name)}]
           }];
           if (repoCollectionRoot._isTopLevel) {
-            _root.isTopLevel = true;
+            _root.isTopLevel = 'true';
           }
           //root.collection = _root['name'] || root['@id'];
           const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});

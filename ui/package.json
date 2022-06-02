@@ -13,7 +13,7 @@
         "@jbtje/vue3pdf": "^2.0.0",
         "core-js": "^3.16.4",
         "date-fns": "^2.16.1",
-        "element-plus": "^2.0.1",
+        "element-plus": "^2.2.2",
         "loglevel": "^1.7.0",
         "loglevel-plugin-prefix": "^0.8.4",
         "pdfvuer": "^2.0.1",
