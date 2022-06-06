@@ -2,10 +2,10 @@
   <div>
     <li class="m-2 mt-4 cursor-pointer" v-for="ag of buckets">
       <div class="form-check form-check-inline cursor-pointer">
-        <input :id="ag.key" :name="ag.key" v-model="checkedBuckets" v-on:change="onChange"
+        <input :id="aggsName + '_' + ag.key" :name="aggsName + '_' + ag.key" v-model="checkedBuckets" v-on:change="onChange"
                class=" cursor-pointer form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
                type="checkbox" :value="ag.key">
-        <label class=" cursor-pointer form-check-label inline-block text-gray-800" :for="ag.key">
+        <label class=" cursor-pointer form-check-label inline-block text-gray-800" :for="aggsName + '_' + ag.key">
           {{ ag.key }} <span v-if="ag['doc_count'] > 1"
             class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{ ag['doc_count'] }}</span>
         </label>
@@ -66,11 +66,11 @@ export default {
         query.f = encodedFilters;
       } else {
         const queryFilters = {};
-        for (let cB of this.checkedBuckets) {
+        for (const checkedBucket of this.checkedBuckets) {
           if (!queryFilters[this.aggsName]) {
             queryFilters[this.aggsName] = [];
           }
-          queryFilters[this.aggsName].push(cB);
+          queryFilters[this.aggsName].push(checkedBucket);
         }
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
         query.f = encodedFilters;
