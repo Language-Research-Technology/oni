@@ -16,7 +16,7 @@ exit 0
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     # echo '>> Building the API code'
-    # docker build --rm -t arkisto/workspace-api:latest -f Dockerfile.api-build .
+    # docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
     # echo
 
     # echo '>> Building the UI code'
@@ -24,8 +24,7 @@ if [ "$resp" == "y" ] ; then
     # # npm run build
     # docker run -it --rm \
     #     -v $PWD:/srv/ui \
-    #     -v ui_node_modules:/srv/ui/node_modules \
-    #     -w /srv/ui node:14-buster bash -l -c "npm run build"
+    #     -w /srv/ui node:16 bash -l -c "npm run build"
     # cd -
     # echo
 fi
@@ -41,12 +40,12 @@ if [ "$resp" == "y" ] ; then
     # git commit -a -m "tag and bump version"
 
     # echo "Building API container"
-    # docker tag arkisto/workspace-api:latest arkisto/workspace-api:${VERSION}
+    # docker tag arkisto/oni-api:latest arkisto/oni-api:${VERSION}
     # # docker rmi $(docker images | grep none | awk '{print $3}')
 
     # echo "Building UI container"
-    # docker build --rm -t arkisto/workspace-ui:latest -f Dockerfile.ui-build .
-    # docker tag arkisto/workspace-ui:latest arkisto/workspace-ui:${VERSION}
+    # docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
+    # docker tag arkisto/oni-ui:latest arkisto/oni-ui:${VERSION}
 
     # # docker rmi $(docker images | grep none | awk '{print $3}')
     # echo
@@ -56,8 +55,8 @@ read -p '>> Push the containers to docker hub? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     # echo "Pushing built containers to docker hub"
     # docker login
-    # docker push arkisto/workspace-api:latest
-    # docker push arkisto/workspace-api:${VERSION}
-    # docker push arkisto/workspace-ui:latest
-    # docker push arkisto/workspace-ui:${VERSION}
+    # docker push arkisto/oni-api:latest
+    # docker push arkisto/oni-api:${VERSION}
+    # docker push arkisto/oni-ui:latest
+    # docker push arkisto/oni-ui:${VERSION}
 fi

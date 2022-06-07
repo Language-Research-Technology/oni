@@ -5,12 +5,6 @@ networks:
         name: oni
         driver: bridge
 
-volumes:
-    api_node_modules:
-        driver: local
-    ui_node_modules:
-        driver: local
-
 services:
     db:
         image: postgres:13-alpine
@@ -44,7 +38,7 @@ services:
             DB_PASSWORD: ""
             DB_DATABASE: "oni"
         volumes:
-            - api_node_modules:/srv/api/node_modules:delegated
+            #- api_node_modules:/srv/api/node_modules:delegated
             - ./api:/srv/api:delegated
             - ./.git:/srv/api/.git:delegated
             - ./scripts/wait-for-it.sh:/wait-for-it.sh
@@ -57,14 +51,15 @@ services:
             - "9229:9229"
 
     ui:
-        image: node:18-buster
+        #image: node:18-buster
+        build: ui
         hostname: ui
         tty: true
         environment:
             TERM: "xterm-256color"
             NODE_ENV: "development"
         volumes:
-            - ui_node_modules:/srv/ui/node_modules:delegated
+            #- ui_node_modules:/srv/ui/node_modules:delegated
             - ./ui:/srv/ui:delegated
             - ./configuration:/srv/configuration
             - .git:/srv/ui/.git:delegated

@@ -113,7 +113,7 @@
               </p>
             </el-row>
           </div>
-          <el-row :gutter="2" v-if="this.more && !this.isStart" class="flex justify-center p-6">
+          <el-row :gutter="2" v-if="this.more" class="flex justify-center p-6">
             <el-button @click="getNext()"><i class="fa fa-arrow-alt-circle-down"></i>&nbsp;VIEW MORE
             </el-button>
           </el-row>

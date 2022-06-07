@@ -1,11 +1,5 @@
 version: "3.8"
 
-volumes:
-    api_node_modules:
-        driver: local
-    ui_node_modules:
-        driver: local
-
 services:
     db:
         image: postgres:13-alpine
