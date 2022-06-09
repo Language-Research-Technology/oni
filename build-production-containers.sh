@@ -34,13 +34,13 @@ if [ "$resp" == "y" ] ; then
 
      echo "Building API container"
      docker tag arkisto/oni-api:latest arkisto/oni-api:${VERSION}
-     # docker rmi $(docker images | grep none | awk '{print $3}')
+     docker rmi $(docker images | grep none | awk '{print $3}')
 
      echo "Building UI container"
      docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      docker tag arkisto/oni-ui:latest arkisto/oni-ui:${VERSION}
 
-     # docker rmi $(docker images | grep none | awk '{print $3}')
+     docker rmi $(docker images | grep none | awk '{print $3}')
      echo
 fi
 
