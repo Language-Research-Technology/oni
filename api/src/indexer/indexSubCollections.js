@@ -32,7 +32,7 @@ export async function indexSubCollections({configuration, repository, client, cr
             repoSubCollectionRoot._crateId = col.crateId;
             repoSubCollectionRoot._containsTypes = [];
             repoSubCollectionRoot.conformsTo = 'RepositoryCollection';
-            repoSubCollectionRoot._isTopLevel = 'true';
+            repoSubCollectionRoot._isSubLevel = 'true';
             //TODO: better license checks
             repoSubCollectionRoot.license = repoSubCollectionRoot?.license || col.record.dataValues?.license || col.record?.license || root?.license;
             if (isEmpty(repoSubCollectionRoot.license)) {

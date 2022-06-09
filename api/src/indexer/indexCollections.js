@@ -80,17 +80,17 @@ export async function indexCollections({configuration, repository, client}) {
             const license = configuration.api.license;
             repoCollectionRoot.license = license['default'];
           }
+          const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});
           const _root = [{
             '@id': first(repoCollectionRoot._crateId),
             '@type': repoCollectionRoot['@type'],
             'name': [{'@value': first(repoCollectionRoot.name)}],
-            'license': first(repoCollectionRoot.license)
+            'license': first(normalRoot.license)
           }];
           if (repoCollectionRoot._isTopLevel) {
             _root.isTopLevel = 'true';
           }
           //root.collection = _root['name'] || root['@id'];
-          const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});
           normalRoot._root = _root;
           try {
             const {body} = await client.index({

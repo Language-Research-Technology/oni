@@ -52,7 +52,7 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._crateId = crateId;
         item.conformsTo = 'RepositoryObject';
         //item.partOf = {'@id': parent['@id']};
-        item.license = item?.license || member?.license || parent?.license || root?.license;
+        item.license = item?.license || parent?.license || root?.license;
         if (isEmpty(item.license)){
           log.warn('No license found for indexMembers.item: ' + item._crateId);
         }
