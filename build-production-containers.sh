@@ -6,12 +6,6 @@ if [ "$#" != 1 ] ; then
 fi
 VERSION="${1}"
 
-echo
-echo
-echo "This script needs to be updated for Oni - exiting."
-echo
-echo
-exit 0
 
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
@@ -21,7 +15,7 @@ if [ "$resp" == "y" ] ; then
 
      echo '>> Building the UI code'
      cd ui
-     # npm run build
+     npm run build
      docker run -it --rm \
          -v $PWD:/srv/ui \
          -w /srv/ui node:16 bash -l -c "npm run build"

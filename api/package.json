@@ -59,7 +59,7 @@
         "random-word": "^2.0.0",
         "regenerator-runtime": "^0.13.9",
         "restify": "^8.5.1",
-        "restify-cors-middleware": "^1.1.1",
+        "restify-cors-middleware2": "^2.1.2",
         "restify-errors": "^8.0.2",
         "rimraf": "^3.0.2",
         "ro-crate": "git+https://github.com/Arkisto-Platform/ro-crate-js.git#develop-rewrite",

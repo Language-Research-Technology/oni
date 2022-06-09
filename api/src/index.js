@@ -9,7 +9,7 @@ import {bootstrap} from './services/bootstrap';
 import {elasticInit, elasticBootstrap, elasticIndex} from './indexer/elastic';
 import {ocfltools} from "oni-ocfl";
 
-import corsMiddleware from 'restify-cors-middleware';
+import corsMiddleware from 'restify-cors-middleware2';
 
 const log = getLogger();
 const server = restify.createServer();
