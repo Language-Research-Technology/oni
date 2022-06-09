@@ -2,7 +2,7 @@ import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
 import path from "path";
 import * as fs from 'fs-extra';
-import {first, toArray, isEqual} from "lodash";
+import {first, toArray, isEqual, isEmpty} from "lodash";
 
 const log = getLogger();
 
@@ -17,7 +17,10 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._containsTypes = [];
         item.conformsTo = 'RepositoryCollection';
         //item.partOf = {'@id': parent['@id']};
-        item.license = item.license || parent.license;
+        item.license = item?.license || parent?.license || root?.license
+        if (isEmpty(item.license)) {
+          log.warn('No license found for item: ' + item._crateId);
+        }
         await indexMembers({parent: item, crate, client, configuration, crateId, root, _memberOf, repository});
         //Bubble up types to the parent
         for (let t of crate.utils.asArray(item._containsTypes)) {
@@ -49,7 +52,10 @@ export async function indexMembers({parent, crate, client, configuration, crateI
         item._crateId = crateId;
         item.conformsTo = 'RepositoryObject';
         //item.partOf = {'@id': parent['@id']};
-        item.license = item.license || parent.license;
+        item.license = item?.license || member?.license || parent?.license || root?.license;
+        if (isEmpty(item.license)){
+          log.warn('No license found for indexMembers.item: ' + item._crateId);
+        }
         item.name = item['name'] || item['@id'];
         const normalObjectItem = crate.getTree({root: item, depth: 1, allowCycle: false});
         const normalParent = [{

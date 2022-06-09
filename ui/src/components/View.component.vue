@@ -67,7 +67,10 @@
                   :enrollmentClass="this.enrollment.class || 'underline text-blue-600 hover:text-blue-800 visited:text-purple-600 text-center'"
                   v-on:close="this.openDocModal = false"/>
   <el-dialog v-model="errorDialogVisible" width="30%" center>
-    <span>{{ this.errorDialogText }}</span>
+    <el-alert :title="this.errorDialogTitle" type="warning"
+              :closable="false">
+      <p class="break-normal">{{ this.errorDialogText }}</p>
+    </el-alert>
     <template #footer>
       <span class="dialog-footer">
         <el-button type="primary" @click="errorDialogVisible = false">Close</el-button>
@@ -175,7 +178,7 @@ export default {
         this.metadata = metadata._source;
         this._memberOf = this.metadata._memberOf;
         this._access = this.metadata._access;
-        if(this._access && !this._access.hasAccess) {
+        if (this._access && !this._access.hasAccess) {
           this.getEnrollment();
         }
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
@@ -236,7 +239,11 @@ export default {
             if (response.status !== 200) {
               this.errorDialogVisible = true;
               this.errorDialogTitle = 'Download Error';
-              this.errorDialogText = response.statusText;
+              if (response.status === 404) {
+                this.errorDialogText = 'The file was not found in the path, please contact your Data Provider or Data Steward';
+              } else {
+                this.errorDialogText = response.statusText;
+              }
             } else {
               const data = await response.blob();
               link.href = window.URL.createObjectURL(data);

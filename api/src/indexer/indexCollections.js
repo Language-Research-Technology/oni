@@ -9,7 +9,7 @@ import {indexSubCollections} from "./indexSubCollections";
 
 import path from "path";
 import * as fs from 'fs-extra';
-import {first, toArray} from 'lodash';
+import {first, isEmpty, toArray} from 'lodash';
 import {getRootMemberOfs} from "../controllers/rootMemberOf";
 
 const log = getLogger();
@@ -73,11 +73,18 @@ export async function indexCollections({configuration, repository, client}) {
           repoCollectionRoot.conformsTo = 'Collection';
           repoCollectionRoot._isRoot = 'true';
           //TODO: better license checks
-          repoCollectionRoot.license = repoCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
+          repoCollectionRoot.license = repoCollectionRoot?.license || col.record.dataValues?.license || col.record?.license;
+          if (isEmpty(repoCollectionRoot.license)) {
+            log.warn('No license found for item repoCollectionRoot: ' + repoCollectionRoot._crateId);
+            log.warn('A default text string as license will be attached');
+            const license = configuration.api.license;
+            repoCollectionRoot.license = license['default'];
+          }
           const _root = [{
             '@id': first(repoCollectionRoot._crateId),
             '@type': repoCollectionRoot['@type'],
-            'name': [{'@value': first(repoCollectionRoot.name)}]
+            'name': [{'@value': first(repoCollectionRoot.name)}],
+            'license': first(repoCollectionRoot.license)
           }];
           if (repoCollectionRoot._isTopLevel) {
             _root.isTopLevel = 'true';

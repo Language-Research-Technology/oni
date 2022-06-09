@@ -26,6 +26,7 @@ services:
     api:
         #image: node:18-buster
         build: api
+        user: "node:node"
         hostname: api
         tty: true
         environment:
@@ -53,6 +54,7 @@ services:
     ui:
         #image: node:18-buster
         build: ui
+        user: "node:node"
         hostname: ui
         tty: true
         environment:

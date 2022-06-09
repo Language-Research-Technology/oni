@@ -102,12 +102,14 @@ export function setupObjectRoutes({ server, configuration, repository }) {
           } else if (req.query.id) {
             await getResolveParts({ req, res, next, configuration, select: [ 'parts' ], repository });
           } else {
-            res.json({ message: 'id parameter value is required' }).status(400);
+            res.status(400);
+            res.json({ message: 'id parameter value is required' });
             next();
           }
         } catch (e) {
           log.error(e);
-          res.json({ error: e['message'] }).status(500);
+          res.status(500);
+          res.json({ error: e['message'] });
           next();
         }
       })

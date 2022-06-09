@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import * as path from 'path';
 import {getFile} from '../controllers/record';
 import {getLogger} from "../services";
-import {toArray} from "lodash";
+import {isEmpty, toArray} from "lodash";
 
 const log = getLogger();
 
@@ -23,6 +23,9 @@ export async function indexFiles({
 
       fileItem._crateId = crateId;
       fileItem.license = fileItem.license || item.license || parent.license;
+      if (isEmpty(fileItem.license)) {
+        log.warn('No license found for fileItem ' + fileItem._crateId);
+      }
       fileItem._parent = {
         name: item.name,
         '@id': item['@id'],
@@ -68,7 +71,8 @@ export async function indexFiles({
                   //addContent(item['hasFile'], fileItem['@id'], fileContent);
                   normalFileItem['_text'] = fileContent;
                 } else {
-                  log.debug(`path: ${fileObj.filePath} does not resolve to a file`);
+                  normalFileItem['_error'] = 'file_not_found';
+                  log.error(`path: ${fileObj.filePath} does not resolve to a file`);
                 }
               }
             }

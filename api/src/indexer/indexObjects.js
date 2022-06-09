@@ -5,7 +5,7 @@ import {getLogger} from "../services";
 import {indexFiles} from "./indexFiles";
 import path from "path";
 import * as fs from 'fs-extra';
-import {toArray} from "lodash";
+import {first, isEmpty, toArray} from "lodash";
 
 const log = getLogger();
 
@@ -32,7 +32,10 @@ export async function indexObjects({crateId, client, index, root, parent, _membe
           //item._root = root;
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
-          item.license = item.license || member.license || root.license;
+          item.license = item?.license || member?.license || parent?.license || first(root)?.license;
+          if (isEmpty(item.license)) {
+            log.warn('No license found for indexObjects.item: ' + item._crateId);
+          }
           const normalItem = crate.getTree({root: item, depth: 1, allowCycle: false});
           normalItem._memberOf = _memberOf;
           //normalItem._root = {"@value": root['@id']};
@@ -57,7 +60,7 @@ export async function indexObjects({crateId, client, index, root, parent, _membe
           // /stream?id=<<crateId>>&path=<<pathOfFile>>
           for (let hasPart of crate.utils.asArray(item['hasPart'])) {
             await indexFiles({
-              crateId: item['@id'], item, hasPart, crate,
+              crateId: item['@id'], item, hasPart, crate, parent: item,
               client, index, root, repository, configuration,
               _memberOf
             });

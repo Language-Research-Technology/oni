@@ -6,7 +6,7 @@ import path from "path";
 import * as fs from 'fs-extra';
 import {indexMembers} from "./indexMembers";
 import {indexObjects} from "./indexObjects";
-import {first, toArray} from "lodash";
+import {first, isEmpty, toArray} from "lodash";
 
 const log = getLogger();
 
@@ -34,7 +34,13 @@ export async function indexSubCollections({configuration, repository, client, cr
             repoSubCollectionRoot.conformsTo = 'RepositoryCollection';
             repoSubCollectionRoot._isTopLevel = 'true';
             //TODO: better license checks
-            repoSubCollectionRoot.license = repoSubCollectionRoot.license || col.record.dataValues?.license || col.record?.license;
+            repoSubCollectionRoot.license = repoSubCollectionRoot?.license || col.record.dataValues?.license || col.record?.license || root?.license;
+            if (isEmpty(repoSubCollectionRoot.license)) {
+              log.warn('No license found for item repoSubCollectionRoot:' + repoSubCollectionRoot._crateId);
+              log.warn('A default text string as license will be attached');
+              const license = configuration.api.license;
+              repoSubCollectionRoot.license = license['default'];
+            }
             const normalRoot = crate.getTree({root: repoSubCollectionRoot, depth: 2, allowCycle: false});
             //root should be already normalized
             normalRoot._root = root;

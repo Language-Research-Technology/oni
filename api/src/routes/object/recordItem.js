@@ -45,15 +45,18 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
         filestream.pipe(res);
       } else {
         message = 'Path not found';
-        res.json({ id: req.query.id, path: req.query.path, message: message }).status(401);
+        res.status(404);
+        res.json({ id: req.query.id, path: req.query.path, message: message });
       }
     } else {
       message = 'Not authorized';
-      res.json({ id: req.query.id, path: req.query.path, message: message }).status(404);
+      res.status(404);
+      res.json({ id: req.query.id, path: req.query.path, message: message });
       next();
     }
   } else {
-    res.send({ message: `Path: ${ req.query.path } of ${ req.query.id } not found` }).status(404);
+    res.status(404);
+    res.send({ message: `Path: ${ req.query.path } of ${ req.query.id } not found` });
     next();
   }
 }

@@ -46,6 +46,12 @@
               Your browser does not support the video element.
             </video>
           </div>
+          <div class="p-4" v-else-if="this.error">
+            <el-alert :title="this.errorMessage" type="warning"
+                      :closable="false" center>
+              <p class="break-normal text-xl">{{ this.error }}</p>
+            </el-alert>
+          </div>
           <div class="p-4" v-else>
             <img height="500px" :src="this.data"/>
           </div>
@@ -82,7 +88,9 @@ export default {
       parentTitle: '',
       loadCsv: false,
       csv: {},
-      loading: false
+      loading: false,
+      errorMessage: '',
+      error: ''
     }
   },
   async mounted() {
@@ -95,8 +103,26 @@ export default {
     if (this.path != '') {
       route += `&path=${this.path}`;
     }
-    console.log(route);
-    let response = await this.$http.get({route: route});
+    let response;
+    try {
+      response = await this.$http.get({route: route});
+      if (response.status !== 200) {
+        this.errorMessage = 'There was an error loading the file';
+        if (response.status === 404) {
+          this.error = 'The file was not found in the path, please contact your Data Provider or Data Steward';
+        } else {
+          this.error = response.statusText;
+        }
+        this.loading = false;
+        return;
+      }
+    } catch (e) {
+      console.log(response);
+      this.errorMessage = 'File Not Found';
+      this.error = e.message;
+      this.loading = false;
+      return;
+    }
     const title = decodeURIComponent(this.$route.query.title);
     if (title) {
       this.title = title;
@@ -110,6 +136,7 @@ export default {
       this.parentTitle = parentTitle;
     }
     //TODO: Ask for MIME types
+    //TODO: craete some file widgets
     if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf"))) {
       this.type = 'txt';
       this.data = await response.text();
@@ -135,30 +162,38 @@ export default {
             this.loadCsv = false;
           }
         } catch (e) {
-          console.log('cannot automatically convert to csv.');
+          this.errorMessage = 'Cannot automatically convert to csv.'
           console.log(e);
+          this.loading = false;
         }
       }
     } else {
-      this.data = await response.blob();
-      const blobURL = window.URL.createObjectURL(this.data);
-      if (this.path && (this.path.endsWith(".mp3") || this.path.endsWith(".wav"))) {
-        this.type = 'audio';
-        this.data = blobURL;
-      } else if (this.path && this.path.endsWith(".mp4")) {
-        this.type = 'video';
-        this.sourceType = 'video/mp4';
-        this.data = blobURL;
-      } else if (this.path && this.path.endsWith(".pdf")) {
-        this.type = 'pdf';
-        this.pdfdata = pdf.createLoadingTask(blobURL);
-        this.pdfdata.promise.then(pdf => {
-          this.numPages = pdf.numPages;
-          console.log(`this.numPages: ${this.numPages} pdf.numPages: ${pdf.numPages}`);
-        });
-      } else {
-        this.type = 'other';
-        this.data = blobURL;
+      try {
+        this.data = await response.blob();
+        const blobURL = window.URL.createObjectURL(this.data);
+        if (this.path && (this.path.endsWith(".mp3") || this.path.endsWith(".wav"))) {
+          this.type = 'audio';
+          this.data = blobURL;
+        } else if (this.path && this.path.endsWith(".mp4")) {
+          this.type = 'video';
+          this.sourceType = 'video/mp4';
+          this.data = blobURL;
+        } else if (this.path && this.path.endsWith(".pdf")) {
+          this.type = 'pdf';
+          this.pdfdata = pdf.createLoadingTask(blobURL);
+          this.pdfdata.promise.then(pdf => {
+            this.numPages = pdf.numPages;
+            console.log(`this.numPages: ${this.numPages} pdf.numPages: ${pdf.numPages}`);
+          });
+        } else {
+          this.type = 'other';
+          this.data = blobURL;
+        }
+        this.loading = false;
+      } catch (e) {
+        this.errorMessage = 'File cannot be loaded';
+        this.error = e.message;
+        this.loading = false;
       }
     }
     this.loading = false;

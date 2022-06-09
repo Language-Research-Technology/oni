@@ -202,7 +202,7 @@ export async function getFile({itemId, repository, filePath}) {
       log.error(`path: ${filePath}`);
     }
   } catch (e) {
-    log.error(`getFile in repository with id: ${itemId} found in: ${filePath}`);
+    log.error(`getFile in repository with id: ${itemId} not found in: ${filePath}`);
     log.debug(`path: ${filePath}`);
   }
 }
