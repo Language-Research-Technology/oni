@@ -14,7 +14,7 @@ if [ "$resp" == "y" ] ; then
 
      echo '>> Building the UI code'
      cd ui
-     # npm run build
+     npm run build
      docker run -it --rm \
          -v $PWD:/srv/ui \
          -w /srv/ui node:16 bash -l -c "npm run build"
