@@ -15,10 +15,12 @@ if [ "$resp" == "y" ] ; then
 
      echo '>> Building the UI code'
      cd ui
-     npm run build
      docker run -it --rm \
+         -e NODE_ENV=production \
+         -v $PWD/configuration/configuration.json:/srv/configuration/configuration.json \
          -v $PWD:/srv/ui \
-         -w /srv/ui node:16 bash -l -c "npm run build"
+         -w /srv/ui \
+         node:18.3-buster bash -l -c "rm -f package-lock.json && npm run build"
      cd -
      echo
 fi
