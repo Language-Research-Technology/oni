@@ -20,7 +20,7 @@ if [ "$resp" == "y" ] ; then
          -v $PWD/configuration/configuration.json:/srv/configuration/configuration.json \
          -v $PWD:/srv/ui \
          -w /srv/ui \
-         node:18.3-buster bash -l -c "rm -f package-lock.json && npm run build"
+         node:18.3-buster bash -l -c "rm -rf node_modules package-lock.json && npm run build"
      cd -
      echo
 fi
