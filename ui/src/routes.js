@@ -57,7 +57,8 @@ const routes = [
       component: LogoutComponent
     },
       {
-        path: '/404', component: NotFoundPage
+        path: '/404',
+        component: NotFoundPage
       }
     ]
   },
