@@ -1,5 +1,6 @@
 FROM node:18 AS ui-builder
 ENV ONI_CONFIG_PATH /srv/configuration.json
+ENV NODE_ENV production
 LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oniui"
 WORKDIR /srv
 COPY ui/ /srv/
