@@ -6,7 +6,10 @@ if [ "$#" != 1 ] ; then
 fi
 VERSION="${1}"
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 2207699b537648a94e0e49b12f0ab11e1fc70f1a
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
@@ -37,13 +40,13 @@ if [ "$resp" == "y" ] ; then
 
      echo "Building API container"
      docker tag arkisto/oni-api:latest arkisto/oni-api:${VERSION}
-     # docker rmi $(docker images | grep none | awk '{print $3}')
+     docker rmi $(docker images | grep none | awk '{print $3}')
 
      echo "Building UI container"
      docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      docker tag arkisto/oni-ui:latest arkisto/oni-ui:${VERSION}
 
-     # docker rmi $(docker images | grep none | awk '{print $3}')
+     docker rmi $(docker images | grep none | awk '{print $3}')
      echo
 fi
 
