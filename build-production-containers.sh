@@ -9,7 +9,7 @@ VERSION="${1}"
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
-     #docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
+     docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
      echo
 
      echo '>> Building the UI code'
@@ -17,7 +17,7 @@ if [ "$resp" == "y" ] ; then
      echo
 fi
 
-read -p '>> Build the containers? [y|N] ' resp
+read -p '>> Tag the containers? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      cd api
      npm version --no-git-tag-version ${VERSION}
