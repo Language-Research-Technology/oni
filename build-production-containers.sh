@@ -9,18 +9,11 @@ VERSION="${1}"
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
-     docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
+     #docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
      echo
 
      echo '>> Building the UI code'
-     cd ui
-     docker run -it --rm \
-         -e NODE_ENV=production \
-         -v $PWD/configuration/configuration.json:/srv/configuration/configuration.json \
-         -v $PWD:/srv/ui \
-         -w /srv/ui \
-         node:18.3-buster bash -l -c "rm -rf node_modules package-lock.json && npm run build"
-     cd -
+     docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      echo
 fi
 
@@ -39,7 +32,6 @@ if [ "$resp" == "y" ] ; then
      docker tag arkisto/oni-api:latest arkisto/oni-api:${VERSION}
 
      echo "Building UI container"
-     docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      docker tag arkisto/oni-ui:latest arkisto/oni-ui:${VERSION}
 
      echo
