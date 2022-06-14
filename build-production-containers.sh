@@ -6,10 +6,6 @@ if [ "$#" != 1 ] ; then
 fi
 VERSION="${1}"
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 2207699b537648a94e0e49b12f0ab11e1fc70f1a
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
