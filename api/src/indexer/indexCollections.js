@@ -72,21 +72,23 @@ export async function indexCollections({configuration, repository, client}) {
           repoCollectionRoot._containsTypes = [];
           repoCollectionRoot.conformsTo = 'Collection';
           repoCollectionRoot._isRoot = 'true';
+
+          const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});
+          const _root = [{
+            '@id': first(repoCollectionRoot._crateId),
+            '@type': repoCollectionRoot['@type'],
+            'name': [{'@value': first(repoCollectionRoot.name)}]
+          }];
           //TODO: better license checks
           repoCollectionRoot.license = repoCollectionRoot?.license || col.record.dataValues?.license || col.record?.license;
           if (isEmpty(repoCollectionRoot.license)) {
             log.warn('No license found for item repoCollectionRoot: ' + repoCollectionRoot._crateId);
             log.warn('A default text string as license will be attached');
             const license = configuration.api.license;
-            repoCollectionRoot.license = license['default'];
+            _root.license = [{'@value': license}];
+          } else {
+            _root.license = normalRoot.license
           }
-          const normalRoot = crate.getTree({root: repoCollectionRoot, depth: 2, allowCycle: false});
-          const _root = [{
-            '@id': first(repoCollectionRoot._crateId),
-            '@type': repoCollectionRoot['@type'],
-            'name': [{'@value': first(repoCollectionRoot.name)}],
-            'license': first(normalRoot.license)
-          }];
           if (repoCollectionRoot._isTopLevel) {
             _root.isTopLevel = 'true';
           }
