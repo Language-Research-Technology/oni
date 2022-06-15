@@ -19,6 +19,20 @@ const log = getLogger();
 
 export function setupObjectRoutes({ server, configuration, repository }) {
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Object
+   *     parameters:
+   *       - memberOf
+   *       - conformsTo
+   *       - id
+   *       - memberOfTopLevel
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get("/object", async (req, res, next) => {
     if (!isUndefined(req.query.memberOf) && !isUndefined(req.query.conformsTo)) {
       //memberOf=id&conformsTo=Collection/Object/
@@ -40,7 +54,20 @@ export function setupObjectRoutes({ server, configuration, repository }) {
     }
   });
 
-
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Object Meta
+   *     parameters:
+   *       - memberOf
+   *       - conformsTo
+   *       - id
+   *       - memberOfTopLevel
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get('/object/meta', async (req, res, next) => {
     if (req.query.id) {
       if (!isUndefined(req.query.types)) {
@@ -61,16 +88,41 @@ export function setupObjectRoutes({ server, configuration, repository }) {
     }
   });
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Object Meta Versions
+   *     parameters:
+   *       - id
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get('/object/meta/versions', async (req, res, next) => {
     if (req.query.id) {
-      res.json({ message: 'meta version: Not implemented' }).status(400);
+      res.status(400);
+      res.json({ message: 'meta version: Not implemented' })
       next();
     } else {
-      res.json({ message: 'id parameter is required' }).status(400);
+      res.status(400);
+      res.json({ message: 'id parameter is required' })
       next();
     }
   });
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Stream
+   *     parameters:
+   *       - id
+   *       - path
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get('/stream',
     routeBearer(
       async function (req, res, next) {
@@ -80,7 +132,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
           } else if (req.query.id) {
             await getResolveParts({ req, res, next, configuration, select: [ 'parts' ], repository });
           } else {
-            res.json({ message: 'id parameter value is required' }).status(400);
+            res.status(400);
+            res.json({ message: 'id parameter value is required' });
             next();
           }
         } catch

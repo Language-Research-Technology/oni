@@ -14,6 +14,17 @@ const log = getLogger();
 
 export function setupOauthRoutes({server, configuration}) {
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: O-Auth Provider Login
+   *     parameters:
+   *       - provider
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get("/oauth/:provider/login", async function (req, res, next) {
     const provider = req.params.provider;
     const conf = configuration.api.authentication[provider];
@@ -63,6 +74,19 @@ export function setupOauthRoutes({server, configuration}) {
     next();
   });
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: O-Auth Provider Code
+   *     parameters:
+   *       - provider
+   *       - code
+   *       - state
+   *     responses:
+   *       200:
+   *         description: Return session token to authorize user with corresponding code.
+   */
   server.post("/oauth/:provider/code", async function (req, res, next) {
     if (!req.body.code) {
       return next(new BadRequestError(`Code not provided`));
@@ -175,8 +199,7 @@ async function getUserToken({configuration, provider, token}) {
           'Authorization': conf.bearer + ' ' + token['access_token']
         }
       });
-    }
-    if (conf['useFormData']) {
+    } else if (conf['useFormData']) {
       log.debug(`useFormData: ${conf['useFormData']}`);
       const formData = new FormData();
       formData.append('access_token', token['access_token'] || 'NA');

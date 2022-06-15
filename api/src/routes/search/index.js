@@ -9,6 +9,20 @@ import {filterResults} from "../../services/elastic";
 const log = getLogger();
 
 export function setupSearchRoutes({server, configuration}) {
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Search Index
+   *     parameters:
+   *       - index
+   *       - id
+   *       - filters
+   *       - scroll
+   *     responses:
+   *       200:
+   *         description: Search results.
+   */
   //Usability: Do we want users to be authenticated or let users browse without? if so use routeUser
   server.get("/search/:index", routeBrowse(async (req, res, next) => {
     try {
