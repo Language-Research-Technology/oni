@@ -27,6 +27,15 @@ export function setupRoutes({ server, configuration, repository }) {
     next();
   });
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Configuration
+   *     responses:
+   *       200:
+   *         description: Returns ui configuration including licenses and aggregations.
+   */
   server.get('/configuration', async (req, res, next) => {
     let configuration = await loadConfiguration();
     const ui = configuration.ui;
@@ -36,6 +45,15 @@ export function setupRoutes({ server, configuration, repository }) {
     next();
   });
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Version
+   *     responses:
+   *       200:
+   *         description: Returns package version.
+   */
   server.get('/version', (req, res, next) => {
     res.send({ version: version });
   });

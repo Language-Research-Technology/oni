@@ -19,7 +19,10 @@ if (process.env.ONI_CONFIG_PATH) {
     : "../configuration/configuration.json";
 }
 
-const config = fs.readJsonSync(path.resolve(__dirname, configuration));
+const configPath = path.resolve(__dirname, configuration);
+console.log(configPath);
+const config = fs.readJsonSync(configPath);
+
 
 module.exports = {
   target: "web",

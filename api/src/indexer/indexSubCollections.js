@@ -34,7 +34,7 @@ export async function indexSubCollections({configuration, repository, client, cr
             repoSubCollectionRoot.conformsTo = 'RepositoryCollection';
             repoSubCollectionRoot._isSubLevel = 'true';
             //TODO: better license checks
-            repoSubCollectionRoot.license = repoSubCollectionRoot?.license || col.record.dataValues?.license || col.record?.license || root?.license;
+            repoSubCollectionRoot.license = repoSubCollectionRoot?.license || col.record.dataValues?.license || col.record?.license || first(root)?.license;
             if (isEmpty(repoSubCollectionRoot.license)) {
               log.warn('No license found for item repoSubCollectionRoot:' + repoSubCollectionRoot._crateId);
               log.warn('A default text string as license will be attached');

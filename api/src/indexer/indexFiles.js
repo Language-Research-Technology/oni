@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import * as path from 'path';
 import {getFile} from '../controllers/record';
 import {getLogger} from "../services";
-import {isEmpty, toArray} from "lodash";
+import {first, isEmpty, toArray} from "lodash";
 
 const log = getLogger();
 
@@ -22,10 +22,11 @@ export async function indexFiles({
       //crate.pushValue(fileItem, 'file', {'@id': fileItem['@id']});
 
       fileItem._crateId = crateId;
-      fileItem.license = fileItem.license || item.license || parent.license;
+      fileItem.license = fileItem.license || item.license || parent?.license;
       if (isEmpty(fileItem.license)) {
         log.warn('No license found for fileItem ' + fileItem._crateId);
       }
+
       fileItem._parent = {
         name: item.name,
         '@id': item['@id'],

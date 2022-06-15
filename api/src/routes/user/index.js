@@ -9,6 +9,16 @@ import {getCiLogonMemberships} from "../../controllers/cilogon";
 const log = getLogger();
 
 export function setupUserRoutes({server, configuration}) {
+
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: User
+   *     responses:
+   *       200:
+   *         description: Returns user information including Group Membership.
+   */
   server.get("/user", routeUser(async (req, res, next) => {
       try {
         if (req.session.user) {
@@ -32,6 +42,16 @@ export function setupUserRoutes({server, configuration}) {
       }
     })
   );
+
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Set user token
+   *     responses:
+   *       200:
+   *         description: Returns user information including Group Membership.
+   */
   server.get("/user/token", routeUser(async (req, res, next) => {
       try {
         if (req.session.user) {
@@ -53,6 +73,15 @@ export function setupUserRoutes({server, configuration}) {
       }
     })
   );
+  /**
+   * @openapi
+   * /:
+   *   del:
+   *     description: Remove user token
+   *     responses:
+   *       200:
+   *         description: Returns user information.
+   */
   server.del("/user/token", routeUser(async (req, res, next) => {
       try {
         if (req.session.user) {
@@ -63,13 +92,14 @@ export function setupUserRoutes({server, configuration}) {
             value: null
           });
           user['accessToken'] = '...removed';
-          res.json({user}).status(200);
+          res.json({user});
         } else {
-          res.json({user: null}).status(200);
+          res.json({user: null});
         }
       } catch (e) {
         log.error(e);
-        res.send({error: e['message']}).status(500);
+        res.status(500);
+        res.send({error: e['message']})
         next();
       }
     })
