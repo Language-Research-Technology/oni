@@ -1,7 +1,13 @@
 <template>
-  <nav-view/>
-  <router-view/>
-  <footer-view/>
+  <header>
+    <nav-view/>
+  </header>
+  <main class="flex-grow">
+    <router-view/>
+  </main>
+  <footer>
+    <footer-view/>
+  </footer>
 </template>
 
 <script>

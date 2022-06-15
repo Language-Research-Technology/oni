@@ -1,5 +1,5 @@
 <template>
-  <el-row align="'middle'" justify="'end'" :gutter="0" class="grid place-items-center h-screen">
+  <el-row :gutter="0" class="grid place-items-center py-6">
     <el-col :xs="1" :sm="2" :md="2" :lg="2" :xl="2"></el-col>
     <el-col :xs="7" :sm="8" :md="8" :lg="8" :xl="8" class="flex items-center justify-center">
       <div class="flex items-center justify-center">

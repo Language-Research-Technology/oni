@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-screen flex justify-center bg-gray-100">
+  <div class="w-full flex justify-center bg-gray-100">
     <div class="h-auto rounded-lg pt-8 pb-8 px-8 flex-col items-center">
       <h2>{{ helpHead }}</h2>
       <p class="text-right mb-4">{{ helpBody }}</p>
