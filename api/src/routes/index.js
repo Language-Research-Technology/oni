@@ -16,12 +16,30 @@ export function setupRoutes({ server, configuration, repository }) {
   setupAuthRoutes({ server, configuration });
 
   if (process.env.NODE_ENV === 'development') {
+    /**
+     * @openapi
+     * /:
+     *   get:
+     *     description: Test Middleware
+     *     responses:
+     *       200:
+     *         description: None.
+     */
     server.get('/test-middleware', routeUser((req, res, next) => {
       res.send({});
       next();
     }));
   }
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Root
+   *     responses:
+   *       200:
+   *         description: None.
+   */
   server.get('/', (req, res, next) => {
     res.send({});
     next();
@@ -71,3 +89,4 @@ export function setupRoutes({ server, configuration, repository }) {
     }
   }
 }
+ 

@@ -3,7 +3,6 @@ import { isUndefined } from 'lodash';
 import {
   getRecordConformsTo,
   getRecordMemberOfTop,
-  getAllRecords,
   getRecordSingle,
   getRecordMembers,
   getRecordTypes,
@@ -13,7 +12,6 @@ import {
 import { getRecordCrate } from './recordCrate';
 import { getRecordItem } from './recordItem';
 import {routeBearer, routeBrowse} from '../../middleware/auth';
-import {getUser} from "../../controllers/user";
 
 const log = getLogger();
 
@@ -145,6 +143,18 @@ export function setupObjectRoutes({ server, configuration, repository }) {
       })
   );
 
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Open Object
+   *     parameters:
+   *       - id
+   *       - path
+   *     responses:
+   *       200:
+   *         description: .
+   */
   server.get('/object/open',
     routeBrowse(async function (req, res, next) {
         try {
