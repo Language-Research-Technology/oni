@@ -1,13 +1,16 @@
 <template>
   <div class="flex items-center justify-center py-32">
-    <div class="w-96 h-32 rounded-lg pt-8 pb-8 px-8 flex flex-col items-center"
-         v-loading="loading"
-         :element-loading-text="loadingText"
-         element-loading-background="rgba(229, 231, 235, 0.5)"
-         >
+    <div class="bg-gray-200 w-96 rounded-lg py-8 flex flex-col items-center">
+      <el-row class="h-32 items-center" align="middle">
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
+          <p v-loading="loading"></p>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
+          <p class="items-center">{{ loadingText }}</p>
+        </el-col>
+      </el-row>
     </div>
   </div>
-  <footer/>
 </template>
 
 <script>
@@ -53,9 +56,11 @@ export default {
           this.$store.commit("setUserData", user);
           this.$store.commit("setIsLoggedIn", true);
           putLocalStorage({key: tokenSessionKey, data: {token}});
-          this.loading = false;
+          debugger;
           await this.$http.get({route: "/auth/memberships"});
           await this.$router.push("/");
+
+          this.loading = false;
         } catch (e) {
           this.loading = false;
           console.log(e);
