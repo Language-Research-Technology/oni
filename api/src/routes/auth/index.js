@@ -41,6 +41,7 @@ export function setupAuthRoutes({server, configuration}) {
 
   server.get('/auth/memberships',
     routeUser(async function (req, res, next) {
+      log.debug('checking memberships');
       log.debug('User: ' + req.session?.user?.id);
       if (!req.session?.user?.id) {
         res.json({accessDenied: true});

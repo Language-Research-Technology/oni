@@ -60,7 +60,7 @@ export async function indexCollections({configuration, repository, client}) {
       } else {
         const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
         const crate = new ROCrate(resolvedCrate, rocrateOpts);
-        const repoCollectionRoot = crate.getRootDataset();
+        const repoCollectionRoot = crate.rootDataset;
         if (repoCollectionRoot) {
           const memberOf = col['memberOf'];
           if (!memberOf) {
