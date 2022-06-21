@@ -8,7 +8,7 @@ import {getRootConformsTos} from "../controllers/rootConformsTo";
 import {getFile, getRawCrate} from "../controllers/record";
 
 /**
- * Class to create an elastic indexer
+ * Class to create an elastic Oni indexer
  */
 export class Indexer {
   /**
@@ -18,7 +18,7 @@ export class Indexer {
     this.configuration = configuration;
     this.logFolder = this.configuration.api?.log?.logFolder;
     this.index = this.configuration.api?.elastic?.index;
-    this.defaultLicense = configuration.api.license?.default;
+    this.defaultLicense = this.configuration.api.license?.default;
     this.repository = repository;
     this.client = client;
     this.log = getLogger();

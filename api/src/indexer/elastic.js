@@ -1,7 +1,5 @@
 import {getLogger} from '../services';
 import {Client} from '@elastic/elasticsearch';
-import {indexCollections} from './indexCollections';
-import {inspect} from '../services/utils';
 
 import {Indexer} from './Indexer';
 
