@@ -24,6 +24,9 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
 
 export async function checkIfAuthorized({userId, license, configuration}) {
   let access = {hasAccess: false};
+  if(license && license['metadataIsPublic'] === false) {
+    access.hasAccess = false;
+  }
   if (configuration['api']['licenses'] && license) {
     //Doing this so, it works without any sort of user authorization for the collections that can be.
     //The licenses are not checked if not in your configuration file.
@@ -36,8 +39,6 @@ export async function checkIfAuthorized({userId, license, configuration}) {
       license: license,
       licenseConfiguration: configuration['api']['licenses']
     });
-  } else {
-    access.hasAccess = true;
   }
   return access;
 }

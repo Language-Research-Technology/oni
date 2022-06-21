@@ -35,7 +35,7 @@ export async function bootstrapObject({configuration, repository, object}) {
     if (rootLicense && rootLicense['@id']) {
       lic = rootLicense['@id'];
     } else {
-      lic = license['default'];
+      lic = license['default']['@id'];
     }
     const crateId = crate.getRootId();
     //console.log(`${crateId} license: ${lic}`);

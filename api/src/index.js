@@ -10,6 +10,7 @@ import {elasticInit, elasticBootstrap, elasticIndex} from './indexer/elastic';
 import {ocfltools} from "oni-ocfl";
 
 import corsMiddleware from 'restify-cors-middleware2';
+import * as fs from "fs-extra";
 
 const log = getLogger();
 const server = restify.createServer();
@@ -71,6 +72,11 @@ let repository;
       maxFieldsSize: 2 * 1024 * 1024,
     })
   );
+
+  const logFolder = configuration.api?.log?.logFolder || '/tmp/logs/oni';
+  if (!await fs.exists(logFolder)) {
+    await fs.mkdir(logFolder);
+  }
 
   if (configuration['api']['bootstrap']) {
     await bootstrap({configuration});
