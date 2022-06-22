@@ -7,7 +7,10 @@
         </el-col>
         <el-col class="flex flex-col items-center" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
           <p>{{ loadingText }}</p>
-          <p v-if="goHome" class="items-center"><el-link href="/">Go Home</el-link></p>
+          <br/>
+          <p v-if="goHome">
+            <el-link href="/login">Login</el-link>
+          </p>
         </el-col>
       </el-row>
     </div>
@@ -67,7 +70,12 @@ export default {
               this.loadingText = 'Please enroll first';
               window.location.href = this.$store.state.configuration.ui.enrollmentURL;
             } else {
-              await this.$router.push("/");
+              let lastRoute = getLocalStorage({key: 'lastRoute'});
+              if (lastRoute) {
+                await this.$router.push(lastRoute);
+              } else {
+                await this.$router.push("/");
+              }
             }
             this.loading = false;
           } catch (e) {

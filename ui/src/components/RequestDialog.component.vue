@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="dialogVisible" v-on:close="this.closeDialog()" title="Request Access" width="50%" draggable>
-    <el-row :gutter="10" :justify="'center'">
+    <el-row v-loading="this.loading" :gutter="10" :justify="'center'">
       <el-row v-if="isLoggedIn">
         <el-row>
           <p class="flex flex-col items-center" v-if="this.enrollmentUrl">
@@ -21,26 +21,11 @@
         <br/>
       </el-row>
       <el-row v-else>
-        <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-          <el-row>
-            <a v-if="this.enrollmentUrl" :href="this.enrollmentUrl"
-               target="_blank" :class="this.enrollmentClass"
-               :underline="false">{{
-                this.enrollmentLabel
-              }}
-            </a>
-            <p v-else>No enrolment url has been configured, please configure it</p>
-          </el-row>
-          <br/>
-        </el-col>
-        <el-col class="p-2" v-if="!isLoggedIn" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
-          <el-divider direction="vertical"/>
-        </el-col>
-        <el-col v-if="!isLoggedIn" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
+        <p class="flex flex-col items-center" v-if="this.enrollmentUrl">
           <router-link to="/login">
-            <el-button>Login</el-button>
+            <el-button>Sign up or Login</el-button>
           </router-link>
-        </el-col>
+        </p>
       </el-row>
     </el-row>
     <el-row>
@@ -52,7 +37,7 @@
     </el-row>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false">Ok</el-button>
+        <el-button type="primary" @click="dialogVisible = false">Close</el-button>
       </span>
     </template>
   </el-dialog>
@@ -80,17 +65,19 @@ export default {
         removeLocalStorage({key: tokenSessionKey});
         removeLocalStorage({key: 'isLoggedIn'});
         await this.$router.push("/login");
+        this.loading = false;
       } else {
         const {memberships} = await response.json();
         this.memberships = memberships;
         //TODO: make it nicer, not reload!
-        location.reload();
+        this.$router.go(this.$router.currentRoute);
+        this.loading = false;
       }
-      this.loading = false;
     }
   },
   data() {
     return {
+      loading: false,
       isLoggedIn: false,
       emailHelp: this.$store.state.configuration.ui.email.help || 'add-email@example.com',
     }

@@ -84,6 +84,7 @@ import 'element-plus/theme-chalk/display.css'
 import {Switch, Download} from "@element-plus/icons-vue";
 import {first} from 'lodash';
 import {defineAsyncComponent} from 'vue';
+import {putLocalStorage} from '@/storage';
 
 export default {
   components: {
@@ -299,6 +300,7 @@ export default {
       }
     },
     openRequestModal() {
+      putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
       this.openDocModal = true;
     },
     getEnrollment() {
