@@ -72,8 +72,8 @@ export default {
         this.memberships = memberships;
         //TODO: do smarter membership checks
         //If user is not enrolled need to send it to enrollmentURL if configured
-        if(this.memberships.length === 0 && this.$store.state.configuration.ui.enrollmentURL) {
-          window.location.href = this.$store.state.configuration.ui.enrollmentURL;
+        if(this.memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
+          window.location.href = this.$store.state.configuration.ui.enrollment.URL;
         }
       }
       this.loading = false;

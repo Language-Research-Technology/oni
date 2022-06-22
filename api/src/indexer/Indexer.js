@@ -56,7 +56,6 @@ export class Indexer {
         members: null
       });
       let i = 0;
-
       this.log.info(`Trying to index: ${rootConformsTos.length}`);
       for (let rootConformsTo of rootConformsTos) {
         const col = rootConformsTo['dataValues'] || rootConformsTo;
