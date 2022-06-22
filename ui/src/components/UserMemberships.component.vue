@@ -24,7 +24,7 @@
           <label for="key">&nbsp;</label>
           <div class="h-10 flex rounded items-center mt-1">
             <input type="button" value="Check Memberships" id="key" name="key"
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                   class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                    @click="this.getUserMemberships()"/>
           </div>
           <div class="h-10 flex mt-2">
@@ -67,8 +67,14 @@ export default {
         removeLocalStorage({key: 'isLoggedIn'});
         await this.$router.push("/login");
       } else {
+        console.log(this.$store.state.configuration.ui.enrollmentURL);
         const {memberships} = await response.json();
         this.memberships = memberships;
+        //TODO: do smarter membership checks
+        //If user is not enrolled need to send it to enrollmentURL if configured
+        if(this.memberships.length === 0 && this.$store.state.configuration.ui.enrollmentURL) {
+          window.location.href = this.$store.state.configuration.ui.enrollmentURL;
+        }
       }
       this.loading = false;
     }

@@ -58,7 +58,7 @@
             <label for="key">&nbsp;</label>
             <div class="h-10 flex rounded items-center mt-1">
               <input type="button" value="Generate" id="key" name="key"
-                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                     class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                      @click="this.updateApiToken()"/>
             </div>
             <div class="h-10 flex mt-2">

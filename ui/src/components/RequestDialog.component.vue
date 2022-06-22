@@ -3,12 +3,18 @@
     <el-row :gutter="10" :justify="'center'">
       <el-row v-if="isLoggedIn">
         <el-row>
-          <a v-if="this.enrollmentUrl" :href="this.enrollmentUrl"
-                   target="_blank" :class="this.enrollmentClass"
-                   :underline="false">{{
-              this.enrollmentLabel
-            }}
-          </a>
+          <p class="flex flex-col items-center" v-if="this.enrollmentUrl">
+            <a :href="this.enrollmentUrl"
+               target="_blank" :class="this.enrollmentClass"
+               :underline="false">{{
+                this.enrollmentLabel
+              }}
+            </a>
+            <br/>
+            <input type="button" value="Check Memberships" id="key" name="key"
+                   class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                   @click="this.getUserMemberships()"/>
+          </p>
           <p v-else>No enrolment url has been configured, please configure it</p>
         </el-row>
         <br/>
@@ -18,8 +24,8 @@
         <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
           <el-row>
             <a v-if="this.enrollmentUrl" :href="this.enrollmentUrl"
-                     target="_blank" :class="this.enrollmentClass"
-                     :underline="false">{{
+               target="_blank" :class="this.enrollmentClass"
+               :underline="false">{{
                 this.enrollmentLabel
               }}
             </a>
@@ -65,6 +71,22 @@ export default {
   methods: {
     closeDialog() {
       this.$emit('close');
+    },
+    async getUserMemberships() {
+      this.loading = true;
+      const response = await this.$http.get({route: "/auth/memberships"});
+      if (response.status !== 200) {
+        delete this.$store.state.user;
+        removeLocalStorage({key: tokenSessionKey});
+        removeLocalStorage({key: 'isLoggedIn'});
+        await this.$router.push("/login");
+      } else {
+        const {memberships} = await response.json();
+        this.memberships = memberships;
+        //TODO: make it nicer, not reload!
+        location.reload();
+      }
+      this.loading = false;
     }
   },
   data() {
