@@ -129,7 +129,7 @@ export default {
         url: '', label: ''
       },
       openDocModal: false,
-      loading: true,
+      loading: false,
       errorDialogVisible: false,
       errorDialogText: '',
       _memberOf: null,
@@ -232,6 +232,7 @@ export default {
     async downloadFileUrl() {
       if (this.isFile()) {
         try {
+          this.loading = true;
           const crateId = this.crateId?.['@value'];
           const filePath = this.metadata?.['@id'];
           if (filePath && crateId) {
