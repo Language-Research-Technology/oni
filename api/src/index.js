@@ -95,6 +95,6 @@ let repository;
   setupRoutes({server, configuration, repository});
 
   server.listen("8080", function () {
-    console.log("ready on %s", server.url);
+    log.debug(`ready on ${server.url}`);
   });
 })();

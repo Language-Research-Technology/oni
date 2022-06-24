@@ -41,7 +41,7 @@ export async function recordResolve({id, getUrid, configuration, repository}) {
         await fs.writeFile(path.normalize(path.join(logFolder, id.replace(/[/\\?%*:|"<>]/g, '-') + '.json')), JSON.stringify(response[0], null, 2));
         log.error('________')
       }
-      return rocrate.getJson();
+      return rocrate.toJSON();
     } else {
       //Merge all the ROCrates into one giant one.
       log.silly('recordResolve:mergeAllCrates');

@@ -4,6 +4,7 @@ const log = getLogger();
 
 export function isAuthorized({ memberships, license, licenseConfiguration }) {
   const needsLicense = licenseConfiguration.find(l => l['license'] === license);
+  log.debug(`isAuthorized: needsLiecense ${JSON.stringify(needsLicense)}`);
   if (needsLicense) {
     const foundAuthorization = memberships.find(membership => {
       const group = membership['group'];
@@ -24,9 +25,11 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
 
 export async function checkIfAuthorized({userId, license, configuration}) {
   let access = {hasAccess: false};
-  if(license && license['metadataIsPublic'] === false) {
-    access.hasAccess = false;
-  }
+  console.log(license)
+  // if(license && license['metadataIsPublic'] === false) {
+  //   access.hasAccess = false;
+  // }
+
   if (configuration['api']['licenses'] && license) {
     //Doing this so, it works without any sort of user authorization for the collections that can be.
     //The licenses are not checked if not in your configuration file.

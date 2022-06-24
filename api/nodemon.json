@@ -1,4 +1,8 @@
 {
-    "verbose": false,
-    "ignore": ["*.spec.js"]
+  "verbose": true,
+  "ignore": [
+    "node_modules/*",
+    "test-data",
+    "*.spec.js"
+  ]
 }

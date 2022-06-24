@@ -1,19 +1,278 @@
 {
     "ui": {
-        "siteName": "Oni"
+        "siteName": "Language Data",
+        "siteNameX": "Commons of Australia",
+        "publicPath": "http://localhost:9000/",
+        "title": "Language Data Commons of Australia",
+        "help": {
+            "mainText": "For access please email help@ldaca.edu.au"
+        },
+        "email": {
+            "help": "help@ldaca.edu.au"
+        },
+        "footer": {
+            "copyright": "© 2022 UQ Text Commons Group",
+            "link": {
+                "href": "https://ldaca.edu.au",
+                "text": "LDaCA"
+            }
+        },
+        "loginProviders": [
+            {
+                "name": "github",
+                "text": "Sign in with Github",
+                "disabled": false,
+                "loginRoute": "/oauth/github/login",
+                "buttonStyle": "background: rgba(88 115 181)"
+            },
+            {
+                "name": "cilogon",
+                "text": "Sign in with CILogon",
+                "disabled": false,
+                "loginRoute": "/oauth/cilogon/login",
+                "buttonStyle": "background: rgba(76 60 185)"
+            }
+        ],
+        "enrollment":{
+            "enforced": true,
+            "URL": ""
+        }
     },
     "api": {
+        "bootstrap": false,
+        "log": {
+            "logFolder": "/opt/storage/oni/logs"
+        },
+        "host": "http://localhost:8080",
+        "ocfl": {
+            "ocflPath": "/opt/storage/oni/ocfl",
+            "ocflScratch": "/opt/storage/oni/scratch-ocfl",
+            "ocflTestPath": "/opt/storage/oni/test/ocfl",
+            "ocflTestScratch": "/opt/storage/oni/test/scratch-ocfl",
+            "catalogFilename": "ro-crate-metadata.json",
+            "hashAlgorithm": "md5",
+            "create": {
+                "repoName": "ATAP",
+                "collections": "../test-data/ingest-crate-list.development.json"
+            }
+        },
+        "rocrate": {
+            "dataTransform": {
+                "types": [
+                    "File"
+                ]
+            }
+        },
         "administrators": [
-            "{user@email.com}",
-            "{other user@somewhere.else.com}"
+            "ephe@feko.mt"
         ],
         "session": {
             "lifetime": {
                 "hours": 5
             },
-            "secret": "{some secret - 32 characters or longer}"
+            "secret": "some_secret_-_32_characters_or_longer"
         },
         "services": {},
-        "authentication": {}
+        "authentication": {
+            "cilogon": {
+                "clientID": "",
+                "clientSecret": "",
+                "redirect_uri": "http://localhost:9000/auth/cilogon/callback",
+                "authorizeHost": "https://cilogon.org",
+                "authorizePath": "/authorize",
+                "tokenHost": "https://cilogon.org",
+                "tokenPath": "/oauth2/token",
+                "user": "https://cilogon.org/oauth2/userinfo",
+                "bearer": "token",
+                "scope": "openid+profile+email+org.cilogon.userinfo",
+                "state": "cilogon",
+                "oauthType": "AuthorizationCode",
+                "useFormData": true,
+                "memberOf": "is_member_of"
+            },
+            "github": {
+                "clientID": "",
+                "clientSecret": "",
+                "redirect_uri": "http://localhost:9000/auth/github/callback",
+                "authorizeHost": "https://github.com",
+                "authorizePath": "/login/oauth/authorize",
+                "tokenHost": "https://github.com",
+                "tokenPath": "/login/oauth/access_token",
+                "user": "https://api.github.com/user",
+                "bearer": "token",
+                "scope": "read:org, user",
+                "state": "github",
+                "oauthType": "ClientCredentials",
+                "useHeaders": true
+            }
+        },
+        "licenses": [
+            {
+                "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/A/",
+                "group": "sydney-speaks-license-a",
+                "enrollment": {
+                    "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:20",
+                    "label": "Follow enrolment to Sydney Speaks License A",
+                    "class": ""
+                }
+            },
+            {
+                "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/B/",
+                "group": "sydney-speaks-license-b",
+                "enrollment": {
+                    "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:36",
+                    "label": "Follow this link to enrol for access to Sydney Speaks B License",
+                    "class": ""
+                }
+            },
+            {
+                "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/C/",
+                "group": "sydney-speaks-license-c",
+                "enrollment": {}
+            },
+            {
+                "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/D/",
+                "group": "sydney-speaks-license-d",
+                "enrollment": {
+                    "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:33",
+                    "label": "Follow enrolment to Sydney Speaks License D",
+                    "class": ""
+                }
+            },
+            {
+                "license": "#restricted",
+                "group": "restricted-users",
+                "enrollment": {}
+            }
+        ],
+        "licenseGroup": "text-commons",
+        "license": {
+            "default": {
+                "@id": "https://choosealicense.com/no-permission/",
+                "@type": "OrganizationReuseLicense",
+                "metadataIsPublic": true,
+                "allowTextIndex": true,
+                "name": "Default LDaCA No License",
+                "description": "No License"
+            }
+        },
+        "identifier": {
+            "main": "ATAP"
+        },
+        "elastic": {
+            "bootstrap": false,
+            "node": "http://elasticsearch:9200",
+            "log": "debug",
+            "index": "items",
+            "fields": [
+                "@id",
+                "name.@value",
+                "description.@value",
+                "_text"
+            ],
+            "aggregations": [
+                {
+                    "display": "Root",
+                    "order": 0,
+                    "name": "_root.name.@value",
+                    "field": "_root.name.@value.keyword"
+                },
+                {
+                    "display": "Member Of",
+                    "order": 1,
+                    "name": "_memberOf.name.@value",
+                    "field": "_memberOf.name.@value.keyword"
+                },
+                {
+                    "display": "License",
+                    "order": 2,
+                    "name": "license.name.@value",
+                    "field": "license.name.@value.keyword"
+                },
+                {
+                    "display": "Record Type",
+                    "order": 3,
+                    "name": "@type",
+                    "field": "@type.keyword"
+                },
+                {
+                    "display": "Language",
+                    "order": 4,
+                    "name": "language.name.@value",
+                    "field": "language.name.@value.keyword"
+                },
+                {
+                    "display": "Modality",
+                    "order": 5,
+                    "name": "modality.name.@value",
+                    "field": "modality.name.@value.keyword"
+                },
+                {
+                    "display": "Linguistic Genre",
+                    "order": 6,
+                    "name": "linguisticGenre.name.@value",
+                    "field": "linguisticGenre.name.@value.keyword"
+                },
+                {
+                    "display": "Encoding Format",
+                    "order": 7,
+                    "name": "encodingFormat.@value",
+                    "field": "encodingFormat.@value.keyword"
+                },
+                {
+                    "display": "Annotation Type",
+                    "order": 8,
+                    "name": "annotationType.@value",
+                    "field": "annotationType.@value.keyword"
+                }
+            ],
+            "highlightFields": [
+                "_text"
+            ],
+            "test": {
+                "filters": {
+                    "hasFile.language.name": [
+                        "Arabic, Standard",
+                        "Chinese, Mandarin",
+                        "Persian, Iranian",
+                        "Turkish",
+                        "Vietnames"
+                    ]
+                },
+                "@type": [
+                    "TextDialogue"
+                ]
+            },
+            "mappingFieldLimit": 3000,
+            "mappings": {
+                "date_detection": false,
+                "properties": {
+                    "@id": {
+                        "type": "keyword"
+                    },
+                    "hasFile": {
+                        "type": "nested",
+                        "properties": {
+                            "language": {
+                                "type": "nested",
+                                "properties": {
+                                    "name": {
+                                        "type": "nested",
+                                        "properties": {
+                                            "@value": {
+                                                "type": "keyword"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "admin": {
+            "indexRoutes": true
+        }
     }
 }

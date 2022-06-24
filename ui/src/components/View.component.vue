@@ -60,11 +60,11 @@
     </el-col>
   </el-row>
   <div v-else>
-    <view-doc-error v-loading="this.loading"/>
+    <view-doc-error v-if="this.noData"/>
   </div>
-  <request-dialog :dialogVisible="this.openDocModal" :enrollmentUrl="this.enrollment.url"
-                  :enrollmentLabel="this.enrollment.label || 'To request access follow this link'"
-                  :enrollmentClass="this.enrollment.class || 'underline text-blue-600 hover:text-blue-800 visited:text-purple-600 text-center'"
+  <request-dialog :dialogVisible="this.openDocModal" :enrollmentUrl="this.enrollment?.url"
+                  :enrollmentLabel="this.enrollment?.label || 'To request access follow this link'"
+                  :enrollmentClass="this.enrollment?.class || 'underline text-blue-600 hover:text-blue-800 visited:text-purple-600 text-center'"
                   v-on:close="this.openDocModal = false"/>
   <el-dialog v-model="errorDialogVisible" width="30%" center>
     <el-alert :title="this.errorDialogTitle" type="warning"
@@ -129,10 +129,11 @@ export default {
         url: '', label: ''
       },
       openDocModal: false,
-      loading: false,
+      loading: true,
       errorDialogVisible: false,
       errorDialogText: '',
-      _memberOf: null
+      _memberOf: null,
+      noData: false
     }
   },
   async mounted() {
@@ -184,6 +185,8 @@ export default {
         }
         //this.metadata = omitBy(metadata._source, (value, key) => key.startsWith('_'));
         //console.log(this.metadata)
+      } else {
+        this.noData = true;
       }
     },
     isFile() {
@@ -229,7 +232,6 @@ export default {
     async downloadFileUrl() {
       if (this.isFile()) {
         try {
-          this.loading = true;
           const crateId = this.crateId?.['@value'];
           const filePath = this.metadata?.['@id'];
           if (filePath && crateId) {
@@ -310,7 +312,7 @@ export default {
             return l.enrollment;
           }
         });
-        this.enrollment = license.enrollment;
+        this.enrollment = license?.enrollment;
       } else {
         this.errorDialogText = 'No licenses configured';
       }

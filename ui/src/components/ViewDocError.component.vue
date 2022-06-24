@@ -1,20 +1,30 @@
 <template>
-  <div class="p-6 flex justify-center">
-    <div class="container max-w-screen-lg mx-auto">
-      <div class="md:col-span-5">
-        <p class="relative space-x-3 font-bold text-xl select-none text-left">
-          No data found
-        </p>
-      </div>
-    </div>
-  </div>
+  <not-found-page :go="go"
+                  :go_url="backUrl"
+                  :not_found="'No Data Found'"
+                  :not_found_message="' '"/>
 </template>
 
 <script>
 
+import NotFoundPage from "./NotFoundPage.vue";
+
 export default {
+  components: {NotFoundPage},
+  beforeMount() {
+    if (window.history.length === 0) {
+      this.backUrl = null;
+      this.go = 'Go Home';
+    } else {
+      this.backUrl = this.$router.back;
+    }
+  },
   data() {
-    return {}
+    console.log(this.$route)
+    return {
+      backUrl: '',
+      go: 'Go Back'
+    }
   }
 }
 </script>
