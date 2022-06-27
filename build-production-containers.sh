@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+ORG=moisbo
+
 if [ "$#" != 1 ] ; then
     echo "Please provide a version number for these containers: e.g. 0.1.0"
     exit -1
@@ -9,11 +11,11 @@ VERSION="${1}"
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
-     docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
+     docker build --rm -t ${ORG}/oni-api:latest -f Dockerfile.api-build .
      echo
 
      echo '>> Building the UI code'
-     docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
+     docker build --rm -t ${ORG}/oni-ui:latest -f Dockerfile.ui-build .
      echo
 fi
 
@@ -29,20 +31,20 @@ if [ "$resp" == "y" ] ; then
 
      docker rmi $(docker images | grep none | awk '{print $3}')
      echo "Building API container"
-     docker tag arkisto/oni-api:latest arkisto/oni-api:${VERSION}
+     docker tag ${ORG}/oni-api:latest ${ORG}/oni-api:${VERSION}
 
      echo "Building UI container"
-     docker tag arkisto/oni-ui:latest arkisto/oni-ui:${VERSION}
+     docker tag ${ORG}/oni-ui:latest ${ORG}/oni-ui:${VERSION}
 
      echo
 fi
 
 read -p '>> Push the containers to docker hub? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
-#     echo "Pushing built containers to docker hub"
-#     docker login
-#     docker push arkisto/oni-api:latest
-#     docker push arkisto/oni-api:${VERSION}
-#     docker push arkisto/oni-ui:latest
-#     docker push arkisto/oni-ui:${VERSION}
+     echo "Pushing built containers to docker hub"
+     docker login
+     docker push ${ORG}/oni-api:latest
+     docker push ${ORG}/oni-api:${VERSION}
+     docker push ${ORG}/oni-ui:latest
+     docker push ${ORG}/oni-ui:${VERSION}
 fi
