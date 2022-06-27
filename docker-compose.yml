@@ -60,6 +60,8 @@ services:
         environment:
             TERM: "xterm-256color"
             NODE_ENV: "development"
+            ASSET_PATH: "http://localhost:9000/"
+            TITLE: "Oni - local"
         volumes:
             #- ui_node_modules:/srv/ui/node_modules:delegated
             - ./ui:/srv/ui:delegated

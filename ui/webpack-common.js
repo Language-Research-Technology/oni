@@ -10,27 +10,13 @@ const webpack = require('webpack');
 
 require('dotenv').config({path: '../.env'});
 
-let configuration;
-if (process.env.ONI_CONFIG_PATH) {
-  configuration = process.env.ONI_CONFIG_PATH;
-} else {
-  configuration = process.env.NODE_ENV === "development"
-    ? "../configuration/development-configuration.json"
-    : "../configuration/configuration.json";
-}
-
-const configPath = path.resolve(__dirname, configuration);
-console.log(configPath);
-const config = fs.readJsonSync(configPath);
-
-
 module.exports = {
   target: "web",
   entry: ["./src/main.js"],
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[contenthash].js",
-    publicPath: config['ui']['publicPath'] || "http://localhost:9000/",
+    publicPath: process.env.ASSET_PATH || "http://localhost:9000/",
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -38,7 +24,7 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: config['ui']['title'] || "Oni",
+      title: process.env.TITLE || "Oni",
       template: "./public/index.html",
     }),
     new VueLoaderPlugin(),
