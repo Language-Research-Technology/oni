@@ -60,7 +60,7 @@ export class Indexer {
       for (let rootConformsTo of rootConformsTos) {
         const col = rootConformsTo?.dataValues || rootConformsTo;
         i++;
-        //this.log.info(`Indexing: ${i}: ${col.crateId}`);
+        this.log.info(`Indexing: ${i}: ${col.crateId}`);
         const resolvedCrate = await recordResolve({
           id: col.crateId,
           getUrid: false,
@@ -80,7 +80,6 @@ export class Indexer {
             this.log.error(e);
           }
           if (collRoot) {
-            this.log.debug('memberOf')
             const memberOf = col['memberOf'];
             if (!memberOf) {
               collRoot._isTopLevel = 'true';
@@ -91,7 +90,13 @@ export class Indexer {
             collRoot._containsTypes = [];
             collRoot.conformsTo = 'Collection';
             collRoot._isRoot = 'true';
-            const validLicense = this.validateLicense(collRoot?.license || col.record?.dataValues?.license || col.record?.license);
+            this.log.debug('validating license')
+            const licenseItemOrId = collRoot?.license || col['record']['license'] || col?.license;
+            let validLicense = this.validateLicense(licenseItemOrId);
+            if (!validLicense) {
+              //put the default one.
+              validLicense = this.defaultLicense;
+            }
             if (!validLicense) {
               this.log.error('----------------------------------------------------------------');
               this.log.error(`Skipping indexCollections ${collRoot._crateId}, No License Found`);
@@ -102,7 +107,7 @@ export class Indexer {
               this._root = [{
                 '@id': first(collRoot._crateId),
                 '@type': collRoot['@type'],
-                'name': [{'@value': first(collRoot.name)}]
+                  'name': [{'@value': first(collRoot.name)}]
               }];
               this._root.license = collRoot.license;
               if (collRoot._isTopLevel) {
@@ -174,7 +179,14 @@ export class Indexer {
               subCollRoot.conformsTo = 'RepositoryCollection';
               subCollRoot._isSubLevel = 'true';
               //TODO: better license checks
-              const validLicense = this.validateLicense(subCollRoot?.license || col.record.dataValues?.license || col.record?.license || first(this._root)?.license);
+              let validLicense = this.validateLicense(subCollRoot?.license);
+              if (!validLicense) {
+                validLicense = this.validateLicense( col.record.dataValues?.license || col.record?.license || first(this._root)?.license);
+              }
+              if (!validLicense) {
+                //put the default one.
+                validLicense = this.defaultLicense;
+              }
               if (!validLicense) {
                 this.log.error('----------------------------------------------------------------');
                 this.log.error(`Skipping indexSubCollections ${subCollRoot._crateId}, No License Found`);
@@ -242,7 +254,15 @@ export class Indexer {
           item._containsTypes = [];
           item.conformsTo = 'RepositoryCollection';
           //item.partOf = {'@id': parent['@id']};
-          const validLicense = this.validateLicense(item?.license || parent?.license || first(this._root)?.license);
+          let validLicense = this.validateLicense(item?.license);
+          if (!validLicense) {
+            //Try again with its parent or root.
+            validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
+          }
+          if (!validLicense) {
+            //put the default one.
+            validLicense = this.defaultLicense;
+          }
           if (!validLicense) {
             this.log.error('----------------------------------------------------------------');
             this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
@@ -275,7 +295,15 @@ export class Indexer {
           item._crateId = crateId;
           item.conformsTo = 'RepositoryObject';
           //item.partOf = {'@id': parent['@id']};
-          const validLicense = this.validateLicense(item?.license || parent?.license || first(this._root)?.license);
+          let validLicense = this.validateLicense(item?.license);
+          if (!validLicense) {
+            //Try again with its parent or root.
+            validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
+          }
+          if (!validLicense) {
+            //put the default one.
+            validLicense = this.defaultLicense;
+          }
           if (!validLicense) {
             this.log.error('----------------------------------------------------------------');
             this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
@@ -355,7 +383,7 @@ export class Indexer {
         this.log.debug(`indexObject: member ${member['crateId']}`);
         //TODO: add version
         const rawCrate = await getRawCrate({repository: this.repository, crateId: member['crateId']});
-        this.crate = new ROCrate(rawCrate);
+        this.crate = new ROCrate(rawCrate, {alwaysAsArray: true, resolveLinks: true});
         const item = this.crate.rootDataset;
         if (item) {
           if (item['@type'] && item['@type'].includes('RepositoryObject')) {
@@ -363,7 +391,11 @@ export class Indexer {
             //item._root = root;
             item._crateId = crateId;
             item.conformsTo = 'RepositoryObject';
-            const validLicense = this.validateLicense(item?.license || member?.license || parent?.license || first(this._root)?.license);
+            let validLicense = this.validateLicense(item?.license || member?.license || parent?.license || first(this._root)?.license);
+            if (!validLicense) {
+              //put the default one.
+              validLicense = this.defaultLicense;
+            }
             if (!validLicense) {
               this.log.error('----------------------------------------------------------------');
               this.log.error(`Skipping indexObjects ${item._crateId}, No License Found`);
@@ -420,7 +452,15 @@ export class Indexer {
         //Id already in fileItem
         //crate.pushValue(fileItem, 'file', {'@id': fileItem['@id']});
         fileItem._crateId = crateId;
-        const validLicense = this.validateLicense(fileItem.license || item.license || parent?.license);
+        let validLicense = this.validateLicense(fileItem.license);
+        if (!validLicense) {
+          //Try again with its parent or root.
+          validLicense = this.validateLicense(item.license || parent?.license);
+        }
+        if (!validLicense) {
+          //put the default one.
+          validLicense = this.defaultLicense;
+        }
         if (!validLicense) {
           this.log.error('----------------------------------------------------------------');
           this.log.error(`Skipping indexFiles ${fileItem._crateId}, No License Found`);
@@ -505,11 +545,11 @@ export class Indexer {
   * @returns a license object
   * */
   validateLicense(itemOrId) {
+    itemOrId = first(itemOrId);
     let license;
-    if (typeof first(itemOrId) === "string") {
+    if (typeof itemOrId === "string") {
       try {
-        const item = first(itemOrId);
-        itemOrId = this.crate.getItem(item);
+        itemOrId = this.crate.getItem(itemOrId);
       } catch (e) {
         this.log.error('Licenses should be @ids of items in rocrate');
         itemOrId = null;
@@ -517,19 +557,12 @@ export class Indexer {
     } else {
       //try to resolve
       try {
-        const item = first(itemOrId);
-        itemOrId = this.crate.getItem(item?.['@id']);
+        itemOrId = this.crate.getItem(itemOrId?.['@id']);
       } catch (e) {
-        this.log.error(`Licenses not resolved with @id: ${item?.['@id']}`);
+        this.log.error(`Licenses not resolved with @id: ${itemOrId?.['@id']}`);
         itemOrId = null;
       }
     }
-    if (isUndefined(itemOrId) || isEmpty(itemOrId)) {
-      //If you like to limit to index if there is no license, set the defaultLicense to undefined
-      license = this.defaultLicense;
-    } else {
-      license = itemOrId;
-    }
-    return license;
+    return itemOrId;
   }
 }
