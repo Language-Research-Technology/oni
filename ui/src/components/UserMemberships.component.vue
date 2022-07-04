@@ -39,7 +39,7 @@
     <el-alert :title="'No Enrollment Found'" type="warning"
               :closable="false">
       <p class="break-normal">
-        You have not been enrolled, you will be redirected to enroll to our registry
+        You have not been enrolled, Please enroll with the following URL
         <el-link :underline="true" :href="enrollmentUrl">{{ enrollmentUrl }}</el-link>
       </p>
     </el-alert>
@@ -90,9 +90,6 @@ export default {
         //If user is not enrolled need to send it to enrollmentURL if configured
         if (this.memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
           this.noEmrollmentDialogVisible = true;
-          setTimeout(() => {
-            window.location.href = this.enrollmentUrl;
-          }, 1000);
         }
       }
       this.loading = false;
