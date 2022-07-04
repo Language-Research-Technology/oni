@@ -19,12 +19,16 @@ export async function getGroupMembership({configuration, user}) {
       }
     });
     const userInfo = await response.json();
+    log.debug('userInfo');
+    console.log(JSON.stringify(userInfo));
     assert(conf['memberOf'], 'setup a memberOf field in configuration.api.authentication["cilogon"]');
     //This is to model it to look like and match github api
     const groups = [];
     forEach(userInfo[conf['memberOf']], (g) => {
       groups.push({group: g});
     });
+    log.debug('user groups');
+    console.log(groups);
     return groups;
   } catch (e) {
     return {error: e};

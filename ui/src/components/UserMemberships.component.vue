@@ -35,6 +35,20 @@
       </div>
     </div>
   </div>
+  <el-dialog v-model="noEmrollmentDialogVisible" width="50%" center>
+    <el-alert :title="'No Enrollment Found'" type="warning"
+              :closable="false">
+      <p class="break-normal">
+        You have not been enrolled, you will be redirected to enroll to our registry
+        <el-link :underline="true" :href="enrollmentUrl">{{ enrollmentUrl }}</el-link>
+      </p>
+    </el-alert>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="noEmrollmentDialogVisible = false">Close</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -49,10 +63,13 @@ export default {
   data() {
     return {
       loading: false,
-      memberships: []
+      memberships: [],
+      noEmrollmentDialogVisible: false,
+      enrollmentUrl: ''
     };
   },
   mounted() {
+    this.enrollmentUrl = this.$store.state.configuration.ui.enrollment.URL;
     this.$nextTick(async function () {
       await this.getUserMemberships();
     });
@@ -61,19 +78,21 @@ export default {
     async getUserMemberships() {
       this.loading = true;
       const response = await this.$http.get({route: "/auth/memberships"});
-      if(response.status !== 200) {
+      if (response.status !== 200) {
         delete this.$store.state.user;
         removeLocalStorage({key: tokenSessionKey});
         removeLocalStorage({key: 'isLoggedIn'});
         await this.$router.push("/login");
       } else {
-        console.log(this.$store.state.configuration.ui.enrollmentURL);
         const {memberships} = await response.json();
         this.memberships = memberships;
         //TODO: do smarter membership checks
         //If user is not enrolled need to send it to enrollmentURL if configured
-        if(this.memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
-          window.location.href = this.$store.state.configuration.ui.enrollment.URL;
+        if (this.memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
+          this.noEmrollmentDialogVisible = true;
+          setTimeout(() => {
+            window.location.href = this.enrollmentUrl;
+          }, 1000);
         }
       }
       this.loading = false;

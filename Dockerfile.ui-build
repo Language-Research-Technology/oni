@@ -1,9 +1,7 @@
 FROM node:18 AS ui-builder
-ENV ONI_CONFIG_PATH /srv/configuration.json
 LABEL maintainer="Moises Sacal <moisbo@gmail.com>"
 WORKDIR /srv
 COPY ui/ /srv/
-COPY configuration/configuration.json /srv/configuration.json
 RUN rm -rf node_modules && rm -rf package_lock.json && npm run build
 
 FROM nginx:latest

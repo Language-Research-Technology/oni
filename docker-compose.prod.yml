@@ -24,7 +24,7 @@ services:
       - "5432:5432"
 
   api:
-    image: moisbo/oni-api
+    image: arkisto/oni-api
     hostname: api
     tty: true
     environment:
@@ -44,7 +44,7 @@ services:
       - "8080:8080"
 
   ui:
-    image: moisbo/oni-ui:latest
+    image: arkisto/oni-ui:latest
     hostname: ui
     tty: true
     environment:

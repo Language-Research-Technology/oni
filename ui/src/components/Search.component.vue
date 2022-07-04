@@ -351,7 +351,7 @@ export default {
     },
     async searchTopCollections() {
       const memberOfAgg = this.memberOfBuckets;
-      const membersOf = toRaw(memberOfAgg.buckets);
+      const membersOf = toRaw(memberOfAgg?.buckets);
       const hasFilters = find(this.filters, f => f.length > 0);
       this.isStart = isEmpty(hasFilters) && isEmpty(this.searchQuery);
       if (membersOf && membersOf.length > 0) {
