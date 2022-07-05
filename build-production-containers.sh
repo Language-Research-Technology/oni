@@ -10,11 +10,12 @@ VERSION="${1}"
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
      echo '>> Building the API code'
-     docker build --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
+     docker buildx create --use
+     docker buildx build --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
      echo
 
      echo '>> Building the UI code'
-     docker build --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
+     docker buildx build --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      echo
 fi
 
