@@ -19,6 +19,8 @@ export class Indexer {
     this.logFolder = this.configuration.api?.log?.logFolder;
     this.index = this.configuration.api?.elastic?.index;
     this.defaultLicense = this.configuration.api.license?.default || null;
+    this.conformsToCollection = this.configuration.api.conformsTo.collection;
+    this.conformsToObject = this.configuration.api.conformsTo.object;
     this.repository = repository;
     this.client = client;
     this.log = getLogger();
@@ -52,7 +54,7 @@ export class Indexer {
     this.log.debug('Index Collections');
     try {
       let rootConformsTos = await getRootConformsTos({
-        conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+        conforms: this.conformsToCollection,
         members: null
       });
       let i = 0;
@@ -88,55 +90,57 @@ export class Indexer {
             }
             collRoot._crateId = col.crateId;
             collRoot._containsTypes = [];
-            collRoot.conformsTo = 'Collection';
-            collRoot._isRoot = 'true';
-            this.log.debug('validating license')
-            const licenseItemOrId = collRoot?.license || col['record']['license'] || col?.license;
-            let validLicense = this.validateLicense(licenseItemOrId);
-            if (!validLicense) {
-              //put the default one.
-              validLicense = this.defaultLicense;
-            }
-            if (!validLicense) {
-              this.log.error('----------------------------------------------------------------');
-              this.log.error(`Skipping indexCollections ${collRoot._crateId}, No License Found`);
-              this.log.error('----------------------------------------------------------------');
-            } else {
-              collRoot.license = validLicense;
-              const normalRoot = this.crate.getTree({root: collRoot, depth: 2, allowCycle: false});
-              this._root = [{
-                '@id': first(collRoot._crateId),
-                '@type': collRoot['@type'],
-                  'name': [{'@value': first(collRoot.name)}]
-              }];
-              this._root.license = collRoot.license;
-              if (collRoot._isTopLevel) {
-                this._root.isTopLevel = 'true';
+            //SKip if it doesnt conformsTo
+            if (this.validateConformsTo(collRoot, this.conformsToCollection)) {
+              collRoot._isRoot = 'true';
+              this.log.debug('validating license')
+              const licenseItemOrId = collRoot?.license || col['record']['license'] || col?.license;
+              let validLicense = this.validateLicense(licenseItemOrId);
+              if (!validLicense) {
+                //put the default one.
+                validLicense = this.defaultLicense;
               }
-              //root.collection = _root['name'] || root['@id'];
-              normalRoot._root = this._root;
-              try {
-                const {body} = await this.client.index({
-                  index: this.index,
-                  body: normalRoot
-                });
-              } catch (e) {
-                this.log.error('index normalRoot');
-                await this.writeLogFile(col.crateId, '_normalRoot.json', normalRoot);
-              }
-              if (collRoot.hasMember && collRoot.hasMember.length > 0) {
-                this.log.debug(`Indexing Members of root`);
-                await this.indexMembers({
-                  parent: collRoot,
-                  crateId: col.crateId,
-                  _memberOf: this._root.concat(),
-                });
+              if (!validLicense) {
+                this.log.error('----------------------------------------------------------------');
+                this.log.error(`Skipping indexCollections ${collRoot._crateId}, No License Found`);
+                this.log.error('----------------------------------------------------------------');
               } else {
-                this.log.debug('Indexing SubCollections and objects');
-                await this.indexSubCollections({
-                  crateId: col.crateId,
-                  _memberOf: this._root.concat(),
-                });
+                collRoot.license = validLicense;
+                const normalRoot = this.crate.getTree({root: collRoot, depth: 2, allowCycle: false});
+                this._root = [{
+                  '@id': first(collRoot._crateId),
+                  '@type': collRoot['@type'],
+                  'name': [{'@value': first(collRoot.name)}]
+                }];
+                this._root.license = collRoot.license;
+                if (collRoot._isTopLevel) {
+                  this._root.isTopLevel = 'true';
+                }
+                //root.collection = _root['name'] || root['@id'];
+                normalRoot._root = this._root;
+                try {
+                  const {body} = await this.client.index({
+                    index: this.index,
+                    body: normalRoot
+                  });
+                } catch (e) {
+                  this.log.error('index normalRoot');
+                  await this.writeLogFile(col.crateId, '_normalRoot.json', normalRoot);
+                }
+                if (collRoot.hasMember && collRoot.hasMember.length > 0) {
+                  this.log.debug(`Indexing Members of root`);
+                  await this.indexMembers({
+                    parent: collRoot,
+                    crateId: col.crateId,
+                    _memberOf: this._root.concat(),
+                  });
+                } else {
+                  this.log.debug('Indexing SubCollections and objects');
+                  await this.indexSubCollections({
+                    crateId: col.crateId,
+                    _memberOf: this._root.concat(),
+                  });
+                }
               }
             }
           } else {
@@ -160,7 +164,7 @@ export class Indexer {
     this.log.debug('indexSubCollections');
     try {
       let rootConformsTos = await getRootConformsTos({
-        conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Collection',
+        conforms: this.conformsToCollection,
         members: crateId
       });
       this.log.debug(`SubCollections of ${crateId} : ${rootConformsTos['length'] || 0}`);
@@ -176,54 +180,56 @@ export class Indexer {
             if (subCollRoot['@type'] && subCollRoot['@type'].includes('RepositoryCollection')) {
               subCollRoot._crateId = col.crateId;
               subCollRoot._containsTypes = [];
-              subCollRoot.conformsTo = 'RepositoryCollection';
-              subCollRoot._isSubLevel = 'true';
-              //TODO: better license checks
-              let validLicense = this.validateLicense(subCollRoot?.license);
-              if (!validLicense) {
-                validLicense = this.validateLicense( col.record.dataValues?.license || col.record?.license || first(this._root)?.license);
-              }
-              if (!validLicense) {
-                //put the default one.
-                validLicense = this.defaultLicense;
-              }
-              if (!validLicense) {
-                this.log.error('----------------------------------------------------------------');
-                this.log.error(`Skipping indexSubCollections ${subCollRoot._crateId}, No License Found`);
-                this.log.error('----------------------------------------------------------------');
-              } else {
-                const normalSubCollRoot = this.crate.getTree({root: subCollRoot, depth: 2, allowCycle: false});
-                //root should be already normalized
-                normalSubCollRoot._root = this._root;
-                const parent = [{
-                  '@id': subCollRoot['@id'],
-                  '@type': subCollRoot['@type'],
-                  name: [{'@value': first(subCollRoot['name'])}]
-                }];
-                normalSubCollRoot._memberOf = _memberOf;
-                try {
-                  const {body} = await this.client.index({
-                    index: this.index,
-                    body: normalSubCollRoot
-                  });
-                } catch (e) {
-                  this.log.error('Index SubCollection RepositoryCollection normalSubCollRoot');
-                  await this.writeLogFile(col.crateId, '_normalSubCollectionItem.json', normalSubCollRoot);
+              //Skip if it does not conformsTo
+              if (this.validateConformsTo(subCollRoot, this.conformsToCollection)) {
+                subCollRoot._isSubLevel = 'true';
+                //TODO: better license checks
+                let validLicense = this.validateLicense(subCollRoot?.license);
+                if (!validLicense) {
+                  validLicense = this.validateLicense(col.record.dataValues?.license || col.record?.license || first(this._root)?.license);
                 }
-                if (subCollRoot.hasMember && subCollRoot.hasMember.length > 0) {
-                  this.log.debug(`Indexing Members of root`);
-                  await this.indexMembers({
-                    parent,
-                    crateId: col.crateId,
-                    _memberOf: _memberOf.concat(parent)
-                  });
+                if (!validLicense) {
+                  //put the default one.
+                  validLicense = this.defaultLicense;
+                }
+                if (!validLicense) {
+                  this.log.error('----------------------------------------------------------------');
+                  this.log.error(`Skipping indexSubCollections ${subCollRoot._crateId}, No License Found`);
+                  this.log.error('----------------------------------------------------------------');
                 } else {
-                  this.log.debug('Indexing objects of SubCollections');
-                  await this.indexObjects({
-                    crateId: col.crateId,
-                    parent,
-                    _memberOf: _memberOf.concat(parent)
-                  });
+                  const normalSubCollRoot = this.crate.getTree({root: subCollRoot, depth: 2, allowCycle: false});
+                  //root should be already normalized
+                  normalSubCollRoot._root = this._root;
+                  const parent = [{
+                    '@id': subCollRoot['@id'],
+                    '@type': subCollRoot['@type'],
+                    name: [{'@value': first(subCollRoot['name'])}]
+                  }];
+                  normalSubCollRoot._memberOf = _memberOf;
+                  try {
+                    const {body} = await this.client.index({
+                      index: this.index,
+                      body: normalSubCollRoot
+                    });
+                  } catch (e) {
+                    this.log.error('Index SubCollection RepositoryCollection normalSubCollRoot');
+                    await this.writeLogFile(col.crateId, '_normalSubCollectionItem.json', normalSubCollRoot);
+                  }
+                  if (subCollRoot.hasMember && subCollRoot.hasMember.length > 0) {
+                    this.log.debug(`Indexing Members of root`);
+                    await this.indexMembers({
+                      parent,
+                      crateId: col.crateId,
+                      _memberOf: _memberOf.concat(parent)
+                    });
+                  } else {
+                    this.log.debug('Indexing objects of SubCollections');
+                    await this.indexObjects({
+                      crateId: col.crateId,
+                      parent,
+                      _memberOf: _memberOf.concat(parent)
+                    });
+                  }
                 }
               }
             }
@@ -252,104 +258,110 @@ export class Indexer {
           this.log.debug(`Indexing RepositoryCollection of ${item['@id']}`);
           item._crateId = crateId;
           item._containsTypes = [];
-          item.conformsTo = 'RepositoryCollection';
-          //item.partOf = {'@id': parent['@id']};
-          let validLicense = this.validateLicense(item?.license);
-          if (!validLicense) {
-            //Try again with its parent or root.
-            validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
-          }
-          if (!validLicense) {
-            //put the default one.
-            validLicense = this.defaultLicense;
-          }
-          if (!validLicense) {
-            this.log.error('----------------------------------------------------------------');
-            this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
-            this.log.error('----------------------------------------------------------------');
-          } else {
-            item.license = validLicense;
-            await this.indexMembers({parent: item, crateId, _memberOf});
-            //Bubble up types to the parent
-            for (let t of this.crate.utils.asArray(item._containsTypes)) {
-              if (t !== 'RepositoryObject') {
-                if (!parent._containsTypes.includes(t)) {
-                  this.crate.pushValue(parent, '_containsTypes', t);
+          //item.conformsTo = 'RepositoryCollection';
+          //Skip if doesnt conformsTo
+          if (this.validateConformsTo(item, this.conformsToCollection)) {
+            //item.partOf = {'@id': parent['@id']};
+            let validLicense = this.validateLicense(item?.license);
+            if (!validLicense) {
+              //Try again with its parent or root.
+              validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
+            }
+            if (!validLicense) {
+              //put the default one.
+              validLicense = this.defaultLicense;
+            }
+            if (!validLicense) {
+              this.log.error('----------------------------------------------------------------');
+              this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
+              this.log.error('----------------------------------------------------------------');
+            } else {
+              item.license = validLicense;
+              await this.indexMembers({parent: item, crateId, _memberOf});
+              //Bubble up types to the parent
+              for (let t of this.crate.utils.asArray(item._containsTypes)) {
+                if (t !== 'RepositoryObject') {
+                  if (!parent._containsTypes.includes(t)) {
+                    this.crate.pushValue(parent, '_containsTypes', t);
+                  }
                 }
               }
-            }
-            const normalCollectionItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
-            normalCollectionItem._root = this._root;
-            normalCollectionItem._memberOf = _memberOf;
-            try {
-              const {body} = await this.client.index({
-                index: this.index,
-                body: Object.assign({}, normalCollectionItem)
-              });
-            } catch (e) {
-              this.log.error('Index normalCollectionItem');
-              await this.writeLogFile(crateId, '_normalCollectionItem.json', normalCollectionItem);
+              const normalCollectionItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
+              normalCollectionItem._root = this._root;
+              normalCollectionItem._memberOf = _memberOf;
+              try {
+                const {body} = await this.client.index({
+                  index: this.index,
+                  body: Object.assign({}, normalCollectionItem)
+                });
+              } catch (e) {
+                this.log.error('Index normalCollectionItem');
+                await this.writeLogFile(crateId, '_normalCollectionItem.json', normalCollectionItem);
+              }
             }
           }
         } else if (item['@type'] && item['@type'].includes('RepositoryObject')) {
           item._crateId = crateId;
-          item.conformsTo = 'RepositoryObject';
-          //item.partOf = {'@id': parent['@id']};
-          let validLicense = this.validateLicense(item?.license);
-          if (!validLicense) {
-            //Try again with its parent or root.
-            validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
-          }
-          if (!validLicense) {
-            //put the default one.
-            validLicense = this.defaultLicense;
-          }
-          if (!validLicense) {
-            this.log.error('----------------------------------------------------------------');
-            this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
-            this.log.error('----------------------------------------------------------------');
-          } else {
-            item.license = validLicense;
-            item.name = item['name'] || item['@id'];
-            const normalObjectItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
-            const normalParent = [{
-              '@id': parent['@id'],
-              '@type': parent['@type'],
-              name: [{'@value': first(parent['name'])}]
-            }];
-            //TODO: this below seems unnecessary. What can we do? We are relying
-            if (isEqual(_memberOf, normalParent)) {
-              normalObjectItem._memberOf = _memberOf;
+          //item.conformsTo = 'RepositoryObject';
+          //Skip if it does not conformsTo
+          if (this.validateConformsTo(item, this.conformsToObject)) {
+            //item.partOf = {'@id': parent['@id']};
+            let validLicense = this.validateLicense(item?.license);
+            if (!validLicense) {
+              //Try again with its parent or root.
+              validLicense = this.validateLicense(parent?.license || first(this._root)?.license);
+            }
+            if (!validLicense) {
+              //put the default one.
+              validLicense = this.defaultLicense;
+            }
+            if (!validLicense) {
+              this.log.error('----------------------------------------------------------------');
+              this.log.error(`Skipping indexMembers ${item['@id']}, No License Found`);
+              this.log.error('----------------------------------------------------------------');
             } else {
-              normalObjectItem._memberOf = _memberOf.concat(normalParent);
-            }
-            normalObjectItem._root = this._root;
-            try {
-              const {body} = await this.client.index({
-                index: this.index,
-                body: normalObjectItem
-              });
-            } catch (e) {
-              this.log.error('IndexMembers normalObjectItem');
-              this.log.error(e);
-              await this.writeLogFile(crateId, '_normalObjectItem.json', normalObjectItem);
-            }
-            // Add a parent for the @type: File
-            for (let typeProxy of this.crate.utils.asArray(item['@type'])) {
-              const type = Object.assign({}, typeProxy)
-              if (type !== 'RepositoryObject') {
-                if (Array.isArray(parent._containsTypes)) {
-                  if (!parent._containsTypes.includes(type)) {
-                    this.crate.pushValue(parent, '_containsTypes', type);
+              item.license = validLicense;
+              item.name = item['name'] || item['@id'];
+              const normalObjectItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
+              const normalParent = [{
+                '@id': parent['@id'],
+                '@type': parent['@type'],
+                name: [{'@value': first(parent['name'])}]
+              }];
+              //TODO: this below seems unnecessary. What can we do? We are relying
+              if (isEqual(_memberOf, normalParent)) {
+                normalObjectItem._memberOf = _memberOf;
+              } else {
+                normalObjectItem._memberOf = _memberOf.concat(normalParent);
+              }
+              normalObjectItem._root = this._root;
+              try {
+                const {body} = await this.client.index({
+                  index: this.index,
+                  body: normalObjectItem
+                });
+              } catch (e) {
+                this.log.error('IndexMembers normalObjectItem');
+                this.log.error(e);
+                await this.writeLogFile(crateId, '_normalObjectItem.json', normalObjectItem);
+              }
+              // Add a parent for the @type: File
+              for (let typeProxy of this.crate.utils.asArray(item['@type'])) {
+                const type = Object.assign({}, typeProxy)
+                if (type !== 'RepositoryObject') {
+                  if (Array.isArray(parent._containsTypes)) {
+                    if (!parent._containsTypes.includes(type)) {
+                      this.crate.pushValue(parent, '_containsTypes', type);
+                    }
                   }
                 }
               }
-            }
-            //if (item['hasPart']) log.debug(`Getting files for ${crateId}`);
-            for (let hasPart of this.crate.utils.asArray(item['hasPart'])) {
-              await this.indexFiles({
-                crateId: crateId, item, hasPart, parent, _memberOf
-              });
+              //if (item['hasPart']) log.debug(`Getting files for ${crateId}`);
+              for (let hasPart of this.crate.utils.asArray(item['hasPart'])) {
+                await this.indexFiles({
+                  crateId: crateId, item, hasPart, parent, _memberOf
+                });
+              }
             }
           }
         } else {
@@ -373,7 +385,7 @@ export class Indexer {
       //This is the same as doing
       // http://localhost:9000/api/object?conformsTo=https://github.com/Language-Research-Technology/ro-crate-profile%23Object&memberOf=<<crateId>>
       let members = await getRootConformsTos({
-        conforms: 'https://github.com/Language-Research-Technology/ro-crate-profile#Object',
+        conforms: this.conformsToObject,
         members: crateId
       });
       this.log.debug(`Members of ${crateId} : ${members['length'] || 0}`);
@@ -390,38 +402,40 @@ export class Indexer {
             //log.debug(`Indexing RepositoryObject of ${item['@id']}`);
             //item._root = root;
             item._crateId = crateId;
-            item.conformsTo = 'RepositoryObject';
-            let validLicense = this.validateLicense(item?.license || member?.license || parent?.license || first(this._root)?.license);
-            if (!validLicense) {
-              //put the default one.
-              validLicense = this.defaultLicense;
-            }
-            if (!validLicense) {
-              this.log.error('----------------------------------------------------------------');
-              this.log.error(`Skipping indexObjects ${item._crateId}, No License Found`);
-              this.log.error('----------------------------------------------------------------');
-            } else {
-              item.license = validLicense;
-              const normalItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
-              normalItem._memberOf = _memberOf;
-              //normalItem._root = {"@value": root['@id']};
-              normalItem._root = this._root;
-              try {
-                let {body} = await this.client.index({
-                  index: this.index,
-                  body: normalItem
-                });
-              } catch (e) {
-                this.log.error('IndexObjects normalItem');
-                await this.writeLogFile(member.crateId, '_normalItem.json', normalItem);
+            //Skip if it does not conformsTo
+            if (this.validateConformsTo(item, this.conformsToObject)) {
+              let validLicense = this.validateLicense(item?.license || member?.license || parent?.license || first(this._root)?.license);
+              if (!validLicense) {
+                //put the default one.
+                validLicense = this.defaultLicense;
               }
-              //Then get a file, same as:
-              // /stream?id=<<crateId>>&path=<<pathOfFile>>
-              for (let hasPart of this.crate.utils.asArray(item['hasPart'])) {
-                await this.indexFiles({
-                  crateId: item['@id'], item, hasPart, parent: item,
-                  _memberOf
-                });
+              if (!validLicense) {
+                this.log.error('----------------------------------------------------------------');
+                this.log.error(`Skipping indexObjects ${item._crateId}, No License Found`);
+                this.log.error('----------------------------------------------------------------');
+              } else {
+                item.license = validLicense;
+                const normalItem = this.crate.getTree({root: item, depth: 1, allowCycle: false});
+                normalItem._memberOf = _memberOf;
+                //normalItem._root = {"@value": root['@id']};
+                normalItem._root = this._root;
+                try {
+                  let {body} = await this.client.index({
+                    index: this.index,
+                    body: normalItem
+                  });
+                } catch (e) {
+                  this.log.error('IndexObjects normalItem');
+                  await this.writeLogFile(member.crateId, '_normalItem.json', normalItem);
+                }
+                //Then get a file, same as:
+                // /stream?id=<<crateId>>&path=<<pathOfFile>>
+                for (let hasPart of this.crate.utils.asArray(item['hasPart'])) {
+                  await this.indexFiles({
+                    crateId: item['@id'], item, hasPart, parent: item,
+                    _memberOf
+                  });
+                }
               }
             }
           } else {
@@ -564,5 +578,21 @@ export class Indexer {
       }
     }
     return itemOrId;
+  }
+
+  /*
+  * Validate if it conforms to object/collection with configuration item
+  * @param {item} - object item
+  * @param {conformsTo} - string to compare it with
+  * @returns true or false
+  * */
+  validateConformsTo(item, conformsTo) {
+
+    const value = first(item['conformsTo']);
+    if (value) {
+      return value['@id'] === conformsTo || value === conformsTo;
+    } else {
+      return false;
+    }
   }
 }
