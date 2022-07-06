@@ -20,7 +20,7 @@
             Logout
           </button>
         </el-dropdown-item>
-        <el-dropdown-item v-if="userMemberships" divided>
+        <el-dropdown-item v-if="userMemberships.length > 0" divided>
           <ul>
             <li class="font-semibold">Memberships:</li>
             <li v-for="uM of userMemberships">
@@ -110,9 +110,11 @@ export default {
       this.loading = true;
       const response = await this.$http.get({route: "/auth/memberships"});
       const {memberships} = await response.json();
-      for (let m of memberships) {
-        if (m['group']) {
-          this.userMemberships.push(m['group']);
+      if (memberships) {
+        for (let m of memberships) {
+          if (m['group']) {
+            this.userMemberships.push(m['group']);
+          }
         }
       }
     }
