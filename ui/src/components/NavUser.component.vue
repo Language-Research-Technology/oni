@@ -20,9 +20,9 @@
             Logout
           </button>
         </el-dropdown-item>
-        <el-dropdown-item divided>
-          <ul class="bg-transparent">
-            <li>Memberships:</li>
+        <el-dropdown-item v-if="userMemberships" divided>
+          <ul>
+            <li class="font-semibold">Memberships:</li>
             <li v-for="uM of userMemberships">
               {{ uM }}
             </li>

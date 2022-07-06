@@ -36,7 +36,7 @@ import {
   removeLocalStorage,
   getLocalStorage
 } from "@/storage";
-import NavUser from './NavUSer.component.vue';
+import NavUser from './NavUser.component.vue';
 
 export default {
   name: 'NavView',
