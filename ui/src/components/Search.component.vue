@@ -121,6 +121,17 @@
       </el-col>
     </el-row>
   </div>
+  <el-dialog v-model="errorDialogVisible" width="30%" center>
+    <el-alert :title="this.errorDialogTitle" type="warning"
+              :closable="false">
+      <p class="break-normal">{{ this.errorDialogText }}</p>
+    </el-alert>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="errorDialogVisible = false">Close</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 
@@ -165,7 +176,9 @@ export default {
       collectionScrollId: '',
       isStart: false,
       newSearch: true,
-      isBrowse: false
+      isBrowse: false,
+      errorDialogVisible: false,
+      errorDialogText: ''
     };
   },
   updated() {
@@ -280,9 +293,14 @@ export default {
       return orderBy(a, 'order');
     },
     async getNext() {
-      let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
-      const items = await response.json();
-      this.populate({items});
+      try {
+        let response = await this.$http.get({route: `/search/items?scroll=${this.scrollId}`});
+        const items = await response.json();
+        this.populate({items});
+      } catch (e) {
+        this.errorDialogVisible = true;
+        this.errorDialogText = 'Your search session has expired, please reload';
+      }
     },
     onInputChange(value) {
       this.searchInput = value;

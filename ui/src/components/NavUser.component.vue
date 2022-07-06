@@ -92,11 +92,10 @@ export default {
       const response = await this.$http.get({route: "/user"});
       const {user} = await response.json();
       this.user = user;
-      this.setName()
-      this.provider = user['provider'];
+      this.setName();
     },
     setName() {
-      if (this.user['name']) {
+      if (this.user && this.user['name']) {
         if (this.user['name'].length > 30) {
           this.userName = this.user['name'].substring(0, 30) + '...';
         } else {

@@ -72,6 +72,7 @@ export default {
             } else {
               let lastRoute = getLocalStorage({key: 'lastRoute'});
               if (lastRoute) {
+                removeLocalStorage({key: 'lastRoute'});
                 await this.$router.push(lastRoute);
               } else {
                 await this.$router.push("/");
