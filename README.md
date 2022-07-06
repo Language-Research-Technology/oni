@@ -54,13 +54,13 @@ test file) does not re-run the tests.
 
 ## Repo layout
 
--   api: the api source code
+- api: the api source code
     -   src:
         -   routes: route handlers - return responses, throw http exceptions here
         -   controllers: handlers that do things - interact with the db here
         -   models: the database models
         -   services: services used code like loggers and config loaders
--   ui: the Vue SPA
+- ui: the Vue SPA
     -   public: icons and other static things
     -   src
         -   assets: css and stuff - there should be very little in here as this is visible globally.
@@ -68,11 +68,13 @@ test file) does not re-run the tests.
         -   components: your components structure as you like
         -   routes: SPA route code
         -   store: SPA state management
--   configuration: application configuration
--   scripts: script helpers to run the code
--   production: production configuration - compose file and nginx code
--   build-production-containers.sh: script to build the containers, tag and push to docker hub -
+- configuration: application configuration
+- scripts: script helpers to run the code
+- production: production configuration - compose file and nginx code
+- build-production-containers.sh: script to build the containers, tag and push to docker hub -
     REQUIRES WORK : COMMENTED OUT FOR NOW
+
+
 
 ## Documentation
 

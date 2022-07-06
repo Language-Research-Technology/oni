@@ -1,5 +1,7 @@
 ### DOCS for Oni
 
-### [Main Config](./Config.md)
+### [Main Config](./config.md)
 
-### [REST API](./REST_API.md)
+### [ReST API](./rest_api.md)
+
+### [Docker](./docker.md)

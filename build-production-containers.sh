@@ -9,13 +9,14 @@ VERSION="${1}"
 
 read -p '>> Build the code? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
-     echo '>> Building the API code'
+     # Use buildx to build multiplatform containers
      docker buildx create --use
-     docker buildx build --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
+     echo '>> Building the API code'
+     docker buildx build --push --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-api:latest -f Dockerfile.api-build .
      echo
 
      echo '>> Building the UI code'
-     docker buildx build --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
+     docker buildx build --push --platform linux/amd64,linux/arm64 --rm -t arkisto/oni-ui:latest -f Dockerfile.ui-build .
      echo
 fi
 
