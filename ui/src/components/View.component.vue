@@ -42,17 +42,13 @@
         </el-button-group>
       </el-row>
       <view-doc :crateId="this.crateId" :meta="this.metadata" :root="this.root"/>
-      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                    :conformsToName="'Collections'"
-                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Collection'"/>
-      <!--      <view-members v-if="getMembers()" :crateId="this.crateId" :limitMembers=10-->
-      <!--                    :conformsToName="'Objects'"-->
-
-      <!--                    :conformsTo="'https://github.com/Language-Research-Technology/ro-crate-profile%23Object'"/>-->
-
-      <!--                    :conformsTo="'RepositoryCollection'"/>-->
+      <!--      <view-members :crateId="this.crateId" :limitMembers=10-->
+      <!--                    :conformsToName="'Collections'"-->
+      <!--                    :conformsTo="conformsToCollection"/>-->
       <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
-                           :conformsToName="'Repository Objects'" :conformsTo="'RepositoryObject'"/>
+                           :conformsToName="'Related Collections'" :conformsTo="conformsToCollection"/>
+      <view-members-search v-if="getMembers()" :crateId="this.crateId" :limitMembers=10
+                           :conformsToName="'Related Objects'" :conformsTo="conformsToObject"/>
       <el-row>
         &nbsp;
       </el-row>
@@ -133,7 +129,9 @@ export default {
       errorDialogVisible: false,
       errorDialogText: '',
       _memberOf: null,
-      noData: false
+      noData: false,
+      conformsToCollection: '',
+      conformsToObject: ''
     }
   },
   async mounted() {
@@ -153,6 +151,8 @@ export default {
       this.setFacetUrl();
       this.setParentLink();
       this.getMembers();
+      this.conformsToCollection = this.$store.state.configuration.ui.conformsTo?.collection;
+      this.conformsToObject = this.$store.state.configuration.ui.conformsTo?.object;
     } catch (e) {
       this.errorDialogVisible = true;
       this.errorDialogTitle = 'Error';
@@ -167,7 +167,7 @@ export default {
       if (metadata?._source) {
         this.root = first(metadata._source._root);
         this.crateId = first(metadata._source._crateId);
-        this.conformsTo = first(metadata._source.conformsTo)?.['@value'];
+        this.conformsTo = metadata._source.conformsTo;
         this.error = metadata._source.error;
         this.setError();
         console.log(this.conformsTo);
@@ -271,8 +271,13 @@ export default {
       }
     },
     getMembers() {
-      console.log(this.conformsTo);
-      return this.conformsTo === 'SubCollection' || this.conformsTo === 'Collection' || this.conformsTo === 'RepositoryCollection' || this.conformsTo === 'Dataset';
+      if(this.conformsTo) {
+        for (let c of this.conformsTo) {
+          if (c['@id'] === this.$store.state.configuration.ui.conformsTo?.collection || c['@id'] === this.$store.state.configuration.ui.conformsTo?.object) {
+            return true
+          }
+        }
+      }
     },
     setFacetUrl() {
       if (Array.isArray(this._memberOf)) {

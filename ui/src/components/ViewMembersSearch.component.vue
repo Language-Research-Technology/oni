@@ -44,7 +44,7 @@ export default {
       let route = `/search/items?filters=`;
       const facet = JSON.stringify({
         '_memberOf.@id': [encodeURIComponent(this.crateId['@value'])],
-        '@type': [this.conformsTo]
+        'conformsTo.@id': [encodeURIComponent(this.conformsTo)]
       });
       route = route + facet;
       let response = await this.$http.get({route: route});
@@ -60,7 +60,7 @@ export default {
       //TODO: define search facet value from parent ??
       const facet = JSON.stringify({
         '_memberOf.@id': [this.crateId['@value']],
-        '@type': [this.conformsTo]
+        'conformsTo.@id': [encodeURIComponent(this.conformsTo)]
       });
       return route + encodeURIComponent(facet);
     }

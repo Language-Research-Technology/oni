@@ -587,12 +587,13 @@ export class Indexer {
   * @returns true or false
   * */
   validateConformsTo(item, conformsTo) {
-
-    const value = first(item['conformsTo']);
-    if (value) {
-      return value['@id'] === conformsTo || value === conformsTo;
-    } else {
-      return false;
+    if(item['conformsTo']) {
+      for (let c of item['conformsTo']) {
+        //for consistency all conformsTo have to be an object with an @id
+        if (c['@id'] === conformsTo) {
+          return true
+        }
+      }
     }
   }
 }
