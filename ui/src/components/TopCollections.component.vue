@@ -21,7 +21,7 @@
           </el-row>
           <el-row class="py-2">{{ c._source['_isRoot'] ? 'Top Collection' : '' }}</el-row>
           <el-row class="bottom justify-end" :gutter="0">
-            <el-link :underline="false" :href="'/view?id=' + c._source['@id']">
+            <el-link :underline="false" :href="`/view?id=${c._source['@id']}&_crateId=${first(c._source['_crateId'])?.['@value']}`">
               <el-button type="default">Open</el-button>
             </el-link>
             <el-link :underline="false" :href="getFacet(c._source['@id'])">

@@ -14,7 +14,7 @@
       </el-col>
       <el-col :xs="24" :sm="15" :md="16" :lg="19" :xl="19">
         <div v-for="(value, name, i) in this.meta.slice(0, this.limitMembers)" :key="name">
-          <el-link :href="'/view?id=' + encodeURIComponent(value._source['@id'])">{{ value._source.name[0]?.['@value'] || value._source['@id'] }}</el-link>
+          <el-link :href="`/view?id=${encodeURIComponent(value._source['@id'])}&_crateId=${encodeURIComponent(this.crateId['@value'])}`">{{ value._source.name[0]?.['@value'] || value._source['@id'] }}</el-link>
         </div>
         <el-link v-if="this.showMore" :href="setFacetUrl()">Show More</el-link>
       </el-col>
@@ -26,11 +26,12 @@
 <script>
 
 import {defineAsyncComponent} from 'vue';
-import {isEmpty} from 'lodash';
+import {first} from 'lodash';
 
 export default {
   props: ['limitMembers', 'crateId', 'conformsTo', 'conformsToName'],
-  components: {},
+  components: {
+  },
   async mounted() {
     try {
       await this.getMembersOf();
@@ -40,6 +41,7 @@ export default {
     }
   },
   methods: {
+    first,
     async getMembersOf() {
       let route = `/search/items?filters=`;
       const facet = JSON.stringify({

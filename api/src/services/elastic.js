@@ -34,6 +34,7 @@ export async function filterResults({userId, results, configuration}) {
           '@type': source['@type'] || null,
           '_memberOf': source['_memberOf'] || null,
           '_parent': source['_parent'] || null,
+          '_crateId': source['_crateId'] || null,
           name: source?.name, //TODO: add pseudonym to names
           license: source?.license,
           error: 'not_authorized',

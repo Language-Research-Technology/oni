@@ -6,7 +6,7 @@
           <el-col :xs="24" :sm="15" :md="16" :lg="18" :xl="20">
             <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
               <a class="break-words no-underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-                 :href="'/view?id=' + encodeURIComponent(this.path)">
+                 :href="`/view?id=${encodeURIComponent(this.path)}&_crateId=${this.id}`">
                 <i class="fa fa-1x fa-arrow-left"></i> File Metadata
               </a>
               <span>{{ this.parentTitle || decodeURIComponent(this.path) }}</span>

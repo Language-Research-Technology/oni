@@ -1,5 +1,5 @@
 <template>
-  <el-row class="md:container w-full" >
+  <el-row class="md:container w-full">
   <span v-if="Array.isArray(this.value)" v-for="v of this.value" v-loading="loading">
     <a href="v">OH: {{ v }}</a>
   </span>
@@ -63,7 +63,13 @@ export default {
       let id;
       //TODO: decide what to put in a href that is not searchable
       id = this.value;
-      return '/view?id=' + encodeURIComponent(id);
+      const _crateId = this.crateId?.['@value'];
+      if (_crateId) {
+        return `/view?id=${encodeURIComponent(id)}&_crateId=${encodeURIComponent(_crateId)}`;
+      } else {
+        return `/view?id=${encodeURIComponent(id)}`;
+      }
+
     },
     getTitle() {
       let title = first(this.value['name'])

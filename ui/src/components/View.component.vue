@@ -136,9 +136,10 @@ export default {
   },
   async mounted() {
     try {
-      const id = encodeURIComponent(this.$route.query.id)
+      const id = encodeURIComponent(this.$route.query.id);
+      const crateId = encodeURIComponent(this.$route.query._crateId)
       const element = encodeURIComponent(this.$route.query.element);
-      let route = `/search/items?id=${id}`;
+      let route = `/search/items?id=${id}&_crateId=${crateId}`;
       //encodeURIComponent may return "undefined"
       if (element && element !== 'undefined') {
         route += `&element=${element}`;
@@ -297,8 +298,8 @@ export default {
     },
     setParentLink() {
       if (this.parentId) {
-        let route = '/view?id=';
-        this.parentLink = route + encodeURIComponent(this.parentId);
+        let route = `/view?id=${encodeURIComponent(this.parentId)}&_crateId=${encodeURIComponent(this.crateId['@value'])}`;
+        this.parentLink = route;
       }
     },
     setError() {

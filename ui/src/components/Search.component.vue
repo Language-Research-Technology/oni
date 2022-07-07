@@ -90,7 +90,7 @@
           <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
             <search-detail-element
                 :id="item._source['@id']"
-                :href="'/view?id=' + encodeURIComponent(item._source['@id'])"
+                :href="`/view?id=${encodeURIComponent(item._source['@id'])}&_crateId=${encodeURIComponent(first(item._source['_crateId'])?.['@value'])}`"
                 :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
                 :conformsTo="item.conformsTo"
                 :types="item._source?.['@type']"
