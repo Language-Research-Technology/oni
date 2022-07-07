@@ -46,7 +46,12 @@ export function setupSearchRoutes({server, configuration}) {
       } else if (req.query['id']) {
         exactMatch = true;
         const id = req.query['id'].trim();
-        searchBody.query = {match: {'@id': decodeURIComponent(id)}};
+        const match = {'@id': decodeURIComponent(id)};
+        const _parent = req.query['_parent'].trim();
+        if(_parent) {
+          match['_parent'] = _parent;
+        }
+        searchBody.query = {match: match};
         results = await search({configuration, index, searchBody});
         log.debug(`Total: ${results?.hits?.total?.value}`);
       } else {
