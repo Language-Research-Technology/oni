@@ -51,9 +51,11 @@ export default {
         if (response.status !== 200) {
           this.error = true;
           this.$store.commit("setIsLoggedIn", false);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          await this.$router.push("/login");
+          console.log(response.statusText);
+          this.loadingText = 'There was an error trying to login, try again';
           this.loading = false;
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await this.$router.push("/login");
         } else {
           try {
             this.loadingText = 'Checking memberships';
@@ -81,6 +83,7 @@ export default {
             this.loading = false;
           } catch (e) {
             this.loading = false;
+            this.loadingText = e.message;
             console.log(e);
           }
         }

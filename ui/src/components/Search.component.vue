@@ -325,8 +325,7 @@ export default {
       this.populate({items, newSearch: true});
     },
     scrollToTop() {
-      //TODO: smooth scroll please
-      window.scrollTo(0, 0);
+      window.scrollTo({top: 0, behavior: 'smooth'});
     },
     async clearAggregations() {
       for (let agg of this.aggregations) {
