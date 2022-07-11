@@ -22,7 +22,7 @@
       </el-row>
       <el-row v-else>
         <p class="flex flex-col items-center" v-if="this.enrollmentUrl">
-          <router-link to="/login">
+          <router-link v-if="isLoginEnabled" to="/login">
             <el-button>Sign up or Login</el-button>
           </router-link>
         </p>
@@ -78,6 +78,7 @@ export default {
   data() {
     return {
       loading: false,
+      isLoginEnabled: this.$store.state.configuration.ui.login.enabled,
       isLoggedIn: false,
       emailHelp: this.$store.state.configuration.ui.email.help || 'add-email@example.com',
     }

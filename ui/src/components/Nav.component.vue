@@ -23,7 +23,7 @@
           </button>
         </li>
         <li class="pr-6">
-          <nav-user/>
+          <nav-user v-if="isLoginEnabled"/>
         </li>
       </ul>
     </nav>
@@ -44,7 +44,9 @@ export default {
     NavUser,
   },
   data() {
-    return {};
+    return {
+      isLoginEnabled: this.$store.state.configuration.ui.login.enabled
+    };
   },
   computed: {
     current: async function () {
