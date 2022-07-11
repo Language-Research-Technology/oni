@@ -34,11 +34,12 @@ export async function getAllRootConformsTos({offset = 0, limit = 10}) {
 export async function getRootConformsTos({conforms, members, crateId}) {
 
   try {
+    log.debug(`Getting root conformsTo of ${conforms}`);
     let queryMembers = false;
     if (members === null) {
       queryMembers = false;
     } else queryMembers = !!(members == 'false' || isUndefined(members) || members === '');
-    log.debug(`Check Members: ${queryMembers}`);
+    log.debug(`Check Members: ${members}`);
     // if members is undefined use this
     if (queryMembers) {
       const where = {

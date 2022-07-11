@@ -7,7 +7,7 @@
         "dev": "./node_modules/.bin/nodemon --trace-deprecation --exec npm run babel-node -- src/index.js",
         "make:ocfl": "DOTENV_CONFIG_PATH=../.env --require dotenv/config src/test/load/make_ocfl.js",
         "develop": "npm run develop:server",
-        "babel-node": "babel-node --source-maps --inspect=0.0.0.0 --require dotenv/config ",
+        "babel-node": "babel-node --inspect=0.0.0.0 --require dotenv/config ",
         "develop:server": "npm install && ./node_modules/.bin/nodemon --trace-deprecation --exec npm run babel-node -- src/index.js",
         "test": "./node_modules/.bin/jest",
         "test:watch": "./node_modules/.bin/jest --watch",
@@ -64,7 +64,7 @@
         "restify-errors": "^8.0.2",
         "rimraf": "^3.0.2",
         "ro-crate": "github:Arkisto-Platform/ro-crate-js#develop-rewrite",
-        "sequelize": "^6.6.5",
+        "sequelize": "^6.21.2",
         "simple-oauth2": "^4.3.0",
         "uuid": "^8.3.2",
         "winston": "^3.3.3"

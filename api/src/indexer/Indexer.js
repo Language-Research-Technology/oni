@@ -58,7 +58,11 @@ export class Indexer {
         members: null
       });
       let i = 0;
-      this.log.info(`Trying to index: ${rootConformsTos.length}`);
+      if (rootConformsTos?.length && rootConformsTos.length > 0) {
+        this.log.info(`Trying to index: ${rootConformsTos.length}`);
+      } else {
+        this.log.info(`No root conforms from ${this.conformsToCollection}`);
+      }
       for (let rootConformsTo of rootConformsTos) {
         const col = rootConformsTo?.dataValues || rootConformsTo;
         i++;
@@ -167,6 +171,11 @@ export class Indexer {
         conforms: this.conformsToCollection,
         members: crateId
       });
+      if (rootConformsTos?.length && rootConformsTos?.length > 0) {
+        this.log.info(`Trying to index: ${rootConformsTos.length}`);
+      } else {
+        this.log.info(`No root conforms in subCollections from ${this.conformsToCollection}`);
+      }
       this.log.debug(`SubCollections of ${crateId} : ${rootConformsTos['length'] || 0}`);
       if (rootConformsTos.length > 0) {
         for (let rootConformsTo of rootConformsTos) {
@@ -388,6 +397,11 @@ export class Indexer {
         conforms: this.conformsToObject,
         members: crateId
       });
+      if (members?.length && members?.length > 0) {
+        this.log.info(`Trying to index: ${members.length}`);
+      } else {
+        this.log.info(`No root conforms in subCollections from ${this.conformsToObject} of member ${crateId}`);
+      }
       this.log.debug(`Members of ${crateId} : ${members['length'] || 0}`);
       for (let member of members) {
         //The same as doing:
@@ -584,16 +598,22 @@ export class Indexer {
   * Validate if it conforms to object/collection with configuration item
   * @param {item} - object item
   * @param {conformsTo} - string to compare it with
-  * @returns true or false
+  * @returns true if item conformsTo, otherwise display error message
   * */
   validateConformsTo(item, conformsTo) {
-    if(item['conformsTo']) {
+    let itemConformsTo = false;
+    if (item['conformsTo']) {
       for (let c of item['conformsTo']) {
         //for consistency all conformsTo have to be an object with an @id
         if (c['@id'] === conformsTo) {
-          return true
+          itemConformsTo = true;
         }
       }
+    }
+    if (itemConformsTo) {
+      return true;
+    } else {
+      this.log.info(`item: ${JSON.stringify(item?.['conformsTo'])} does not conformsTo: ${conformsTo}`);
     }
   }
 }
