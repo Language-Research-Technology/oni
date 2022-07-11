@@ -4,7 +4,7 @@ const log = getLogger();
 
 export function isAuthorized({ memberships, license, licenseConfiguration }) {
   const needsLicense = licenseConfiguration.find(l => l['license'] === license);
-  log.debug(`isAuthorized: needsLiecense ${JSON.stringify(needsLicense)}`);
+  log.silly(`isAuthorized: needsLicense ${JSON.stringify(needsLicense)}`);
   if (needsLicense) {
     const foundAuthorization = memberships.find(membership => {
       const group = membership['group'];
@@ -25,7 +25,6 @@ export function isAuthorized({ memberships, license, licenseConfiguration }) {
 
 export async function checkIfAuthorized({userId, license, configuration}) {
   let access = {hasAccess: false};
-  console.log(license)
   // if(license && license['metadataIsPublic'] === false) {
   //   access.hasAccess = false;
   // }
