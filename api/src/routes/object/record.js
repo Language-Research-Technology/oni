@@ -40,7 +40,8 @@ export async function getAllRecordConformsTo({req, res, next}) {
 export async function getRecordConformsTo({req, res, next}) {
   const result = await getRootConformsTos({
     conforms: req.query.conformsTo,
-    members: req.query.memberOf
+    members: req.query.memberOf,
+    crateId: req.query.crateId
   });
   if (result) {
     res.send({

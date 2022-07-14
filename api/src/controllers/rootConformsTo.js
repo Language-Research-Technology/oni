@@ -46,6 +46,7 @@ export async function getRootConformsTos({conforms, members, crateId}) {
         conformsTo: conforms
       }
       if (crateId) {
+        log.debug(`Get crateId: ${crateId}`);
         where.crateId = crateId;
       }
       const conformsTo = await models.rootConformsTo.findAll({

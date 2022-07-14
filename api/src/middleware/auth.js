@@ -33,10 +33,10 @@ export async function demandBearerUser(req, res, next) {
   }
   try {
     const user = await getUser({ where: { apiToken: req.headers.authorization.split("Bearer ")[1], } });
-    if (!user?.dataValues) {
+    if (!user) {
       return next(new UnauthorizedError());
     }
-    req.user = user?.dataValues;
+    req.user = user;
   } catch (error) {
     return next(new UnauthorizedError());
   }
