@@ -7,7 +7,7 @@
       </router-link>
     </button>
   </span>
-  <el-dropdown v-show="this.isLoggedIn" :hide-on-click="true">
+  <el-dropdown v-show="this.isLoggedIn" :hide-on-click="'true'" v-on:mouseover="mouseOver">
     <span class="el-dropdown-link">
       <h1 class="pl-8 lg:pl-0 text-gray-700 text-base">{{ this.userName }}&nbsp;<i class="far fa-1x fa-user"></i>
       <el-icon class="el-icon--right"><arrow-down/></el-icon>
@@ -16,22 +16,25 @@
     <template #dropdown>
       <el-dropdown-menu>
         <el-dropdown-item>
-          <button class="underline" @click="this.logout()">
-            Logout
-          </button>
-        </el-dropdown-item>
-        <el-dropdown-item v-if="userMemberships.length > 0" divided>
           <ul>
             <li class="font-semibold">Memberships:</li>
+            <li v-loading="loading" v-if="loading"><br/><br/></li>
             <li v-for="uM of userMemberships">
               {{ uM }}
             </li>
           </ul>
         </el-dropdown-item>
         <el-dropdown-item divided>
-          <router-link to="/user">
-            <button class="underline">more...</button>
-          </router-link>
+          <el-button>
+            <router-link to="/user">
+              User Information
+            </router-link>
+          </el-button>
+        </el-dropdown-item>
+        <el-dropdown-item>
+          <el-button @click="this.logout()">
+            Logout
+          </el-button>
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
@@ -56,7 +59,9 @@ export default {
       user: '',
       userName: '',
       userMemberships: [],
-      isLoggedIn: false
+      isLoggedIn: false,
+      loading: false,
+      mousedOverAlready: 0
     };
   },
   computed: {
@@ -81,7 +86,6 @@ export default {
     this.$nextTick(async function () {
       this.isLoggedIn = getLocalStorage({key: 'isLoggedIn'});
       await this.getUser();
-      await this.getUserMemberships();
     });
   },
   methods: {
@@ -105,8 +109,15 @@ export default {
         this.userName = 'Welcome';
       }
     },
+    async mouseOver() {
+      this.mousedOverAlready++;
+      if (this.mousedOverAlready === 1) {
+        await this.getUserMemberships();
+      }
+    },
     async getUserMemberships() {
       this.loading = true;
+      this.userMemberships = [];
       const response = await this.$http.get({route: "/auth/memberships"});
       const {memberships} = await response.json();
       if (memberships) {
@@ -116,6 +127,7 @@ export default {
           }
         }
       }
+      this.loading = false;
     }
   }
 };

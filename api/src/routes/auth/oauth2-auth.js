@@ -2,13 +2,14 @@ import {BadRequestError, UnauthorizedError, ServiceUnavailableError} from 'resti
 import {loadConfiguration, getLogger, logEvent, generateToken} from '../../services';
 import {jwtVerify, createRemoteJWKSet} from "jose";
 import {Issuer, generators} from 'openid-client';
-import {createUser} from '../../controllers/user';
+import {createUser, updateUser} from '../../controllers/user';
 import {createSession} from '../../controllers/session';
 import models from '../../models';
 import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
 import {getGithubUser} from '../../services/github';
-import FormData from 'form-data';
+
+const {URL, URLSearchParams} = require('url');
 
 const log = getLogger();
 
@@ -95,7 +96,7 @@ export function setupOauthRoutes({server, configuration}) {
     let token = await getOauthToken({
       code: req.body.code,
       state: req.body.state,
-      configuration: configuration,
+      configuration: configuration
     });
 
     let userData = await getUserToken({configuration, provider: req.body.state, token});
@@ -177,8 +178,19 @@ async function getOauthToken({code, state, configuration}) {
       code: code,
       state: state
     };
-    const {token} = await oauth2.getToken(tokenParams);
-    return token;
+    try {
+      let accessToken = await oauth2.getToken(tokenParams);
+      if (accessToken.expired()) {
+        const refreshParams = {
+          scope: conf.scope,
+          prompt: conf.prompt
+        };
+        accessToken = await accessToken.refresh(refreshParams);
+      }
+      return accessToken.token;
+    } catch (e) {
+      console.log(e)
+    }
   } catch (e) {
     console.log(e);
     log.error(e.message);
@@ -201,11 +213,11 @@ async function getUserToken({configuration, provider, token}) {
       });
     } else if (conf['useFormData']) {
       log.debug(`useFormData: ${conf['useFormData']}`);
-      const formData = new FormData();
-      formData.append('access_token', token['access_token'] || 'NA');
       response = await fetch(conf.user, {
         method: 'POST',
-        body: new URLSearchParams({'access_token': token['access_token'] || 'NA'}),
+        body: new URLSearchParams({
+          'access_token': token['access_token'] || 'NA'
+        }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
         }
@@ -221,7 +233,9 @@ async function getUserToken({configuration, provider, token}) {
         provider: provider,
         providerId: user.id || user.sub,
         providerUsername: user?.username || user?.login,
-        accessToken: token['access_token']
+        accessToken: token['access_token'],
+        accessTokenExpiresAt: token['expires_at'] || null,
+        refreshToken: token['refresh_token'] || null
       };
     } else {
       return {}
@@ -229,5 +243,92 @@ async function getUserToken({configuration, provider, token}) {
   } catch (e) {
     log.error(e);
     throw new Error(e);
+  }
+}
+
+export async function needsNewToken({configuration, provider, user}) {
+  try {
+    const conf = configuration.api.authentication[provider];
+    if (isTokenExpired({
+      expirationWindowSeconds: conf['expirationWindowSeconds'],
+      expires_at: user['accessTokenExpiresAt']
+    })) {
+      log.debug('token expired');
+      const accessToken = await getNewToken({configuration, provider: 'cilogon', user});
+      return accessToken;
+    } else {
+      log.debug('token still working');
+      return user['accessToken'];
+    }
+  } catch (e) {
+    log.debug('needsNewToken');
+    throw new Error(e);
+  }
+}
+
+function isTokenExpired({expirationWindowSeconds = 0, expires_at}) {
+  return expires_at - (Date.now() + expirationWindowSeconds * 1000) <= 0;
+}
+
+async function getNewToken({configuration, provider, user}) {
+  try {
+    log.debug(`getNewToken`);
+    const conf = configuration.api.authentication[provider];
+    const authTokenHost = `${conf.tokenHost}${conf.tokenPath}`;
+    let response;
+    if (conf['useHeaders']) {
+      log.debug(`useHeaders: ${conf['useHeaders']}`);
+      response = await fetch(authTokenHost, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': conf.bearer + ' ' + user['refreshToken']
+        }
+      });
+    } else if (conf['useFormData']) {
+      log.debug(`useFormData: ${conf['useFormData']}`);
+      //     console.log(`
+      //     curl -d grant_type=refresh_token \\
+      //    -d client_id=${conf.clientID} \\
+      //    -d client_secret=${conf.clientSecret} \\
+      //    -d refresh_token=${user['refreshToken']} \\
+      //    -d scope=scope=${conf.scope} \\
+      //    ${authTokenHost} \\
+      // > cilogon-token-response.json`)
+      const parameters = {
+        'grant_type': 'refresh_token',
+        'client_id': conf.clientID,
+        'client_secret': conf.clientSecret,
+        'scope': conf.scope,
+        'refresh_token': user['refreshToken']
+      }
+      // const searchParams = new URLSearchParams();
+      // Object.keys(parameters).forEach(key => searchParams.append(key, parameters[key]))
+      // console.log(searchParams.toString()) // This should be ok but cilogon does not like it encoded OMG!
+      // const body = `grant_type=refresh_token&client_id=${conf.clientID}&client_secret=${conf.clientSecret}&scope=scope=${conf.scope}&refresh_token=${user['refreshToken']}`;
+      // console.log(body)
+      const url = new URL(authTokenHost);
+      Object.keys(parameters).forEach(key => url.searchParams.append(key, parameters[key]))
+      response = await fetch(url);
+    }
+    if (response.status === 200) {
+      const accessToken = await response.json();
+      await updateUser({
+        id: user.id,
+        multi: [
+          {key: 'accessToken', value: accessToken.access_token},
+          {key: 'refreshToken', value: accessToken.refresh_token},
+          {key: 'accessTokenExpiresAt', value: accessToken.expires_at}]
+      });
+      return accessToken.access_token;
+    } else {
+      console.log(response.statusText);
+      return null;
+    }
+  } catch (e) {
+    log.error('getNewToken');
+    log.error(JSON.stringify(e))
+    return null;
   }
 }

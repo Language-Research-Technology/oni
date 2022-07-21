@@ -7,7 +7,7 @@ const { getLogger } = require("./index");
 const log = getLogger();
 
 export async function transformURIs({ host, crateId, uridTypes, repository }) {
-  log.debug('transformURIs');
+  log.silly('transformURIs');
   const jsonInfo = await ocfltools.getFileInfo({ repository, crateId, filePath: 'ro-crate-metadata.json' });
   const json = await fs.readJson(jsonInfo.path);
   const crate = new ROCrate(json);
@@ -22,7 +22,7 @@ export async function transformURIs({ host, crateId, uridTypes, repository }) {
     updateItems.forEach((i) => {
       const ref = crate.getItem(i['@id']);
       if (ref) {
-        log.debug(ref['@id']);
+        log.silly(ref['@id']);
         crate.changeGraphId(ref, `${ host }/stream?id=${ crateId }&path=${ ref['@id'] }`);
       }
     });

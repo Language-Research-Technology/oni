@@ -62,6 +62,7 @@ export function setupUserRoutes({server, configuration}) {
             value: uuidv4()
           });
           user['accessToken'] = '...removed';
+          user['refreshToken'] = '...removed';
           res.json({user}).status(200);
         } else {
           res.json({user: null}).status(200);
@@ -92,6 +93,7 @@ export function setupUserRoutes({server, configuration}) {
             value: null
           });
           user['accessToken'] = '...removed';
+          user['refreshToken'] = '...removed';
           res.json({user});
         } else {
           res.json({user: null});

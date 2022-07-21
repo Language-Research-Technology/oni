@@ -38,6 +38,12 @@ module.exports = function (sequelize, DataTypes) {
       accessToken: {
         type: DataTypes.STRING
       },
+      accessTokenExpiresAt: {
+        type: DataTypes.DATE
+      },
+      refreshToken: {
+        type: DataTypes.STRING,
+      },
       apiToken: {
         type: DataTypes.STRING,
       },

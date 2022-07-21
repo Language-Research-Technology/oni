@@ -12,7 +12,9 @@ export async function getCiLogonMemberships({configuration, user}) {
       configuration,
       user: {
         username: user.providerUsername,
-        accessToken: user.accessToken
+        accessToken: user.accessToken,
+        accessTokenExpiresAt: user.accessTokenExpiresAt,
+        refreshToken: user.refreshToken,
       }
     });
     if (memberships.error) {

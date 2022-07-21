@@ -1,34 +1,35 @@
 import models from "../models";
-import { getLogger } from '../services/logger';
-import { uniqBy, first } from 'lodash';
+import {getLogger} from '../services/logger';
+import {uniqBy, first} from 'lodash';
+
 const log = getLogger();
 
-export async function getUsers({ offset = 0, limit = 10 }) {
+export async function getUsers({offset = 0, limit = 10}) {
   let users = await models.user.findAndCountAll({
     offset,
     limit,
     order: [
-      [ "givenName", "ASC" ],
-      [ "familyName", "ASC" ],
+      ["givenName", "ASC"],
+      ["familyName", "ASC"],
     ],
   });
-  return { total: users.count, users: users.rows.map((u) => u.get()) };
+  return {total: users.count, users: users.rows.map((u) => u.get())};
 }
 
-export async function getUser({ where }) {
+export async function getUser({where}) {
   //Usage: getUser({ where: { column: value })
   let user = await models.user.findOne({
     where,
   });
-  return user?.dataValues;
+  return user;
 }
 
-export async function createUser({ data, configuration }) {
+export async function createUser({data, configuration}) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
   let user = await models.user.findOne({
-    where: { provider: data.provider, providerId: data.providerId.toString() }
+    where: {provider: data.provider, providerId: data.providerId.toString()}
   });
   if (!user) {
     // no user account found but email in admin list
@@ -37,7 +38,7 @@ export async function createUser({ data, configuration }) {
     data.administrator = true;
 
     user = await models.user.findOrCreate({
-      where: { providerId: data.providerId.toString() },
+      where: {providerId: data.providerId.toString()},
       defaults: data,
     });
     user = first(user);
@@ -45,7 +46,7 @@ export async function createUser({ data, configuration }) {
   } else if (user && !configuration.api.administrators.includes(data?.email)) {
     // user account found and not admin
 
-    log.debug(`User Id : ${ user['id'] }`);
+    log.debug(`User Id : ${user['id']}`);
 
     user.locked = false;
     user.upload = false;
@@ -54,7 +55,10 @@ export async function createUser({ data, configuration }) {
     user.name = data?.name;
     user.providerId = data.id;
     user.providerUsername = data?.providerUsername;
-    user.accessToken = data.accessToken;
+    user.accessToken = data?.accessToken;
+    user.accessTokenExpiresAt = data?.accessTokenExpiresAt;
+    user.refreshToken = data?.refreshToken;
+
     user.email = data?.email;
 
     await user.save();
@@ -62,20 +66,27 @@ export async function createUser({ data, configuration }) {
   return user;
 }
 
-export async function updateUser({ where, key, value }) {
+export async function updateUser({where, key, value, multi}) {
   let user = await models.user.findOne(where);
-  user[key] = value;
+  if (multi) {
+    multi.forEach((m) => {
+      user[m.key] = m.value;
+    });
+  } else {
+    user[key] = value;
+  }
+  log.debug(`Updating user ${user.id}`)
   await user.save();
   return user;
 }
 
-export async function deleteUser({ userId }) {
-  let user = await models.user.findOne({ where: { id: userId } });
+export async function deleteUser({userId}) {
+  let user = await models.user.findOne({where: {id: userId}});
   await user.destroy();
 }
 
-export async function toggleUserCapability({ userId, capability }) {
-  let user = await models.user.findOne({ where: { id: userId } });
+export async function toggleUserCapability({userId, capability}) {
+  let user = await models.user.findOne({where: {id: userId}});
   switch (capability) {
     case "lock":
       user.locked = !user.locked;
@@ -91,7 +102,7 @@ export async function toggleUserCapability({ userId, capability }) {
   return user;
 }
 
-export async function createAllowedUserStubAccounts({ emails }) {
+export async function createAllowedUserStubAccounts({emails}) {
   let users = emails.map((email) => {
     return {
       email,
@@ -101,7 +112,7 @@ export async function createAllowedUserStubAccounts({ emails }) {
       administrator: false,
     };
   });
-  users = await models.user.bulkCreate(users, { ignoreDuplicates: true });
+  users = await models.user.bulkCreate(users, {ignoreDuplicates: true});
 
   return uniqBy(users, "email");
 }
