@@ -50,7 +50,7 @@ export async function getTeamsMembership(user, org, team) {
 }
 
 export async function getTeamMembership({ user, group }) {
-  console.log(user.accessToken)
+
   const octokit = new Octokit({ auth: user.accessToken });
   const data = { teams: [], error: null };
   try {

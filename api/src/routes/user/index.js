@@ -5,6 +5,7 @@ import {v4 as uuidv4} from 'uuid';
 import {routeUser} from '../../middleware/auth';
 import {getGithubMemberships} from "../../controllers/github";
 import {getCiLogonMemberships} from "../../controllers/cilogon";
+import * as utils from '../../services/utils';
 
 const log = getLogger();
 
@@ -30,7 +31,7 @@ export function setupUserRoutes({server, configuration}) {
           if (configuration.api.authentication['cilogon']) {
             await getCiLogonMemberships({configuration, user});
           } else if (configuration.api.authentication['github']) {
-            await getGithubMemberships({userId: user.id, group: configuration['api']['licenseGroup']});
+            await getGithubMemberships({configuration, userId: user.id, group: configuration['api']['licenseGroup']});
           }
         } else {
           res.json({user: null}).status(200);
@@ -55,14 +56,17 @@ export function setupUserRoutes({server, configuration}) {
   server.get("/user/token", routeUser(async (req, res, next) => {
       try {
         if (req.session.user) {
+          const tokenConf = configuration.api.tokens;
           const id = req.session.user.id;
+          const apiToken = uuidv4();
           const user = await updateUser({
             where: {where: {id: id}},
             key: 'apiToken',
-            value: uuidv4()
+            value: utils.encrypt(tokenConf.secret, apiToken)
           });
           user['accessToken'] = '...removed';
           user['refreshToken'] = '...removed';
+          user['apiToken'] = apiToken; //Returns in plain text for consuming
           res.json({user}).status(200);
         } else {
           res.json({user: null}).status(200);

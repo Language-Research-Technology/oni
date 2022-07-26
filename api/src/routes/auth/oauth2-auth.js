@@ -8,6 +8,7 @@ import models from '../../models';
 import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
 import {getGithubUser} from '../../services/github';
+import * as utils from "../../services/utils";
 
 const {URL, URLSearchParams} = require('url');
 
@@ -261,7 +262,7 @@ export async function needsNewToken({configuration, provider, user}) {
       return user['accessToken'];
     }
   } catch (e) {
-    log.debug('needsNewToken');
+    log.debug('Error: needsNewToken');
     throw new Error(e);
   }
 }
@@ -314,11 +315,12 @@ async function getNewToken({configuration, provider, user}) {
     }
     if (response.status === 200) {
       const accessToken = await response.json();
+      const tokenConf = configuration.api.tokens;
       await updateUser({
         id: user.id,
         multi: [
-          {key: 'accessToken', value: accessToken.access_token},
-          {key: 'refreshToken', value: accessToken.refresh_token},
+          {key: 'accessToken', value: utils.encrypt(tokenConf.secret, accessToken.access_token)},
+          {key: 'refreshToken', value: utils.encrypt(tokenConf.secret, accessToken.refresh_token)},
           {key: 'accessTokenExpiresAt', value: accessToken.expires_at}]
       });
       return accessToken.access_token;
@@ -327,7 +329,7 @@ async function getNewToken({configuration, provider, user}) {
       return null;
     }
   } catch (e) {
-    log.error('getNewToken');
+    log.error('Error: getNewToken');
     log.error(JSON.stringify(e))
     return null;
   }

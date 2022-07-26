@@ -1,6 +1,7 @@
 import models from "../models";
 import {getLogger} from '../services/logger';
 import {uniqBy, first} from 'lodash';
+import * as utils from '../services/utils';
 
 const log = getLogger();
 
@@ -25,6 +26,7 @@ export async function getUser({where}) {
 }
 
 export async function createUser({data, configuration}) {
+  const tokenConf = configuration.api.tokens;
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
@@ -37,6 +39,13 @@ export async function createUser({data, configuration}) {
     data.upload = true;
     data.administrator = true;
 
+    // This is required because we use findOrCreate
+    if (data.accessToken) {
+      data.accessToken = utils.encrypt(tokenConf.secret, data?.accessToken);
+    }
+    if (data.refreshToken) {
+      data.refreshToken = utils.encrypt(tokenConf.secret, data?.refreshToken);
+    }
     user = await models.user.findOrCreate({
       where: {providerId: data.providerId.toString()},
       defaults: data,
@@ -55,10 +64,13 @@ export async function createUser({data, configuration}) {
     user.name = data?.name;
     user.providerId = data.id;
     user.providerUsername = data?.providerUsername;
-    user.accessToken = data?.accessToken;
-    user.accessTokenExpiresAt = data?.accessTokenExpiresAt;
-    user.refreshToken = data?.refreshToken;
-
+    if (data.accessToken) {
+      user.accessToken = utils.encrypt(tokenConf.secret, data?.accessToken);
+      user.accessTokenExpiresAt = data?.accessTokenExpiresAt;
+    }
+    if (data.refreshToken) {
+      user.refreshToken = utils.encrypt(tokenConf.secret, data?.refreshToken);
+    }
     user.email = data?.email;
 
     await user.save();

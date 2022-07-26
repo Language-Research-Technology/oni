@@ -68,7 +68,7 @@ export default {
             const {memberships} = await getMemberships.json();
             //TODO: do smarter membership checks
             //If user is not enrolled need to send it to enrollmentURL if configured
-            if (memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
+            if (Array.isArray(memberships) === true && memberships.length === 0 && this.$store.state.configuration.ui.enrollment.enforced) {
               this.loadingText = 'Please enroll first';
               window.location.href = this.$store.state.configuration.ui.enrollment.URL;
             } else {

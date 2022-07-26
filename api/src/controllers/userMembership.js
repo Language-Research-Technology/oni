@@ -2,14 +2,14 @@ import models from "../models";
 import { loadConfiguration } from '../services';
 import { uniqBy } from 'lodash';
 
-export async function createUserMemberships({ memberships, user }) {
+export async function createUserMemberships({ memberships, userId }) {
 
-  const destroyMemberships = await models.userMembership.destroy({ where: { userId: user['id'] } });
+  const destroyMemberships = await models.userMembership.destroy({ where: { userId: userId } });
 
   for (const membership of memberships) {
     const createMemberships = await models.userMembership.findOrCreate({
-      where: { userId: user['id'], group: membership['group'] },
-      defaults: { userId: user['id'], group: membership['group'] }
+      where: { userId: userId, group: membership['group'] },
+      defaults: { userId: userId, group: membership['group'] }
     });
   }
 }

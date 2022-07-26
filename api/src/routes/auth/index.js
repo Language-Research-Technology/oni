@@ -58,7 +58,7 @@ export function setupAuthRoutes({server, configuration}) {
           res.json({error: "no provider sent when authorizing"});
         } else {
           if (user?.provider === 'github') {
-            memberships = await getGithubMemberships({userId: user.id, group});
+            memberships = await getGithubMemberships({configuration, userId: user.id, group});
           } else if (user?.provider === 'cilogon') {
             memberships = await getCiLogonMemberships({configuration, user, group});
           }
