@@ -550,7 +550,8 @@ export class Indexer {
             normalFileItem._root = this._root;
             const {body} = await this.client.index({
               index: this.index,
-              body: normalFileItem
+              body: normalFileItem,
+              //id: `${fileId}/${crateId}` // I think we need this. @TODO ask Peter.
             });
           } catch (e) {
             this.log.error(e);
