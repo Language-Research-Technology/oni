@@ -15,7 +15,8 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
     if (configuration['api']['licenses'] && record.data['license'] && !passthrough) {
       const user =req?.session?.user ||  req?.user;
       const userId = user?.id;
-      pass = await checkIfAuthorized({userId, license: record.data['license'], configuration});
+      const access = await checkIfAuthorized({userId, license: record.data['license'], configuration});
+      pass = access.hasAccess;
     } else {
       pass = true;
     }

@@ -28,16 +28,19 @@
       </el-row>
       <el-row>
         <el-button-group class="m-2">
-          <el-link class="mr-2" v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
-            <el-button type="default" class="px-2">Preview File</el-button>
-          </el-link>
-          <el-link class="mr-2" v-loading="this.loading" v-if="this.isFile() && !this.cannotOpenFile" :underline="false"
-                   v-on:click="this.downloadFileUrl()">
-            <el-button type="default">Download&nbsp;<el-icon>
-              <Download/>
-            </el-icon>
-            </el-button>
-          </el-link>
+          <template v-if="!this.notAuthorized">
+            <el-link class="mr-2" v-if="this.isFile() && !this.cannotOpenFile" :href="this.fileUrl" :underline="false">
+              <el-button type="default" class="px-2">Preview File</el-button>
+            </el-link>
+            <el-link class="mr-2" v-loading="this.loading" v-if="this.isFile() && !this.cannotOpenFile"
+                     :underline="false"
+                     v-on:click="this.downloadFileUrl()">
+              <el-button type="default">Download&nbsp;<el-icon>
+                <Download/>
+              </el-icon>
+              </el-button>
+            </el-link>
+          </template>
           <el-button type="default" v-if="this.notAuthorized" v-on:click="openRequestModal()">Request Access</el-button>
         </el-button-group>
       </el-row>
@@ -272,7 +275,7 @@ export default {
       }
     },
     getMembers() {
-      if(this.conformsTo) {
+      if (this.conformsTo) {
         for (let c of this.conformsTo) {
           if (c['@id'] === this.$store.state.configuration.ui.conformsTo?.collection || c['@id'] === this.$store.state.configuration.ui.conformsTo?.object) {
             return true
