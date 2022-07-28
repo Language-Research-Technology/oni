@@ -3,6 +3,7 @@ import { verifyToken } from "../services/jwt";
 import { getLogger } from "../services/logger";
 import { loadConfiguration } from "../services/configuration"
 import { getUser } from '../controllers/user';
+import * as utils from '../services/utils'
 
 const log = getLogger();
 
@@ -32,7 +33,12 @@ export async function demandBearerUser(req, res, next) {
     return next(new UnauthorizedError());
   }
   try {
-    const user = await getUser({ where: { apiToken: req.headers.authorization.split("Bearer ")[1], } });
+    const token = req.headers.authorization.split("Bearer ")[1];
+    const configuration = await loadConfiguration();
+    const tokenConf = configuration.api.tokens;
+    //Using the same initVector when encrypted to be able to compare it.
+    const tokenEncrypted = utils.encrypt(tokenConf.secret, token, tokenConf.accessTokenPassword);
+    const user = await getUser({ where: { apiToken: tokenEncrypted } });
     if (!user) {
       return next(new UnauthorizedError());
     }

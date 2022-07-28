@@ -9,6 +9,7 @@ import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
 import {getGithubUser} from '../../services/github';
 import * as utils from "../../services/utils";
+import {isEmpty} from "lodash";
 
 const {URL, URLSearchParams} = require('url');
 
@@ -99,57 +100,60 @@ export function setupOauthRoutes({server, configuration}) {
       state: req.body.state,
       configuration: configuration
     });
-
-    let userData = await getUserToken({configuration, provider: req.body.state, token});
-    log.debug('userData');
-    let user;
-    // Not all userData contains email
-    userData.provider = req.body.state;
-    if (configuration.api.administrators.includes(userData?.email)) {
-      // admin account - set it up and login
-      console.log(`Admin ${userData?.email}`);
-      try {
-        user = await createUser({data: userData, configuration});
-      } catch (error) {
-        return next(new UnauthorizedError());
-      }
+    if (isEmpty(token) && !token['access_token']) {
+      return next(new UnauthorizedError());
     } else {
-      console.log(`Normal ${userData.provider} / ${userData.id}`);
-      // normal user account - we are allowing access unless its locked
-      // create will findOne and update the token
-      user = await createUser({data: userData, configuration});
-
-      if (user?.locked) {
-        log.info(`The account for '${user.email}' is locked. Denying user login.`);
-        await logEvent({
-          level: "info",
-          owner: user.email,
-          text: `The account is locked. Denying user login.`,
-        });
-        // user account exists but user is locked
-        return next(new UnauthorizedError());
-      }
-      if (!user?.provider || !user.givenName) {
-        // user account looks like a stub account - create it properly
-        log.info(`The account for '${user.email}' is being setup.`);
-        await logEvent({
-          level: "info",
-          owner: user.email,
-          text: `The account is being setup.`,
-        });
+      let userData = await getUserToken({configuration, provider: req.body.state, token});
+      log.debug('userData');
+      let user;
+      // Not all userData contains email
+      userData.provider = req.body.state;
+      if (configuration.api.administrators.includes(userData?.email)) {
+        // admin account - set it up and login
+        console.log(`Admin ${userData?.email}`);
         try {
           user = await createUser({data: userData, configuration});
         } catch (error) {
           return next(new UnauthorizedError());
         }
+      } else {
+        console.log(`Normal ${userData.provider} / ${userData.id}`);
+        // normal user account - we are allowing access unless its locked
+        // create will findOne and update the token
+        user = await createUser({data: userData, configuration});
+
+        if (user?.locked) {
+          log.info(`The account for '${user.email}' is locked. Denying user login.`);
+          await logEvent({
+            level: "info",
+            owner: user.email,
+            text: `The account is locked. Denying user login.`,
+          });
+          // user account exists but user is locked
+          return next(new UnauthorizedError());
+        }
+        if (!user?.provider || !user.givenName) {
+          // user account looks like a stub account - create it properly
+          log.info(`The account for '${user.email}' is being setup.`);
+          await logEvent({
+            level: "info",
+            owner: user.email,
+            text: `The account is being setup.`,
+          });
+          try {
+            user = await createUser({data: userData, configuration});
+          } catch (error) {
+            return next(new UnauthorizedError());
+          }
+        }
       }
+      log.debug(`Creating session for ${userData.provider} / ${userData.providerId} / ${user?.email}`);
+      let session = await createSession({user, configuration});
+
+      res.send({token: session.token});
+
+      next();
     }
-    log.debug(`Creating session for ${userData.provider} / ${userData.providerId} / ${user?.email}`);
-    let session = await createSession({user, configuration});
-
-    res.send({token: session.token});
-
-    next();
   });
 }
 

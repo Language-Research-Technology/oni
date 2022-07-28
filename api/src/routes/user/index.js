@@ -62,7 +62,7 @@ export function setupUserRoutes({server, configuration}) {
           const user = await updateUser({
             where: {where: {id: id}},
             key: 'apiToken',
-            value: utils.encrypt(tokenConf.secret, apiToken)
+            value: utils.encrypt(tokenConf.secret, apiToken, tokenConf.accessTokenPassword) //Using the same initVector when encrypted to be able to compare it.
           });
           user['accessToken'] = '...removed';
           user['refreshToken'] = '...removed';

@@ -15,8 +15,12 @@ function inspect(obj, depth = null) {
   console.log(ins);
 }
 
-function encrypt(securityKey, data) {
-  const initVector = crypto.randomBytes(16);
+function encrypt(securityKey, data, initVector) {
+  if (!initVector) {
+    initVector = crypto.randomBytes(16);
+  } else {
+    initVector = Buffer.from(initVector, 'hex');
+  }
   const key = crypto.createHash('sha256').update(securityKey).digest().slice(0, 16); //https://github.com/nodejs/node/issues/6696
   const cipher = crypto.createCipheriv('aes128', key, initVector);
   let encryptedData = Buffer.concat([
@@ -26,9 +30,13 @@ function encrypt(securityKey, data) {
   return initVector.toString('hex') + '.' + encryptedData.toString('hex');
 }
 
-function decrypt(securityKey, data) {
+function decrypt(securityKey, data, initVector) {
   const iv_k = data.split('.');
-  const initVector = Buffer.from(iv_k[0], 'hex');
+  if (!initVector) {
+    initVector = Buffer.from(iv_k[0], 'hex');
+  } else {
+    initVector = Buffer.from(initVector, 'hex');
+  }
   const key = crypto.createHash('sha256').update(securityKey).digest().slice(0, 16); //https://github.com/nodejs/node/issues/6696
   const decipher = crypto.createDecipheriv('aes128', key, initVector);
   let decryptedData = Buffer.concat([
