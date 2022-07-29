@@ -5,6 +5,7 @@ import isAfter from "date-fns/isAfter";
 import parseISO from "date-fns/parseISO";
 import { getUser } from '../controllers/user';
 import { UnauthorizedError } from 'restify-errors';
+import * as utils from "./utils";
 
 export async function generateToken({ configuration, user }) {
   const key = createSecretKey(Buffer.from(configuration.api.session.secret, "utf-8"));
@@ -26,7 +27,10 @@ export async function generateToken({ configuration, user }) {
 
 export async function verifyToken({ token, configuration }) {
   //try bearer token
-  const user = await getUser({ where: { apiToken: token } });
+  const tokenConf = configuration.api.tokens;
+  //Using the same initVector when encrypted to be able to compare it.
+  const tokenEncrypted = utils.encrypt(tokenConf.secret, token, tokenConf.accessTokenPassword);
+  const user = await getUser({ where: { apiToken: tokenEncrypted } });
   if (user?.id) {
     return user;
   } else {
