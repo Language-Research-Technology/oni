@@ -1,5 +1,5 @@
 import { getLogger } from '../../services';
-import { isUndefined } from 'lodash';
+import {isEmpty, isUndefined} from 'lodash';
 import {
   getRecordConformsTo,
   getRecordMemberOfTop,
@@ -21,7 +21,14 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /:
    *   get:
-   *     description: Object
+   *     description: Gets objects in a variety of combinations example:
+   *     memberOf=id&conformsTo=Collection/Object/ -> Get members of an ID that conforms to a collection
+   *     memberOf=id -> get all the children of id
+   *     memberOf=null -> (ie top-level) Get ALL objects which are not part of ANY collection
+   *     memberOf=null&conformsTo=collectionProfileURI -> All TOP level collections
+   *     id=<<ID>>&memberOfTopLevel -> get the records top level
+   *     id=<<ID>> -> get a single record
+   *     no params -> get all root ConformsTos paginated
    *     parameters:
    *       - memberOf
    *       - conformsTo
@@ -34,13 +41,15 @@ export function setupObjectRoutes({ server, configuration, repository }) {
   server.get("/object", async (req, res, next) => {
     if (!isUndefined(req.query.memberOf) && !isUndefined(req.query.conformsTo)) {
       //memberOf=id&conformsTo=Collection/Object/
+      // OR
+      //memberOf & conformsTo=collectionProfileURI -> All TOP level collections
       await getRecordConformsTo({ req, res, next });
     } else if (!isUndefined(req.query.memberOf)) {
       //memberOf=id -> get all the children of id
       //memberOf=null (ie top-level) Get ALL objects which are not part of ANY collection
       await getRecordMembers({ req, res, next });
     } else if (!isUndefined(req.query.conformsTo)) {
-      //memberOf=null & conformsTo=collectionProfileURI -> All TOP level collections
+      //conformsTo=collectionProfileURI -> Collections that conformsTo
       await getRecordConformsTo({ req, res, next });
     } else if(req.query.id && !isUndefined(req.query.memberOfTopLevel)) {
       await getRecordMemberOfTop({req, res, next});
