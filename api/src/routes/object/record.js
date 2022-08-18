@@ -14,7 +14,8 @@ export async function getRecordSingle({req, res, next}) {
   if (record.data) {
     res.send(record.data);
   } else {
-    res.send({id: req.query.id, message: 'Not Found'}).status(404);
+    res.status(404);
+    res.send({id: req.query.id, message: 'Not Found'})
   }
   next();
 }

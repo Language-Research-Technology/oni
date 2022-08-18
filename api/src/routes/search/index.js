@@ -57,6 +57,16 @@ export function setupSearchRoutes({server, configuration}) {
           };
           results = await search({configuration, index, searchBody});
           log.debug(`Total: ${results?.hits?.total?.value}`);
+        } else if (req.query['_id']) {
+          exactMatch = true;
+          const id = req.query['_id'].trim();
+          searchBody.query = {
+            terms: {
+              _id: [ decodeURIComponent(id) ]
+            }
+          };
+          results = await search({configuration, index, searchBody});
+          log.debug(`Total: ${results?.hits?.total?.value}`);
         } else {
           const searchQuery = req.query?.multi?.trim() || '';
           let filters = [];
