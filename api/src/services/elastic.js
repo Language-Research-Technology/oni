@@ -42,6 +42,8 @@ export async function filterResults({userId, results, configuration}) {
         }
         //What to do? Ask Peter; Do we remove the item of the search result with this and pullAt
         //itemsToFilter.push(index);
+      } else {
+        results.hits.hits[index]._source['_access'] = pass;
       }
     }
   }
