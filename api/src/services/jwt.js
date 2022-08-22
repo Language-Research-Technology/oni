@@ -10,8 +10,6 @@ import * as utils from "./utils";
 export async function generateToken({ configuration, user }) {
   const key = createSecretKey(Buffer.from(configuration.api.session.secret, "utf-8"));
   const expires = add(new Date(), configuration.api.session.lifetime);
-  console.log('generateToken');
-  console.log(user);
   const token = await new SignJWT({
     id: user.id,
     email: user.email,
