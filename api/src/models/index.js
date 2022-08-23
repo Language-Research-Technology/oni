@@ -42,7 +42,8 @@ let modules = [
   require('./rootConformsTo'),
   require('./rootType'),
   require('./crateMember'),
-  require('./crateType')
+  require('./crateType'),
+  require('./log')
 ];
 
 // Initialize models

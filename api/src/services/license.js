@@ -4,22 +4,22 @@ const log = getLogger();
 
 export function isAuthorized({ memberships, license, licenseConfiguration }) {
   const needsLicense = licenseConfiguration.find(l => l['license'] === license);
-  log.debug(`isAuthorized: needsLicense ${JSON.stringify(needsLicense)}`);
+  log.silly(`isAuthorized: needsLicense ${JSON.stringify(needsLicense)}`);
   if (needsLicense) {
     const foundAuthorization = memberships.find(membership => {
       const group = membership['group'];
-      log.debug(group)
+      log.silly(group);
       return group === needsLicense['group'];
     });
     //If just for debugging!
     if (foundAuthorization) {
-      log.debug(`Found Authorization: ${ foundAuthorization['group'] }`);
+      log.silly(`Found Authorization: ${ foundAuthorization['group'] }`);
       return {hasAccess: true, group: needsLicense['group']};
     } else {
       return {hasAccess: false, group: needsLicense['group']};
     }
   } else {
-    log.debug(`Not required or not configured for ${license}`);
+    log.silly(`Not required or not configured for ${license}`);
     return {hasAccess: true};
   }
 }
