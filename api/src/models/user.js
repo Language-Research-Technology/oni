@@ -14,7 +14,7 @@ module.exports = function (sequelize, DataTypes) {
         validate: {
           isEmail: true,
         },
-        unique: true,
+        unique: false,
       },
       name: {
         type: DataTypes.STRING,
@@ -22,7 +22,7 @@ module.exports = function (sequelize, DataTypes) {
       },
       providerId: {
         type: DataTypes.TEXT,
-        allowNull: true,
+        allowNull: false,
         unique: true
       },
       providerUsername: {

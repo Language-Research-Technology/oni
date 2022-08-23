@@ -9,7 +9,7 @@ import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
 import {getGithubUser} from '../../services/github';
 import * as utils from "../../services/utils";
-import {isEmpty} from "lodash";
+import {isEmpty, first} from "lodash";
 
 const {URL, URLSearchParams} = require('url');
 
@@ -91,6 +91,7 @@ export function setupOauthRoutes({server, configuration}) {
    *         description: Return session token to authorize user with corresponding code.
    */
   server.post("/oauth/:provider/code", async function (req, res, next) {
+    const adminEmail = first(configuration.api.administrators);
     if (!req.body.code) {
       return next(new BadRequestError(`Code not provided`));
     }
@@ -117,11 +118,21 @@ export function setupOauthRoutes({server, configuration}) {
           return next(new UnauthorizedError());
         }
       } else {
-        console.log(`Normal ${userData.provider} / ${userData.id}`);
+        console.log(`Normal ${userData.provider} / ${userData.providerId}`);
         // normal user account - we are allowing access unless its locked
         // create will findOne and update the token
-        user = await createUser({data: userData, configuration});
-
+        try {
+          user = await createUser({data: userData, configuration});
+          console.log(user);
+        } catch (e) {
+          await logEvent({
+            level: "error",
+            owner: adminEmail,
+            text: e.message,
+            data: userData.providerId
+          });
+          return next(new UnauthorizedError());
+        }
         if (user?.locked) {
           log.info(`The account for '${user.email}' is locked. Denying user login.`);
           await logEvent({
@@ -142,7 +153,12 @@ export function setupOauthRoutes({server, configuration}) {
           });
           try {
             user = await createUser({data: userData, configuration});
-          } catch (error) {
+          } catch (e) {
+            await logEvent({
+              level: "error",
+              owner: adminEmail,
+              text: e.message,
+            });
             return next(new UnauthorizedError());
           }
         }
