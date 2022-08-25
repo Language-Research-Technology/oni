@@ -28,22 +28,21 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
         filePath: req.query.path
       });
       //TODO: send the correct mimeType
-      if (fileObj && fs.pathExistsSync(fileObj.filePath)) {
+      if (fileObj && fileObj.fileStream) {
         res.writeHead(200, {
           'Content-Disposition': 'attachment; filename=' + fileObj.filename,
           'Content-Type': fileObj.mimetype
         });
-        const filestream = fs.createReadStream(fileObj.filePath);
-        filestream.on('error', function (err) {
+        fileObj.fileStream.on('error', function (err) {
           log.error(err);
           res.end();
         });
-        filestream.on('end', function () {
+        fileObj.fileStream.on('end', function () {
           log.debug('end')
           res.end();
           next();
         });
-        filestream.pipe(res);
+        fileObj.fileStream.pipe(res);
       } else {
         message = 'Path not found';
         res.status(404);

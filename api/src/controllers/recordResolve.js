@@ -2,7 +2,7 @@ import {ROCrate} from 'ro-crate';
 import {getRawCrate, getRecord, getUridCrate} from './record';
 import {getRootMemberOfs} from './rootMemberOf';
 import {getLogger} from '../services';
-import {ocfltools} from "oni-ocfl";
+
 import * as fs from 'fs-extra';
 import assert from "assert";
 import * as path from 'path';

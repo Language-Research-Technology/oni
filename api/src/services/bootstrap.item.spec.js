@@ -1,5 +1,5 @@
 require("regenerator-runtime/runtime");
-import {ocfltools } from "oni-ocfl";
+
 import {testOCFLConf} from "./";
 import {OcflObject} from "ocfl";
 import {getRecord} from "../controllers/record";

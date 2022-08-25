@@ -1,12 +1,12 @@
 import {getLogger} from './index';
 import {createRecord, deleteRecords} from '../controllers/record';
-import {ocfltools} from 'oni-ocfl';
+import ocfl from '@ocfl/ocfl-fs';
 import {ROCrate} from 'ro-crate';
 import * as fs from 'fs-extra';
 import assert from 'assert';
 import * as path from 'path';
 import {first} from 'lodash';
-import {OcflObject} from "@coedl/ocfl";
+
 
 const log = getLogger();
 
@@ -21,14 +21,18 @@ export async function bootstrap({configuration}) {
   }
 }
 
-export async function bootstrapObject({configuration, repository, object}) {
-  log.debug(`Loading record: ${object['repositoryPath']}`);
+export async function bootstrapObject({configuration, object}) {
+  log.debug(`Loading record: ${object.root}`);
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
-  const jsonInfo = await ocfltools.getFileInfo({repository, crateId: object.id, filePath: 'ro-crate-metadata.json'});
-  const crateFile = await fs.readJson(jsonInfo.path);
-  const crate = new ROCrate(crateFile);
-  const root = crate.getRootDataset();
+  let crate;
+  try {
+    const crateFile = await object.getAsString({logicalPath: 'ro-crate-metadata.json'});
+    crate = new ROCrate(JSON.parse(crateFile));
+  } catch (e) {
+    log.error(e.message);
+  }
+  const root = crate.rootDataset;
   if (root) {
     let lic;
     const rootLicense = first(root?.license) || root?.license;
@@ -37,7 +41,7 @@ export async function bootstrapObject({configuration, repository, object}) {
     } else {
       lic = license?.default?.['@id'];
     }
-    const crateId = crate.getRootId();
+    const crateId = crate.rootId;
     //console.log(`${crateId} license: ${lic}`);
     if (crateId !== './') {
       const rec = {
@@ -45,7 +49,7 @@ export async function bootstrapObject({configuration, repository, object}) {
         license: lic,
         name: root['name'],
         description: root['description'] || '',
-        pairtreeId: object.pairtreeId
+        objectRoot: object.root
       }
       log.info(`Loading ${rec.crateId}`);
       //log.info(JSON.stringify(root['conformsTo']));
@@ -62,41 +66,27 @@ export async function bootstrapObject({configuration, repository, object}) {
       log.error(`Cannot insert a crate with Id: './' please use arcp`);
     }
   } else {
-    log.warn(`${jsonInfo.path} : does not contain an ROCrate with a valid root`);
+    log.warn(`${object.root} : does not contain an ROCrate with a valid root`);
   }
 }
 
 export async function initOCFL({configuration}) {
   return new Promise(async (resolve, reject) => {
     try {
-      const ocfl = configuration.api.ocfl;
-      const repository = await ocfltools.connectRepo({ocflRoot: ocfl.ocflPath, ocflScratch: ocfl.ocflScratch});
-      assert(await repository.isRepository(), 'Aborting: Bad OCFL repository');
-      repository.findObjects();
+      const ocflConf = configuration.api.ocfl;
+      const storage = ocfl.storage({root: ocflConf.ocflPath, workspace: ocflConf.ocflScratch, ocflVersion: '1.0'});
+      storage.load();
       let objectsCount = 0;
-      repository.on("object", async object => {
+      for await (let object of storage) {
         await object.load();
         objectsCount++;
         log.info(`Found: ${objectsCount} : ${object.id}`);
-        await bootstrapObject({configuration, repository, object});
-      });
-      repository.on("done", () => {
-        process.nextTick(() => {
-          log.info('Finished walking repository');
-          resolve(objectsCount);
-        });
-      });
-      repository.on("error", (e) => {
-        log.error(e);
-        log.error('Error finding objects!');
-        reject(e);
-      });
-      //TODO: Actually do something here instead of a timeout!
-      //await new Promise((resolve) => setTimeout(resolve, 20000));
-      //return repository;
+        await bootstrapObject({configuration, storage, object});
+      }
+      resolve(objectsCount);
     } catch (e) {
       log.error('initOCFL error');
-      log.error(e);
+      log.error(e.message);
       reject(e);
     }
   });
