@@ -1,15 +1,11 @@
 import {BadRequestError, UnauthorizedError, ServiceUnavailableError} from 'restify-errors';
-import {loadConfiguration, getLogger, logEvent, generateToken} from '../../services';
-import {jwtVerify, createRemoteJWKSet} from "jose";
-import {Issuer, generators} from 'openid-client';
+import {getLogger, logEvent} from '../../services';
+import {generators} from 'openid-client';
 import {createUser, updateUser} from '../../controllers/user';
 import {createSession} from '../../controllers/session';
-import models from '../../models';
-import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
-import {getGithubUser} from '../../services/github';
 import * as utils from "../../services/utils";
-import {isEmpty, first} from "lodash";
+import {isEmpty} from "lodash";
 
 const {URL, URLSearchParams} = require('url');
 
@@ -91,7 +87,6 @@ export function setupOauthRoutes({server, configuration}) {
    *         description: Return session token to authorize user with corresponding code.
    */
   server.post("/oauth/:provider/code", async function (req, res, next) {
-    const adminEmail = first(configuration.api.administrators);
     if (!req.body.code) {
       return next(new BadRequestError(`Code not provided`));
     }
@@ -293,7 +288,7 @@ function isTokenExpired({expirationWindowSeconds = 0, expires_at}) {
 
 async function getNewToken({configuration, provider, user}) {
   try {
-    log.debug(`getNewToken`);
+    log.debug(`getNewToken with refreshToken`);
     const conf = configuration.api.authentication[provider];
     const authTokenHost = `${conf.tokenHost}${conf.tokenPath}`;
     let response;
@@ -304,7 +299,7 @@ async function getNewToken({configuration, provider, user}) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': conf.bearer + ' ' + user['refreshToken']
+          'Authorization': conf.bearer + ' ' + user?.refreshToken
         }
       });
     } else if (conf['useFormData']) {
@@ -322,7 +317,7 @@ async function getNewToken({configuration, provider, user}) {
         'client_id': conf.clientID,
         'client_secret': conf.clientSecret,
         'scope': conf.scope,
-        'refresh_token': user['refreshToken']
+        'refresh_token': user?.refreshToken
       }
       // const searchParams = new URLSearchParams();
       // Object.keys(parameters).forEach(key => searchParams.append(key, parameters[key]))
