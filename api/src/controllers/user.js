@@ -1,5 +1,5 @@
 import models from "../models";
-import {getLogger} from '../services/logger';
+import {getLogger} from '../services';
 import {uniqBy, first} from 'lodash';
 import * as utils from '../services/utils';
 
@@ -30,8 +30,13 @@ export async function createUser({data, configuration}) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
+  if (!data.providerId) {
+    throw new Error(`providerId is a required property`);
+  }
+  data.providerId = data.providerId.toString();
+
   let user = await models.user.findOne({
-    where: {provider: data.provider, providerId: data.providerId.toString()}
+    where: {provider: data.provider, providerId: data.providerId}
   });
   if (!user) {
     // no user account found but email in admin list
@@ -46,23 +51,27 @@ export async function createUser({data, configuration}) {
     if (data.refreshToken) {
       data.refreshToken = utils.encrypt(tokenConf.secret, data?.refreshToken);
     }
-    user = await models.user.findOrCreate({
-      where: {providerId: data.providerId.toString()},
-      defaults: data,
-    });
-    user = first(user);
-
+    try {
+      user = await models.user.findOrCreate({
+        where: {providerId: data.providerId},
+        defaults: data,
+      });
+      user = first(user);
+    } catch (e) {
+      const message = `Could not find or create user table with providerId: ${data.providerId} : ${e.message}`
+      log.error(message);
+      throw new Error(message);
+    }
   } else if (user && !configuration.api.administrators.includes(data?.email)) {
     // user account found and not admin
-
     log.debug(`User Id : ${user['id']}`);
 
     user.locked = false;
     user.upload = false;
     user.administrator = false;
     user.provider = data.provider;
+    user.providerId = data.providerId;
     user.name = data?.name;
-    user.providerId = data.id;
     user.providerUsername = data?.providerUsername;
     if (data.accessToken) {
       user.accessToken = utils.encrypt(tokenConf.secret, data?.accessToken);

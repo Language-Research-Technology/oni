@@ -1,13 +1,9 @@
 import {BadRequestError, UnauthorizedError, ServiceUnavailableError} from 'restify-errors';
-import {loadConfiguration, getLogger, logEvent, generateToken} from '../../services';
-import {jwtVerify, createRemoteJWKSet} from "jose";
-import {Issuer, generators} from 'openid-client';
+import {getLogger, logEvent} from '../../services';
+import {generators} from 'openid-client';
 import {createUser, updateUser} from '../../controllers/user';
 import {createSession} from '../../controllers/session';
-import models from '../../models';
-import {ClientOAuth2} from 'client-oauth2';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
-import {getGithubUser} from '../../services/github';
 import * as utils from "../../services/utils";
 import {isEmpty} from "lodash";
 
@@ -117,11 +113,21 @@ export function setupOauthRoutes({server, configuration}) {
           return next(new UnauthorizedError());
         }
       } else {
-        console.log(`Normal ${userData.provider} / ${userData.id}`);
+        console.log(`Normal ${userData.provider} / ${userData.providerId}`);
         // normal user account - we are allowing access unless its locked
         // create will findOne and update the token
-        user = await createUser({data: userData, configuration});
-
+        try {
+          user = await createUser({data: userData, configuration});
+          console.log(user);
+        } catch (e) {
+          await logEvent({
+            level: "error",
+            owner: adminEmail,
+            text: e.message,
+            data: userData.providerId
+          });
+          return next(new UnauthorizedError());
+        }
         if (user?.locked) {
           log.info(`The account for '${user.email}' is locked. Denying user login.`);
           await logEvent({
@@ -142,7 +148,12 @@ export function setupOauthRoutes({server, configuration}) {
           });
           try {
             user = await createUser({data: userData, configuration});
-          } catch (error) {
+          } catch (e) {
+            await logEvent({
+              level: "error",
+              owner: adminEmail,
+              text: e.message,
+            });
             return next(new UnauthorizedError());
           }
         }
@@ -277,7 +288,7 @@ function isTokenExpired({expirationWindowSeconds = 0, expires_at}) {
 
 async function getNewToken({configuration, provider, user}) {
   try {
-    log.debug(`getNewToken`);
+    log.debug(`getNewToken with refreshToken`);
     const conf = configuration.api.authentication[provider];
     const authTokenHost = `${conf.tokenHost}${conf.tokenPath}`;
     let response;
@@ -288,7 +299,7 @@ async function getNewToken({configuration, provider, user}) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': conf.bearer + ' ' + user['refreshToken']
+          'Authorization': conf.bearer + ' ' + user?.refreshToken
         }
       });
     } else if (conf['useFormData']) {
@@ -306,7 +317,7 @@ async function getNewToken({configuration, provider, user}) {
         'client_id': conf.clientID,
         'client_secret': conf.clientSecret,
         'scope': conf.scope,
-        'refresh_token': user['refreshToken']
+        'refresh_token': user?.refreshToken
       }
       // const searchParams = new URLSearchParams();
       // Object.keys(parameters).forEach(key => searchParams.append(key, parameters[key]))

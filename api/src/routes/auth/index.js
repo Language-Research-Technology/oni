@@ -1,7 +1,5 @@
 import {getLogger} from "../../services";
-import {setupGithubRoutes} from './github';
 import {getUser} from '../../controllers/user';
-import sessions from 'client-sessions';
 import models from '../../models';
 import {UnauthorizedError} from 'restify-errors';
 import {getGithubMemberships} from '../../controllers/github';
@@ -58,7 +56,7 @@ export function setupAuthRoutes({server, configuration}) {
           res.json({error: "no provider sent when authorizing"});
         } else {
           if (user?.provider === 'github') {
-            memberships = await getGithubMemberships({configuration, userId: user.id, group});
+            memberships = await getGithubMemberships({configuration, user, group});
           } else if (user?.provider === 'cilogon') {
             memberships = await getCiLogonMemberships({configuration, user, group});
           }

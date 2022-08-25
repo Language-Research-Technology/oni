@@ -50,7 +50,6 @@ export async function getTeamsMembership(user, org, team) {
 }
 
 export async function getTeamMembership({ user, group }) {
-
   const octokit = new Octokit({ auth: user.accessToken });
   const data = { teams: [], error: null };
   try {
@@ -65,7 +64,8 @@ export async function getTeamMembership({ user, group }) {
       });
     }
   } catch (e) {
-    data['error'] = e;
+    this.log.error(e);
+    data['error'] = e.message;
   }
   return data;
 
