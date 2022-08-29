@@ -27,7 +27,7 @@ export async function bootstrapObject({configuration, object}) {
   const identifier = configuration.api.identifier;
   let crate;
   try {
-    const crateFile = await object.getAsString({logicalPath: 'ro-crate-metadata.json'});
+    const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
     crate = new ROCrate(JSON.parse(crateFile));
   } catch (e) {
     log.error(e.message);
