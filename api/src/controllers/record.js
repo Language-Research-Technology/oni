@@ -165,7 +165,7 @@ export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
   console.log('getRawCrate')
   const object = repository.object({id: crateId});
-  const crateFile = await object.getAsString({logicalPath: 'ro-crate-metadata.json'});
+  const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
   const json = JSON.parse(crateFile);
   return json;
 }
@@ -187,7 +187,7 @@ export async function getFile({itemId, repository, filePath}) {
   try {
     const object = repository.object({id: itemId});
     await object.load();
-    const fileStream = await object.getAsStream({logicalPath: filePath});
+    const fileStream = await object.getFile({logicalPath: filePath}).asStream();
     if (fileStream && filePath) {
       const fileName = path.basename(filePath);
       const ext = path.extname(fileName);

@@ -10,7 +10,7 @@ export async function transformURIs({host, crateId, uridTypes, repository}) {
   log.silly('transformURIs');
   const object = repository.object(crateId);
   await object.load();
-  const crateFile = await object.getAsString({logicalPath: 'ro-crate-metadata.json'});
+  const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
   const crate = new ROCrate(JSON.parse(crateFile));
   for (const item of crate.getGraph()) {
     const itemType = crate.utils.asArray(item['@type']);
