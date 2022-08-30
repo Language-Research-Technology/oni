@@ -28,7 +28,7 @@ export async function getGroupsMembership({ user, org }) {
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
-    console.log(e);
+    log.error(e.message);
     return { error: e }
   }
 }
@@ -44,7 +44,7 @@ export async function getTeamsMembership(user, org, team) {
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
-    console.log(e);
+    log.error(e.message);
     return { error: e }
   }
 }

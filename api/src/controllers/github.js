@@ -5,10 +5,12 @@ import * as utils from "../services/utils";
 export async function getGithubMemberships({configuration, user, group}) {
   console.log('getGithubMemberships');
   const tokenConf = configuration.api.tokens;
+  const username = user.providerUsername;
+  const accessToken = utils.decrypt(tokenConf.secret, user.accessToken);
   const teamMembership = await getTeamMembership({
     user: {
-      username: user.providerUsername,
-      accessToken: utils.decrypt(tokenConf.secret, user.accessToken)
+      username,
+      accessToken
     }, group: group
   });
   if (teamMembership.error) {

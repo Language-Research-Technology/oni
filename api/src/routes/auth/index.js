@@ -61,9 +61,7 @@ export function setupAuthRoutes({server, configuration}) {
             memberships = await getCiLogonMemberships({configuration, user, group});
           }
           if (memberships.error) {
-            res.status(401);
-            res.json({error: memberships.error});
-            next(new UnauthorizedError());
+            res.json({memberships: [], error: memberships.error});
           } else {
             res.json({memberships});
             next();
