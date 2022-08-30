@@ -64,7 +64,7 @@ export async function getTeamMembership({ user, group }) {
       });
     }
   } catch (e) {
-    this.log.error(e);
+    log.error(e);
     data['error'] = e.message;
   }
   return data;
