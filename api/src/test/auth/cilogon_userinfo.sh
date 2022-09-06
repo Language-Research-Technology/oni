@@ -5,4 +5,5 @@ CILOGON_ACCESS_TOKEN=$(jq -r .access_token < cilogon-token-response.json)
 CILOGON_REFRESH_TOKEN=$(jq -r .refresh_token < cilogon-token-response.json)
 
 curl -d access_token=${CILOGON_ACCESS_TOKEN} \
-  https://cilogon.org/oauth2/userinfo
+     -d refresh_token=$CILOGON_REFRESH_TOKEN \
+  https://test.cilogon.org/oauth2/userinfo
