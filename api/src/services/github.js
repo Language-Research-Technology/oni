@@ -28,7 +28,7 @@ export async function getGroupsMembership({ user, org }) {
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
-    console.log(e);
+    log.error(e.message);
     return { error: e }
   }
 }
@@ -44,13 +44,12 @@ export async function getTeamsMembership(user, org, team) {
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
-    console.log(e);
+    log.error(e.message);
     return { error: e }
   }
 }
 
 export async function getTeamMembership({ user, group }) {
-
   const octokit = new Octokit({ auth: user.accessToken });
   const data = { teams: [], error: null };
   try {
@@ -65,7 +64,8 @@ export async function getTeamMembership({ user, group }) {
       });
     }
   } catch (e) {
-    data['error'] = e;
+    log.error(e);
+    data['error'] = e.message;
   }
   return data;
 

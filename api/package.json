@@ -1,6 +1,6 @@
 {
     "name": "api",
-    "version": "0.1.19",
+    "version": "0.1.16",
     "description": "",
     "main": "src/index.js",
     "scripts": {
@@ -33,12 +33,14 @@
         "jest-fetch-mock": "^3.0.3",
         "mockdate": "^3.0.5",
         "nodemon": "^2.0.12",
+        "prettier": "^2.7.1",
         "webpack": "^5.65.0",
         "webpack-cli": "^4.9.1",
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
         "@elastic/elasticsearch": "^7.16.0",
+        "@ocfl/ocfl-fs": "^0.1.1",
         "@octokit/core": "^3.5.1",
         "client-oauth2": "^4.3.3",
         "client-sessions": "^0.8.0",
@@ -52,7 +54,6 @@
         "language-data-node-tools": "git+https://github.com/Language-Research-Technology/language-data-node-tools.git",
         "lodash": "^4.17.20",
         "node-fetch": "^2.6.1",
-        "oni-ocfl": "git+https://github.com/Arkisto-Platform/oni-ocfl.git#develop_marco_ocfl",
         "openid-client": "^5.1.0",
         "pg": "^8.7.1",
         "pg-hstore": "^2.3.4",

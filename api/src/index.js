@@ -7,10 +7,10 @@ import {loadConfiguration, getLogger} from './services/index';
 import {setupRoutes} from './routes';
 import {bootstrap} from './services/bootstrap';
 import {elasticInit, elasticBootstrap, elasticIndex} from './indexer/elastic';
-import {ocfltools} from "oni-ocfl";
 
 import corsMiddleware from 'restify-cors-middleware2';
 import * as fs from "fs-extra";
+import ocfl from "@ocfl/ocfl-fs";
 
 const log = getLogger();
 const server = restify.createServer();
@@ -82,9 +82,9 @@ let repository;
     await bootstrap({configuration});
   }
 
-  const ocfl = configuration.api.ocfl;
-  const repository = await ocfltools.connectRepo({ocflRoot: ocfl.ocflPath, ocflScratch: ocfl.ocflScratch});
-  assert(await repository.isRepository(), 'Aborting: Bad OCFL repository');
+  const ocflConf = configuration.api.ocfl;
+  const repository = ocfl.storage({root: ocflConf.ocflPath, workspace: ocflConf.ocflScratch, ocflVersion: '1.0'});
+  await repository.load();
 
   await elasticInit({configuration});
   if (configuration['api']['elastic']?.bootstrap) {

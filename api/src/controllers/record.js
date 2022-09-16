@@ -1,11 +1,12 @@
 import models from "../models";
 import {getLogger} from "../services";
-import {ocfltools} from "oni-ocfl";
+
 
 import {transformURIs} from "../services/ro-crate-utils";
 import {castArray} from 'lodash';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import {ROCrate} from "ro-crate";
 
 const log = getLogger();
 
@@ -63,7 +64,7 @@ export async function createRecord({data, memberOfs, atTypes, conformsTos}) {
       license: data.license,
       name: data.name,
       description: data.description,
-      pairtreeId: data.pairtreeId
+      objectRoot: data.objectRoot
     });
     atTypes = castArray(atTypes);
     for (const ele of atTypes) {
@@ -162,9 +163,10 @@ export async function decodeHash({id}) {
 
 export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
-  const fileInfo = await ocfltools.getFileInfo({repository, crateId, filePath: 'ro-crate-metadata.json'});
-  const file = await fs.readFile(fileInfo.path, {encoding: 'utf-8'});
-  const json = JSON.parse(file);
+  console.log('getRawCrate')
+  const object = repository.object({id: crateId});
+  const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
+  const json = JSON.parse(crateFile);
   return json;
 }
 
@@ -183,9 +185,10 @@ export async function getUridCrate({host, crateId, typesTransform, version, repo
 
 export async function getFile({itemId, repository, filePath}) {
   try {
-    const fileInfo = await ocfltools.getFileInfo({repository, crateId: itemId, filePath});
-    if (fileInfo && fileInfo.path) {
-      const filePath = fileInfo.path;
+    const object = repository.object({id: itemId});
+    await object.load();
+    const fileStream = await object.getFile({logicalPath: filePath}).asStream();
+    if (fileStream && filePath) {
       const fileName = path.basename(filePath);
       const ext = path.extname(fileName);
       let extName;
@@ -193,6 +196,8 @@ export async function getFile({itemId, repository, filePath}) {
         extName = ext;
       }
       return {
+        objectRoot: object.root,
+        fileStream: fileStream,
         filename: fileName,
         filePath: filePath,
         mimetype: extName || 'file'

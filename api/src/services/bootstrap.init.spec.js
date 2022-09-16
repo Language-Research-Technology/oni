@@ -1,7 +1,7 @@
 require("regenerator-runtime/runtime");
 import fs from  "fs-extra";
 import {ROCrate} from "ro-crate";
-import {ocfltools} from  "oni-ocfl";
+
 import {testOCFLConf as ocfl} from "./";
 
 let records;
