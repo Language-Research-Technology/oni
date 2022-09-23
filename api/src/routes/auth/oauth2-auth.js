@@ -242,7 +242,7 @@ async function getUserToken({configuration, provider, token}) {
     log.debug('user');
     const user = await response.json();
     log.debug(JSON.stringify(user));
-    log.debug(`${user.provider} with ${conf.username} : ${user[conf.username]}`)
+    log.debug(`${provider} with ${conf.username} : ${user[conf.username]}`)
     if (user) {
       return {
         email: user?.email,

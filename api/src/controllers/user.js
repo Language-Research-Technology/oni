@@ -31,6 +31,7 @@ export async function createUser({data, configuration}) {
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
+  data.provider = data.provider.toString();
   if (!data.providerId) {
     throw new Error(`providerId is a required property`);
   }
@@ -62,7 +63,6 @@ export async function createUser({data, configuration}) {
       });
     } else {
       data.accessToken = utils.encrypt(tokenConf.secret, data.accessToken);
-      data.accessTokenExpiresAt = data?.accessTokenExpiresAt;
     }
     if (data.refreshToken) {
       data.refreshToken = utils.encrypt(tokenConf.secret, data?.refreshToken);

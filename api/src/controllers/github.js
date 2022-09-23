@@ -11,6 +11,8 @@ const log = getLogger();
 
 export async function getGithubMemberships({configuration, user, group}) {
   const tokenConf = configuration.api.tokens;
+  log.debug(user);
+  log.debug(`user providerUsername : ${user.providerUsername}`);
   const username = user.providerUsername;
   log.debug(`Get Github Memberships from: ${username}`);
   const accessToken = utils.decrypt(tokenConf.secret, user.accessToken);
