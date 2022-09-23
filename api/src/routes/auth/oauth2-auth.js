@@ -118,7 +118,7 @@ export function setupOauthRoutes({server, configuration}) {
         // create will findOne and update the token
         try {
           user = await createUser({data: userData, configuration});
-          console.log(user);
+          log.debug(`userCreated: ${user.provider} / ${user.providerUsername}`);
         } catch (e) {
           await logEvent({
             level: "error",
@@ -242,6 +242,7 @@ async function getUserToken({configuration, provider, token}) {
     log.debug('user');
     const user = await response.json();
     log.debug(JSON.stringify(user));
+    log.debug(`${user.provider} with ${conf.username} : ${user[conf.username]}`)
     if (user) {
       return {
         email: user?.email,

@@ -13,9 +13,7 @@ export async function getGithubMemberships({configuration, user, group}) {
   const tokenConf = configuration.api.tokens;
   const username = user.providerUsername;
   log.debug(`Get Github Memberships from: ${username}`);
-  console.log(user.accessToken)
   const accessToken = utils.decrypt(tokenConf.secret, user.accessToken);
-  console.log(accessToken)
   let octokit;
   try {
     octokit = await getOctoKit(accessToken);
