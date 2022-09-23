@@ -4,12 +4,21 @@ import {filter} from 'lodash';
 
 const log = getLogger();
 
-export async function getGroupMembership(user, org) {
+export async function getOctoKit(accessToken) {
   try {
-    const octokit = new Octokit({auth: user.accessToken});
+    const octokit = new Octokit({auth: accessToken});
+    return octokit
+  } catch (e) {
+    console.log(e);
+    return {error: e}
+  }
+}
+
+export async function getGroupMembership({octokit, org}) {
+  try {
     const res = await octokit.request('GET /user/memberships/orgs/{org}', {
       org: org
-    })
+    });
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
@@ -18,9 +27,8 @@ export async function getGroupMembership(user, org) {
   }
 }
 
-export async function getGroupsMembership({user, org}) {
+export async function getGroupsMembership({octokit, org}) {
   try {
-    const octokit = new Octokit({auth: user.accessToken});
     const res = await octokit.request('GET /user/orgs', {
       org: org
     });
@@ -28,32 +36,17 @@ export async function getGroupsMembership({user, org}) {
     console.log("Hello, %s", res.data);
     return res.data;
   } catch (e) {
-    log.error(e.message);
+    log.error(e);
     return {error: e}
   }
 }
 
-export async function getTeamsMembership(user, org, team) {
-  try {
-    const octokit = new Octokit({auth: user.accessToken});
-    const res = await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-      org: org,
-      team_slug: team,
-      username: user.username
-    })
-    console.log("Hello, %s", res.data);
-    return res.data;
-  } catch (e) {
-    log.error(e.message);
-    return {error: e}
-  }
-}
-
-export async function getTeamMembership({user, group}) {
-  const octokit = new Octokit({auth: user.accessToken});
+export async function getTeamsOfOrg({octokit, group}) {
+  log.debug("getTeamsOfOrg")
   const data = {teams: [], error: null};
+  let res;
   try {
-    const res = await octokit.request('GET /orgs/{org}/teams', {
+    res = await octokit.request('GET /orgs/{org}/teams', {
       org: group,
       per_page: 100
     });
@@ -72,9 +65,8 @@ export async function getTeamMembership({user, group}) {
 }
 
 //https://docs.github.com/en/rest/teams/members#get-team-membership-for-a-user
-export async function getTeamMembershipForUser({user, group, teams}) {
+export async function getTeamMembershipForUser({octokit, username, group, teams}) {
   log.debug("getTeamMembershipForUser");
-  const octokit = new Octokit({auth: user.accessToken});
   const data = {teams: [], error: null};
   try {
     for (let t of teams) {
@@ -83,7 +75,7 @@ export async function getTeamMembershipForUser({user, group, teams}) {
         res = await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
           org: group,
           team_slug: t.team.slug,
-          username: user.username,
+          username: username,
           per_page: 100
         });
         if (res.status === 200) {
