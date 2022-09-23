@@ -11,7 +11,7 @@ const log = getLogger();
 
 export async function getGithubMemberships({configuration, user, group}) {
   const tokenConf = configuration.api.tokens;
-  log.debug(user);
+  log.debug('getGithubMemberships');
   log.debug(`user providerUsername : ${user.providerUsername}`);
   const username = user.providerUsername;
   log.debug(`Get Github Memberships from: ${username}`);
@@ -22,7 +22,7 @@ export async function getGithubMemberships({configuration, user, group}) {
   }catch (e) {
     // TODO: should need a refresh token
     console.log(e);
-    return {error: e.mesage}
+    return {error: e.message}
   }
   const teamMembership = await getTeamsOfOrg({octokit, group});
   if (teamMembership.teams) {

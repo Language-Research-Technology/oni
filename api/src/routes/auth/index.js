@@ -56,6 +56,7 @@ export function setupAuthRoutes({server, configuration}) {
         if (!user?.provider) {
           res.status(403);
           res.json({error: "no provider sent when authorizing"});
+          next();
         } else {
           log.debug(`user.providerUsername: ${user?.providerUsername}`);
           if (user?.provider === 'github') {
