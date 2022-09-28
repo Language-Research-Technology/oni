@@ -4,6 +4,8 @@ import models from '../../models';
 import {UnauthorizedError} from 'restify-errors';
 import {getGithubMemberships} from '../../controllers/github';
 import {getCiLogonMemberships} from '../../controllers/cilogon';
+import {getREMSMemberships} from '../../controllers/rems';
+
 import {setupLoginRoutes} from './openid-auth';
 import {setupOauthRoutes} from './oauth2-auth';
 import {routeUser, routeAdmin, routeBearer} from '../../middleware/auth';
@@ -59,9 +61,11 @@ export function setupAuthRoutes({server, configuration}) {
           next();
         } else {
           log.debug(`user.providerUsername: ${user?.providerUsername}`);
-          if (user?.provider === 'github') {
+          if(authorization.provider === "rems") {
+            memberships = await getREMSMemberships({configuration, user, group});
+          } else if(authorization.provider === "github"){
             memberships = await getGithubMemberships({configuration, user, group});
-          } else if (user?.provider === 'cilogon') {
+          } else if (authorization.provider === "cilogon") {
             memberships = await getCiLogonMemberships({configuration, user, group});
           }
           if (authorization?.enrollment && authorization?.enrollment?.enforced) {

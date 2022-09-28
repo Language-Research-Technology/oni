@@ -1,5 +1,5 @@
 import {Octokit} from "@octokit/core";
-import {getLogger} from "../services";
+import {getLogger} from "./logger";
 import {filter} from 'lodash';
 
 const log = getLogger();
