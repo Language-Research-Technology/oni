@@ -19,6 +19,7 @@ export function setupSearchRoutes({server, configuration}) {
    *       - id
    *       - filters
    *       - scroll
+   *       - withScroll
    *     responses:
    *       200:
    *         description: Search results.
@@ -38,7 +39,7 @@ export function setupSearchRoutes({server, configuration}) {
         let results;
         if (req.query['scroll']) {
           try {
-            results = await scroll({scrollId: req.query['scroll']});
+            results = await scroll({configuration, scrollId: req.query['scroll']});
           } catch (e) {
             res.status(401);
             res.send({error_type: 'scroll_error', error: 'Error scrolling', message: e.message});
@@ -77,7 +78,8 @@ export function setupSearchRoutes({server, configuration}) {
           searchBody = boolQuery({searchQuery, fields, filters, highlightFields});
           searchBody.aggs = aggsQueries({aggregations});
           //log.debug(JSON.stringify({aggs: searchBody}));
-          results = await search({configuration, index, searchBody, explain: false});
+          const needsScroll = req.query.withScroll;
+          results = await search({configuration, index, searchBody, explain: false, needsScroll});
         }
         const userId = user?.id;
         const filtered = await filterResults({userId, results, configuration});

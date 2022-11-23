@@ -162,6 +162,8 @@
         "elastic": {
             "bootstrap": false,
             "node": "http://elasticsearch:9200",
+            "maxScroll": 5000,
+            "scrollTimeout": "10m",
             "log": "debug",
             "index": "items",
             "fields": [
