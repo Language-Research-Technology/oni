@@ -1,7 +1,7 @@
-import {search, scroll} from '../../indexer/elastic';
+import {search, scroll, clearScroll} from '../../indexer/elastic';
 import {getLogger, loadConfiguration, routeUser} from '../../services';
 import {first, pullAt} from 'lodash';
-import {boolQuery, aggsQueries} from "../../controllers/elastic";
+import {boolQuery, aggsQueries } from "../../controllers/elastic";
 import {getUser} from "../../controllers/user";
 import {routeBrowse} from "../../middleware/auth";
 import {filterResults} from "../../services/elastic";
@@ -63,7 +63,7 @@ export function setupSearchRoutes({server, configuration}) {
           const id = req.query['_id'].trim();
           searchBody.query = {
             terms: {
-              _id: [ decodeURIComponent(id) ]
+              _id: [decodeURIComponent(id)]
             }
           };
           results = await search({configuration, index, searchBody});
@@ -99,5 +99,31 @@ export function setupSearchRoutes({server, configuration}) {
       }
     })
   );
-
+  server.get("/search/scroll", routeBrowse(async (req, res, next) => {}));
+  /**
+   * @openapi
+   * /:
+   *   del:
+   *     description: Delete scroll ID
+   *     parameters:
+   *       - scroll
+   *     responses:
+   *       200:
+   *         description: Deletes scroll id.
+   */
+  server.del("/search/scroll", routeBrowse(async (req, res, next) => {
+      try {
+        log.debug('search/scroll');
+        let scrollId = req.query['id'];
+        const results = await clearScroll({scrollId});
+        res.status(202);
+        res.send({results});
+        next();
+      } catch (e) {
+        res.status(500);
+        res.send({error: 'Error deleting scroll', message: e.message});
+        next();
+      }
+    })
+  );
 }

@@ -113,18 +113,35 @@ export async function configureMappings({configuration, client}) {
 
 export async function configureCluster({configuration, client}) {
   log.debug('Configure Cluster');
-  const elastic = configuration['api']['elastic'];
-  const settings = {
-    "persistent": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000
-    },
-    "transient": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000
+  try {
+    const elastic = configuration['api']['elastic'];
+    const settings = {
+      "persistent": {
+        "search.max_open_scroll_context": elastic?.maxScroll || 5000
+      },
+      "transient": {
+        "search.max_open_scroll_context": elastic?.maxScroll || 5000
+      }
     }
+    await client.cluster.putSettings({body: settings});
+    if (elastic?.log === 'debug') {
+      const config = await client.cluster.getSettings();
+      log.debug(JSON.stringify(config));
+    }
+  } catch (e) {
+    log.error('configureCluster');
+    log.error(JSON.stringify(e.message));
+    throw new Error(e);
   }
-  await client.cluster.putSettings({body: settings});
-  if (elastic?.log === 'debug') {
-    const config = await client.cluster.getSettings();
-    log.debug(JSON.stringify(config));
+}
+
+export async function clearScroll({scrollId}) {
+  try {
+    log.debug(scrollId)
+    return await client.clearScroll({scroll_id: scrollId});
+  } catch (e) {
+    log.error('clearScroll');
+    log.error(JSON.stringify(e.message));
+    throw new Error(e);
   }
 }
