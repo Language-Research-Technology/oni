@@ -1,7 +1,5 @@
 // these endpoints will only return data they are responsible for
 //
-import models from '../models';
-import { UnauthorizedError, ForbiddenError } from 'restify-errors';
 import { routeUser, loadConfiguration } from '../services';
 import { setupObjectRoutes } from './object';
 import { setupUserRoutes } from './user';

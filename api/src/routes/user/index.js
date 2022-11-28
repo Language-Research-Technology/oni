@@ -26,15 +26,11 @@ export function setupUserRoutes({server, configuration}) {
           const user = await getUser({where: {id: req.session.user.id}});
           user['apiToken'] = null;
           user['accessToken'] = '....removed';
-          res.json({user}).status(200);
-          //Testing: Setting up memberships after login
-          if (configuration.api.authentication['cilogon']) {
-            await getCiLogonMemberships({configuration, user});
-          } else if (configuration.api.authentication['github']) {
-            await getGithubMemberships({configuration, userId: user.id, group: configuration['api']['licenseGroup']});
-          }
+          res.status(200);
+          res.json({user});
         } else {
-          res.json({user: null}).status(200);
+          res.status(200);
+          res.json({user: null});
         }
       } catch (e) {
         log.error(e);
