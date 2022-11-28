@@ -5,7 +5,7 @@ import {createUser, updateUser} from '../../controllers/user';
 import {createSession} from '../../controllers/session';
 import {AuthorizationCode, ClientCredentials} from 'simple-oauth2';
 import * as utils from "../../services/utils";
-import {isEmpty} from "lodash";
+import {first, isEmpty} from "lodash";
 
 const {URL, URLSearchParams} = require('url');
 
@@ -15,14 +15,17 @@ export function setupOauthRoutes({server, configuration}) {
 
   /**
    * @openapi
-   * /:
+   * /oauth/{provider}/login:
    *   get:
    *     description: O-Auth Provider Login
    *     parameters:
-   *       - provider
+   *       - in: path
+   *         name: provider
+   *         description: provider name/id
+   *         required: true
    *     responses:
-   *       200:
-   *         description: .
+   *       '200':
+   *         description: Returns a json with URL, code_verifier and provider
    */
   server.get("/oauth/:provider/login", async function (req, res, next) {
     const provider = req.params.provider;
@@ -75,15 +78,33 @@ export function setupOauthRoutes({server, configuration}) {
 
   /**
    * @openapi
-   * /:
-   *   get:
+   * /oauth/{provider}/code:
+   *   post:
    *     description: O-Auth Provider Code
+   *     consumes:
+   *         - application/json
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             required:
+   *               - code
+   *               - state
+   *             type: object
+   *             properties:
+   *               code:
+   *                 type: string
+   *               state:
+   *                 type: string
    *     parameters:
-   *       - provider
-   *       - code
-   *       - state
+   *       - in: path
+   *         name: provider
+   *         description: provider
+   *         required: true
+   *
    *     responses:
-   *       200:
+   *       '200':
    *         description: Return session token to authorize user with corresponding code.
    */
   server.post("/oauth/:provider/code", async function (req, res, next) {
@@ -118,47 +139,47 @@ export function setupOauthRoutes({server, configuration}) {
         // create will findOne and update the token
         try {
           user = await createUser({data: userData, configuration});
-          console.log(user);
+          log.debug(`userCreated: ${user.provider} / ${user.providerUsername}`);
         } catch (e) {
           await logEvent({
             level: "error",
-            owner: adminEmail,
+            owner: first(configuration.api.administrators),
             text: e.message,
             data: userData.providerId
           });
           return next(new UnauthorizedError());
         }
         if (user?.locked) {
-          log.info(`The account for '${user.email}' is locked. Denying user login.`);
+          log.info(`The account for '${user.providerId}' is locked. Denying user login.`);
           await logEvent({
             level: "info",
-            owner: user.email,
-            text: `The account is locked. Denying user login.`,
+            owner: first(configuration.api.administrators),
+            text: `The account is locked. Denying user login for ${user.providerId}`,
           });
           // user account exists but user is locked
           return next(new UnauthorizedError());
         }
-        if (!user?.provider || !user.givenName) {
+        if (!user?.provider || !user.providerId) {
           // user account looks like a stub account - create it properly
-          log.info(`The account for '${user.email}' is being setup.`);
+          log.info(`The account for '${user.providerId}' is being setup.`);
           await logEvent({
             level: "info",
-            owner: user.email,
-            text: `The account is being setup.`,
+            owner: first(configuration.api.administrators),
+            text: `The account for ${user.providerId} is being setup.`,
           });
           try {
             user = await createUser({data: userData, configuration});
           } catch (e) {
             await logEvent({
               level: "error",
-              owner: adminEmail,
+              owner: first(configuration.api.administrators),
               text: e.message,
             });
             return next(new UnauthorizedError());
           }
         }
       }
-      log.debug(`Creating session for ${userData.provider} / ${userData.providerId} / ${user?.email}`);
+      log.debug(`Creating session for ${userData.provider} / ${userData.providerId} / ${user.providerUsername}`);
       let session = await createSession({user, configuration});
 
       res.send({token: session.token});
@@ -242,13 +263,14 @@ async function getUserToken({configuration, provider, token}) {
     log.debug('user');
     const user = await response.json();
     log.debug(JSON.stringify(user));
+    log.debug(`${provider} with ${conf.username} : ${user[conf.username]}`)
     if (user) {
       return {
         email: user?.email,
         name: user?.name,
         provider: provider,
-        providerId: user.id || user.sub,
-        providerUsername: user?.username || user?.login,
+        providerId: user[conf.userid],
+        providerUsername: user[conf.username],
         accessToken: token['access_token'],
         accessTokenExpiresAt: token['expires_at'] || null,
         refreshToken: token['refresh_token'] || null

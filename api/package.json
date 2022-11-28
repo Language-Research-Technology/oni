@@ -63,7 +63,7 @@
         "restify-cors-middleware2": "^2.1.2",
         "restify-errors": "^8.0.2",
         "rimraf": "^3.0.2",
-        "ro-crate": "github:Arkisto-Platform/ro-crate-js#develop-rewrite",
+        "ro-crate": "^3.2.0",
         "sequelize": "^6.21.2",
         "simple-oauth2": "^4.3.0",
         "uuid": "^8.3.2",

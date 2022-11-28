@@ -1,5 +1,5 @@
 import models from "../models";
-import {getLogger} from '../services';
+import {getLogger, logEvent} from '../services';
 import {uniqBy, first} from 'lodash';
 import * as utils from '../services/utils';
 
@@ -26,14 +26,25 @@ export async function getUser({where}) {
 }
 
 export async function createUser({data, configuration}) {
+
   const tokenConf = configuration.api.tokens;
   if (!data.provider) {
     throw new Error(`Provider is a required property`);
   }
+  data.provider = data.provider.toString();
   if (!data.providerId) {
     throw new Error(`providerId is a required property`);
   }
   data.providerId = data.providerId.toString();
+  if (!data.providerUsername) {
+    throw new Error(`providerUsername is a required property`);
+  }
+  data.providerUsername = data.providerUsername.toString();
+
+  if (!data.accessToken) {
+    throw new Error(`accessToken is required for getting users memberships`);
+  }
+  data.accessToken = data.accessToken.toString();
 
   let user = await models.user.findOne({
     where: {provider: data.provider, providerId: data.providerId}
@@ -44,16 +55,21 @@ export async function createUser({data, configuration}) {
     data.upload = true;
     data.administrator = true;
 
-    // This is required because we use findOrCreate
-    if (data.accessToken) {
-      data.accessToken = utils.encrypt(tokenConf.secret, data?.accessToken);
+    if (!data.accessToken) {
+      await logEvent({
+        level: "error",
+        owner: first(configuration.api.administrators),
+        text: "No access token provided for user",
+      });
+    } else {
+      data.accessToken = utils.encrypt(tokenConf.secret, data.accessToken);
     }
     if (data.refreshToken) {
       data.refreshToken = utils.encrypt(tokenConf.secret, data?.refreshToken);
     }
     try {
       user = await models.user.findOrCreate({
-        where: {providerId: data.providerId},
+        where: {provider: data.provider, providerId: data.providerId},
         defaults: data,
       });
       user = first(user);
@@ -72,7 +88,7 @@ export async function createUser({data, configuration}) {
     user.provider = data.provider;
     user.providerId = data.providerId;
     user.name = data?.name;
-    user.providerUsername = data?.providerUsername;
+    user.providerUsername = data.providerUsername;
     if (data.accessToken) {
       user.accessToken = utils.encrypt(tokenConf.secret, data?.accessToken);
       user.accessTokenExpiresAt = data?.accessTokenExpiresAt;

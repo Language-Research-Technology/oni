@@ -1,6 +1,5 @@
 import {getLogger} from '../services';
 import {Client} from '@elastic/elasticsearch';
-
 import {Indexer} from './Indexer';
 
 const log = getLogger();

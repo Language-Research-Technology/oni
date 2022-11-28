@@ -22,51 +22,60 @@ export async function bootstrap({configuration}) {
 }
 
 export async function bootstrapObject({configuration, object}) {
-  log.debug(`Loading record: ${object.root}`);
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
   let crate;
-  try {
-    const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
-    crate = new ROCrate(JSON.parse(crateFile));
-  } catch (e) {
-    log.error(e.message);
+  const skip = configuration.api?.skipByMatch || [];
+  let skipRegExp;
+  if (skip.length > 0) {
+    skipRegExp = new RegExp(skip.join("|"), "i");
   }
-  const root = crate.rootDataset;
-  if (root) {
-    let lic;
-    const rootLicense = first(root?.license) || root?.license;
-    if (rootLicense && rootLicense['@id']) {
-      lic = rootLicense['@id'];
-    } else {
-      lic = license?.default?.['@id'];
-    }
-    const crateId = crate.rootId;
-    //console.log(`${crateId} license: ${lic}`);
-    if (crateId !== './') {
-      const rec = {
-        crateId: crateId,
-        license: lic,
-        name: root['name'],
-        description: root['description'] || '',
-        objectRoot: object.root
-      }
-      log.info(`Loading ${rec.crateId}`);
-      //log.info(JSON.stringify(root['conformsTo']));
-      //index the types
-      //if it claims to be a memberOf !! think of sydney speaks
-      //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
-      const recordCreate = await createRecord({
-        data: rec,
-        memberOfs: root['memberOf'] || [],
-        atTypes: root['@type'] || [],
-        conformsTos: root['conformsTo'] || []
-      });
-    } else {
-      log.error(`Cannot insert a crate with Id: './' please use arcp`);
-    }
+  if (skipRegExp && skipRegExp.test(object.id)) {
+    log.warn(`${object.id} : Skipping object by match in config: ${skipRegExp}`);
   } else {
-    log.warn(`${object.root} : does not contain an ROCrate with a valid root`);
+    try {
+      log.debug(`Loading record: ${object.root}`);
+      const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
+      crate = new ROCrate(JSON.parse(crateFile));
+    } catch (e) {
+      log.error(e.message);
+    }
+    const root = crate.rootDataset;
+    if (root) {
+      let lic;
+      const rootLicense = first(root?.license) || root?.license;
+      if (rootLicense && rootLicense['@id']) {
+        lic = rootLicense['@id'];
+      } else {
+        lic = license?.default?.['@id'];
+      }
+      const crateId = crate.rootId;
+      //console.log(`${crateId} license: ${lic}`);
+      if (crateId !== './') {
+        const rec = {
+          crateId: crateId,
+          license: lic,
+          name: root['name'],
+          description: root['description'] || '',
+          objectRoot: object.root
+        }
+        log.info(`Loading ${rec.crateId}`);
+        //log.info(JSON.stringify(root['conformsTo']));
+        //index the types
+        //if it claims to be a memberOf !! think of sydney speaks
+        //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
+        const recordCreate = await createRecord({
+          data: rec,
+          memberOfs: root['memberOf'] || [],
+          atTypes: root['@type'] || [],
+          conformsTos: root['conformsTo'] || []
+        });
+      } else {
+        log.error(`Cannot insert a crate with Id: './' please use arcp`);
+      }
+    } else {
+      log.warn(`${object.root} : does not contain an ROCrate with a valid root`);
+    }
   }
 }
 

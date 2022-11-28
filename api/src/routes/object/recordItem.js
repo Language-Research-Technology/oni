@@ -1,8 +1,6 @@
 import { getRecord, getFile } from '../../controllers/record';
-import fs from 'fs-extra';
 import { getLogger } from '../../services';
 import { checkIfAuthorized } from '../../services/license';
-import { getUserMemberships } from '../../controllers/userMembership';
 
 const log = getLogger();
 
