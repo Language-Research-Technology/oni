@@ -60,6 +60,7 @@ export function setupRoutes({ server, configuration, repository }) {
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.licenses = configuration?.api?.licenses;
     ui.conformsTo = configuration?.api?.conformsTo;
+    ui.enrollment = configuration?.api?.authorization?.enrollment;
     res.send({ ui: configuration.ui });
     next();
   });
