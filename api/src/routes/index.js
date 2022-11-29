@@ -1,22 +1,22 @@
 // these endpoints will only return data they are responsible for
 //
-import { routeUser, loadConfiguration } from '../services';
-import { setupObjectRoutes } from './object';
-import { setupUserRoutes } from './user';
-import { setupAuthRoutes } from './auth';
-import { setupSearchRoutes } from './search';
-import { setupAdminRoutes } from "./admin";
+import {routeUser, loadConfiguration} from '../services';
+import {setupObjectRoutes} from './object';
+import {setupUserRoutes} from './user';
+import {setupAuthRoutes} from './auth';
+import {setupSearchRoutes} from './search';
+import {setupAdminRoutes} from "./admin";
 
 const version = require('../../package.json')['version'];
 
-export function setupRoutes({ server, configuration, repository }) {
+export function setupRoutes({server, configuration, repository}) {
 
-  setupAuthRoutes({ server, configuration });
+  setupAuthRoutes({server, configuration});
 
   if (process.env.NODE_ENV === 'development') {
     /**
      * @openapi
-     * /:
+     * /test-middleware:
      *   get:
      *     description: Test Middleware
      *     responses:
@@ -39,13 +39,14 @@ export function setupRoutes({ server, configuration, repository }) {
    *         description: None.
    */
   server.get('/', (req, res, next) => {
-    res.send({});
+    res.json({hello: 'from Oni'});
+    res.status(200);
     next();
   });
 
   /**
    * @openapi
-   * /:
+   * /configuration:
    *   get:
    *     description: Configuration
    *     responses:
@@ -59,13 +60,13 @@ export function setupRoutes({ server, configuration, repository }) {
     ui.licenses = configuration?.api?.licenses;
     ui.conformsTo = configuration?.api?.conformsTo;
     ui.enrollment = configuration?.api?.authorization?.enrollment;
-    res.send({ ui: configuration.ui });
+    res.send({ui: configuration.ui});
     next();
   });
 
   /**
    * @openapi
-   * /:
+   * /version:
    *   get:
    *     description: Version
    *     responses:
@@ -73,12 +74,12 @@ export function setupRoutes({ server, configuration, repository }) {
    *         description: Returns package version.
    */
   server.get('/version', (req, res, next) => {
-    res.send({ version: version });
+    res.send({version});
   });
 
-  setupObjectRoutes({ server, configuration, repository });
-  setupUserRoutes({ server, configuration });
-  setupSearchRoutes({ server, configuration });
+  setupObjectRoutes({server, configuration, repository});
+  setupUserRoutes({server, configuration});
+  setupSearchRoutes({server, configuration});
 
   const admin = configuration['api']['admin'];
   if (admin) {

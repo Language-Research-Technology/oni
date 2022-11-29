@@ -1,22 +1,26 @@
-import { UnauthorizedError, ForbiddenError } from "restify-errors";
-import { verifyToken } from "../services/jwt";
-import { getLogger } from "../services/logger";
-import { loadConfiguration } from "../services/configuration"
-import { getUser } from '../controllers/user';
+import {UnauthorizedError, ForbiddenError} from "restify-errors";
+import {verifyToken} from "../services/jwt";
+import {getLogger} from "../services/logger";
+import {loadConfiguration} from "../services/configuration"
+import {getUser} from '../controllers/user';
 import * as utils from '../services/utils'
 
 const log = getLogger();
 
 export function routeUser(handler) {
-  return [ demandAuthenticatedUser, handler ];
+  return [demandAuthenticatedUser, handler];
 }
 
 export function routeAdmin(handler) {
-  return [ demandAuthenticatedUser, demandAdministrator, handler ];
+  return [demandAuthenticatedUser, demandAdministrator, handler];
 }
 
 export function routeBearer(handler) {
-  return [ demandBearerUser, handler ];
+  return [demandBearerUser, handler];
+}
+
+export function routeBasicBearer(handler) {
+  return [demandBearerBasic, handler];
 }
 
 /**
@@ -25,7 +29,7 @@ export function routeBearer(handler) {
  * @return {((function(*, *, *): Promise<*|undefined>)|*)[]}
  */
 export function routeBrowse(handler) {
-  return [ softAuthenticateUser, handler]
+  return [softAuthenticateUser, handler]
 }
 
 export async function demandBearerUser(req, res, next) {
@@ -38,11 +42,31 @@ export async function demandBearerUser(req, res, next) {
     const tokenConf = configuration.api.tokens;
     //Using the same initVector when encrypted to be able to compare it.
     const tokenEncrypted = utils.encrypt(tokenConf.secret, token, tokenConf.accessTokenPassword);
-    const user = await getUser({ where: { apiToken: tokenEncrypted } });
+    const user = await getUser({where: {apiToken: tokenEncrypted}});
     if (!user) {
       return next(new UnauthorizedError());
     }
     req.user = user;
+  } catch (error) {
+    return next(new UnauthorizedError());
+  }
+  next();
+}
+
+// TODO: Use the admin token from the database
+export async function demandBearerBasic(req, res, next) {
+  if (!req.headers.authorization) {
+    return next(new UnauthorizedError());
+  }
+  try {
+    const token = req.headers.authorization.split("Bearer ")[1];
+    const configuration = await loadConfiguration();
+    const adminToken = configuration.api?.tokens?.admin;
+    if (token === adminToken) {
+      next();
+    } else {
+      return next(new UnauthorizedError());
+    }
   } catch (error) {
     return next(new UnauthorizedError());
   }
@@ -78,7 +102,7 @@ export async function demandAuthenticatedUser(req, res, next) {
 export async function softAuthenticateUser(req, res, next) {
   if (!req.headers.authorization) {
     return next();
-  }else{
+  } else {
     try {
       const configuration = await loadConfiguration();
       let user = await verifyToken({
@@ -95,7 +119,7 @@ export async function softAuthenticateUser(req, res, next) {
   }
 }
 
-export async function demandAdministrator({ req, res, next }) {
+export async function demandAdministrator({req, res, next}) {
   if (!req.session.user.administrator) {
     return next(new ForbiddenError());
   }

@@ -11,17 +11,48 @@ const log = getLogger();
 export function setupSearchRoutes({server, configuration}) {
   /**
    * @openapi
-   * /:
+   * /search/{index}:
    *   get:
    *     description: Search Index
+   *     security:
+   *      - Bearer: []
    *     parameters:
-   *       - index
-   *       - id
-   *       - filters
-   *       - scroll
-   *       - withScroll
+   *       - in: path
+   *         name: index
+   *         description: elastic index name
+   *         required: true
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: id
+   *         description: elastic object id
+   *         required: false
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: _id
+   *         description: exact elastic object id
+   *         required: false
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: _crateId
+   *         description: ID of crate in ocfl repository
+   *         required: false
+   *       - in: query
+   *         name: filters
+   *         description: json elastic filter
+   *         required: false
+   *         schema:
+   *           type: json
+   *       - in: query
+   *         name: scroll
+   *         description: scroll id for next item results
+   *         required: false
+   *         schema:
+   *          type: string
    *     responses:
-   *       200:
+   *       '200':
    *         description: Search results.
    */
   //Usability: Do we want users to be authenticated or let users browse without? if so use routeUser

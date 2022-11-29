@@ -19,23 +19,39 @@ export function setupObjectRoutes({ server, configuration, repository }) {
 
   /**
    * @openapi
-   * /:
+   * /object:
    *   get:
-   *     description: Gets objects in a variety of combinations example:
-   *     memberOf=id&conformsTo=Collection/Object/ -> Get members of an ID that conforms to a collection
-   *     memberOf=id -> get all the children of id
-   *     memberOf=null -> (ie top-level) Get ALL objects which are not part of ANY collection
-   *     memberOf=null&conformsTo=collectionProfileURI -> All TOP level collections
-   *     id=<<ID>>&memberOfTopLevel -> get the records top level
-   *     id=<<ID>> -> get a single record
-   *     no params -> get all root ConformsTos paginated
+   *     description: |
+   *                  ### Gets objects in a variety of combinations
+   *                  ### Examples:
+   *                  - memberOf=id&conformsTo=Collection/Object/ -> Get members of an ID that conforms to a collection
+   *                  - memberOf=id -> get all the children of id
+   *                  - memberOf=null -> (ie top-level) Get ALL objects which are not part of ANY collection
+   *                  - memberOf=null&conformsTo=collectionProfileURI -> All TOP level collections
+   *                  - id=<<ID>>&memberOfTopLevel -> get the records top level
+   *                  - id=<<ID>> -> get a single record
+   *                  - no params -> get all root ConformsTos paginated
+   *     security:
+   *       - Bearer: []
    *     parameters:
-   *       - memberOf
-   *       - conformsTo
-   *       - id
-   *       - memberOfTopLevel
+   *       - in: path
+   *         name: memberOf
+   *         description: Member Of
+   *       - in: path
+   *         name: conformsTo
+   *         description: Conforms To
+   *       - in: path
+   *         name: crateId
+   *         description: .
+   *       - in: path
+   *         name: id
+   *         description: .
+   *       - in: path
+   *         name: offset
+   *       - in: path
+   *         name: limit
    *     responses:
-   *       200:
+   *       '200':
    *         description: .
    */
   server.get("/object", async (req, res, next) => {
@@ -63,16 +79,39 @@ export function setupObjectRoutes({ server, configuration, repository }) {
 
   /**
    * @openapi
-   * /:
+   * /object/meta:
    *   get:
    *     description: Object Meta
+   *     security:
+   *       - Bearer: []
    *     parameters:
-   *       - memberOf
-   *       - conformsTo
-   *       - id
-   *       - memberOfTopLevel
+   *       - in: query
+   *         name: id
+   *         description: object id
+   *         required: true
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: resolve-parts
+   *       - in: query
+   *         name: types
+   *       - in: query
+   *         name: members
+   *       - in: query
+   *         name: memberOf
+   *       - in: query
+   *         name: noUrid
+   *         schema:
+   *           type: boolean
+   *       - in: query
+   *         name: version
+   *       - in: query
+   *         name: raw
+   *       - in: query
+   *         name: zip
+   *         description: NOT IMPLEMENTED
    *     responses:
-   *       200:
+   *       '200':
    *         description: .
    */
   server.get('/object/meta', async (req, res, next) => {
@@ -97,13 +136,17 @@ export function setupObjectRoutes({ server, configuration, repository }) {
 
   /**
    * @openapi
-   * /:
+   * /object/meta/versions:
    *   get:
-   *     description: Object Meta Versions
+   *     description: Object Meta Versions, NOT IMPLEMENTED
+   *     security:
+   *       - Bearer: []
    *     parameters:
-   *       - id
+   *       - in: query
+   *         name: id
+   *         description: ocfl version id
    *     responses:
-   *       200:
+   *       '200':
    *         description: .
    */
   server.get('/object/meta/versions', async (req, res, next) => {
@@ -120,15 +163,26 @@ export function setupObjectRoutes({ server, configuration, repository }) {
 
   /**
    * @openapi
-   * /:
+   * /stream:
    *   get:
-   *     description: Stream
+   *     description: Stream File
+   *     security:
+   *      - Bearer: []
    *     parameters:
-   *       - id
-   *       - path
+   *       - in: query
+   *         name: id
+   *         description: object id
+   *         required: true
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: path
+   *         description: path to file
+   *       - in: query
+   *         name: noUrid
    *     responses:
-   *       200:
-   *         description: .
+   *       '200':
+   *         description: Streams file requested
    */
   server.get('/stream',
     routeBearer(
@@ -154,15 +208,22 @@ export function setupObjectRoutes({ server, configuration, repository }) {
 
   /**
    * @openapi
-   * /:
+   * /object/open:
    *   get:
    *     description: Open Object
+   *     security:
+   *      - Bearer: []
    *     parameters:
-   *       - id
-   *       - path
+   *       - in: query
+   *         name: id
+   *       - in: query
+   *         name: path
    *     responses:
-   *       200:
+   *       '200':
    *         description: .
+   *       '400':
+   *         description: Returns error when no id is sent
+   *
    */
   server.get('/object/open',
     routeBrowse(async function (req, res, next) {

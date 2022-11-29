@@ -13,12 +13,25 @@ export function setupUserRoutes({server, configuration}) {
 
   /**
    * @openapi
-   * /:
+   * /user:
    *   get:
-   *     description: User
+   *     description: User Info
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     responses:
-   *       200:
+   *       '200':
    *         description: Returns user information including Group Membership.
+   *       '401':
+   *         description: Not authenticated
+   *       '403':
+   *         description: Access token does not have the required scope
+   *
    */
   server.get("/user", routeUser(async (req, res, next) => {
       try {
@@ -42,7 +55,7 @@ export function setupUserRoutes({server, configuration}) {
 
   /**
    * @openapi
-   * /:
+   * /user/token:
    *   get:
    *     description: Set user token
    *     responses:

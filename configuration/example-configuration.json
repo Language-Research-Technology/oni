@@ -76,6 +76,11 @@
             },
             "secret": "some_secret_-_32_characters_or_longer"
         },
+        "tokens": {
+            "secret": "token_secret",
+            "accessTokenPassword": "64a826ad1c9c9afc6f8731d70471b94e",
+            "admin": "1234-1234-1234-1234"
+        },
         "services": {},
         "authentication": {
             "cilogon": {

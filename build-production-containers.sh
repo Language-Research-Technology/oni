@@ -23,17 +23,6 @@ if [ "$resp" == "y" ] ; then
       -f Dockerfile.api-build .
     echo
 
-#    echo '>> Building the UI code'
-#    docker buildx build --platform linux/amd64,linux/arm64 \
-#      --rm \
-#      -t arkisto/oni-ui:latest \
-#      -t arkisto/oni-ui:${VERSION} \
-#      -f Dockerfile.ui-build .
-#    docker buildx build --load \
-#      -t arkisto/oni-ui:latest \
-#      -t arkisto/oni-ui:${VERSION} \
-#      -f Dockerfile.ui-build .
-#     echo
 fi
 
 read -p '>> Tag the containers? [y|N] ' resp
@@ -60,12 +49,6 @@ if [ "$resp" == "y" ] ; then
       -t arkisto/oni-api:latest \
       -t arkisto/oni-api:${VERSION} \
       -f Dockerfile.api-build .
-#    docker buildx build --platform=linux/amd64,linux/arm64 \
-#      --push \
-#      --rm \
-#      -t arkisto/oni-ui:latest \
-#      -t arkisto/oni-ui:${VERSION} \
-#      -f Dockerfile.ui-build .
 
 fi
 
@@ -73,6 +56,4 @@ read -p '>> Remove local container copies? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     docker rmi arkisto/oni-api:latest
     docker rmi arkisto/oni-api:${VERSION}
-#    docker rmi arkisto/oni-ui:latest
-#    docker rmi arkisto/oni-ui:${VERSION}
 fi
