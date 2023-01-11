@@ -1,7 +1,7 @@
 import {search, scroll, clearScroll} from '../../indexer/elastic';
 import {getLogger, loadConfiguration, routeUser} from '../../services';
 import {first, pullAt} from 'lodash';
-import {boolQuery, aggsQueries } from "../../controllers/elastic";
+import {boolQuery, aggsQueries} from "../../controllers/elastic";
 import {getUser} from "../../controllers/user";
 import {routeBrowse} from "../../middleware/auth";
 import {filterResults} from "../../services/elastic";
@@ -91,12 +91,22 @@ export function setupSearchRoutes({server, configuration}) {
           log.debug(`Total: ${results?.hits?.total?.value}`);
         } else if (req.query['_id']) {
           exactMatch = true;
-          const id = req.query['_id'].trim();
-          searchBody.query = {
-            terms: {
-              _id: [decodeURIComponent(id)]
+          if (req.query['_id']) {
+            const id = req.query['_id'].trim();
+            searchBody.query = {
+              match: {
+                _id: decodeURIComponent(id)
+              }
             }
-          };
+          }
+          if (req.query['_id'] && req.query['term']) {
+            const id = req.query['_id'].trim();
+            searchBody.query = {
+              term: {
+                _id: [decodeURIComponent(id)]
+              }
+            }
+          }
           results = await search({configuration, index, searchBody});
           log.debug(`Total: ${results?.hits?.total?.value}`);
         } else {
@@ -130,7 +140,8 @@ export function setupSearchRoutes({server, configuration}) {
       }
     })
   );
-  server.get("/search/scroll", routeBrowse(async (req, res, next) => {}));
+  server.get("/search/scroll", routeBrowse(async (req, res, next) => {
+  }));
   /**
    * @openapi
    * /:
