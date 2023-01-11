@@ -1,0 +1,11 @@
+FROM --platform=$TARGETPLATFORM node:18 AS api-docs-builder
+LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oniapidocs"
+WORKDIR /srv
+COPY api/ /srv/
+RUN npm install
+
+FROM --platform=$TARGETPLATFORM node:18-slim
+WORKDIR /srv
+RUN apt-get update
+COPY --from=api-docs-builder /srv/ /srv/
+CMD [ "node", "./swagger.js" ]

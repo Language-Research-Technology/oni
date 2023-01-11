@@ -2,6 +2,12 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 
+const port = 3000 || process.env.PORT;
+const host = 'localhost' || process.env.HOST;
+const base = '/docs' || process.env.BASE;
+const serverUrl = 'http://localhost:8080' || process.env.URL;
+const serverDescription = 'Development server' || process.env.DESCRIPTION;
+
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
@@ -20,8 +26,8 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:8080',
-      description: 'Development server',
+      url: serverUrl,
+      description: serverDescription
     },
   ],
   components: {
@@ -43,9 +49,6 @@ const options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 const app = express();
-const port = 3000 || process.env.PORT;
-const host = 'localhost' || process.env.HOST;
-const base = '/docs' || process.env.BASE;
 
 app.use(express.json());
 app.use(base, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
