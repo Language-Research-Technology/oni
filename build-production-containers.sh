@@ -29,8 +29,6 @@ read -p '>> Tag the containers? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     cd api
     npm version --no-git-tag-version ${VERSION}
-    cd ../ui
-    npm version --no-git-tag-version ${VERSION}
     cd ..
     git tag v${VERSION}
     git commit -a -m "tag and bump version"
