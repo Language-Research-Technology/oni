@@ -49,8 +49,8 @@ fi
 read -p '>> Push the containers to docker hub? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     docker login
-    echo "Pushing built containers to docker hub"
 
+    echo "Pushing oni-api containers to docker hub"
     docker buildx build --platform=linux/amd64,linux/arm64 \
       --push \
       --rm \
@@ -58,6 +58,7 @@ if [ "$resp" == "y" ] ; then
       -t arkisto/oni-api:${VERSION} \
       -f Dockerfile.api-build .
 
+    echo "Pushing oni-api-docs containers to docker hub"
     docker buildx build --platform=linux/amd64,linux/arm64 \
       --push \
       --rm \
