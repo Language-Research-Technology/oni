@@ -14,15 +14,6 @@ export function setupRoutes({server, configuration, repository}) {
   setupAuthRoutes({server, configuration});
 
   if (process.env.NODE_ENV === 'development') {
-    /**
-     * @openapi
-     * /test-middleware:
-     *   get:
-     *     description: Test Middleware
-     *     responses:
-     *       200:
-     *         description: None.
-     */
     server.get('/test-middleware', routeUser((req, res, next) => {
       res.send({});
       next();
@@ -33,13 +24,34 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /:
    *   get:
-   *     description: Root
+   *     description: |
+   *                  ### Root
+   *                  List of Api endpoints available
    *     responses:
    *       200:
-   *         description: None.
+   *         description: Returns a list of current Api Requests
    */
   server.get('/', (req, res, next) => {
-    res.json({hello: 'from Oni'});
+    res.json({
+      configuration: '/configuration',
+      version: '/version',
+      admin_elastic_index: '/admin/elastic/index',
+      admin_database_index: '/admin/database/index',
+      object: '/object{memberOf}{id}',
+      object_meta: '/object/meta{id}',
+      object_meta_versions: '/object/meta/versions',
+      stream: '/stream',
+      object_open: '/object/open',
+      user: '/user',
+      user_token: '/user/token',
+      search_index: '/search/:index',
+      search_scroll: '/search/scroll',
+      auth_memberships: '/auth/memberships',
+      oauth_provider_login: '/oauth/:provider/login',
+      oauth_provider_code:'/oauth/:provider/code',
+      authenticated: '/authenticated',
+      logout: '/logout'
+    });
     res.status(200);
     next();
   });
@@ -48,7 +60,9 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /configuration:
    *   get:
-   *     description: Configuration
+   *     description: |
+   *                  ### Configuration
+   *                  Configuration
    *     responses:
    *       200:
    *         description: Returns ui configuration including licenses and aggregations.
@@ -68,10 +82,12 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /version:
    *   get:
-   *     description: Version
+   *     description: |
+   *                  ### Version
+   *                  Oni Version
    *     responses:
    *       200:
-   *         description: Returns package version.
+   *         description: Returns Oni's current version.
    */
   server.get('/version', (req, res, next) => {
     res.send({version});

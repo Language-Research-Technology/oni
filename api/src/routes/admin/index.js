@@ -8,21 +8,23 @@ const log = getLogger();
 export function setupAdminRoutes({server, configuration, repository}) {
 
   server.get("/admin/info", async (req, res, next) => {
-
+    res.status(200);
+    res.json({});
   });
 
   /**
    * @openapi
    * /admin/elastic/index:
    *   get:
-   *     description: Runs elastic indexer
+   *     description: |
+   *                  ### Admin Elastic Index
+   *                  Runs elastic indexer used only with the admin api key
    *     security:
    *       - Bearer: []
    *     responses:
    *       '200':
    *         description: |
-   *           - Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".
-   *           - Returns a message that it has started indexing.
+   *                      - Returns a message that it has started indexing.
    */
   server.get("/admin/elastic/index", routeBasicBearer(async (req, res, next) => {
       try {
@@ -45,14 +47,15 @@ export function setupAdminRoutes({server, configuration, repository}) {
    * @openapi
    * /admin/database/index:
    *   get:
-   *     description: Runs structural indexer
+   *     description: |
+   *                  ### Admin Database Index
+   *                  Runs structural indexer used only with the admin api key
    *     security:
    *       - Bearer: []
    *     responses:
    *       200:
    *         description: |
-   *           - Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".
-   *           - Returns a message that it has started indexing.
+   *                      - Returns a message that it has started indexing.
    */
   server.get("/admin/database/index", routeBasicBearer(async (req, res, next) => {
       try {

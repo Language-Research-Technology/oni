@@ -13,25 +13,27 @@ export function setupSearchRoutes({server, configuration}) {
    * @openapi
    * /search/{index}:
    *   get:
-   *     description: Search Index
+   *     description: |
+   *                  ### Search Index
+   *                  Searches Index provided
    *     security:
    *      - Bearer: []
    *     parameters:
    *       - in: path
    *         name: index
-   *         description: elastic index name
+   *         description: Elastic index name
    *         required: true
    *         schema:
    *           type: string
    *       - in: query
    *         name: id
-   *         description: elastic object id
+   *         description: Elastic object id
    *         required: false
    *         schema:
    *           type: string
    *       - in: query
    *         name: _id
-   *         description: exact elastic object id
+   *         description: Exact elastic object id
    *         required: false
    *         schema:
    *           type: string
@@ -51,9 +53,28 @@ export function setupSearchRoutes({server, configuration}) {
    *         required: false
    *         schema:
    *          type: string
+   *       - in: query
+   *         name: withScroll
+   *         description: request a scroll id for pagination
    *     responses:
    *       '200':
-   *         description: Search results.
+   *         description: |
+   *                      Search results either unique or a list of results
+   *                      - Example:
+   *                        - Search in index items with filters: @type=Dataset,RepositoryCollection, _isTopLevel=true
+   *                        - /api/search/items?filters={"@type":["Dataset","RepositoryCollection"],"_isTopLevel.@value":["true"]}
+   *                      - Example:
+   *                        - Search in index items and request a Scroll Id with filters memberOf cooee that conformsTo Objects
+   *                        - /api/search/items?withScroll=true&filters={"_memberOf.@id":["arcp://name,cooee-corpus/corpus/root"],"conformsTo.@id":["https://purl.archive.org/language-data-commons/profile#Object"]}
+   *                      - Example:
+   *                        - Search in index vocabs the exact match of the citation vocab
+   *                        - /api/search/vocabs?_id=https://purl.archive.org/language-data-commons/terms#citation
+   *                      - Example:
+   *                        - Search in index items the files that are of type csv
+   *                        - /api/search/items?withScroll=true&filters={"@type":["File"],"encodingFormat.@value":["text/csv"]}
+   *                      - Example:
+   *                        - Search for the object with id data/1-215-plain.txt in the cooee corpus
+   *                        - /api/search/items?id=data/1-215-plain.txt&_crateId=arcp://name,cooee-corpus/corpus/root
    */
   //Usability: Do we want users to be authenticated or let users browse without? if so use routeUser
   server.get("/search/:index", routeBrowse(async (req, res, next) => {
@@ -146,7 +167,9 @@ export function setupSearchRoutes({server, configuration}) {
    * @openapi
    * /:
    *   del:
-   *     description: Delete scroll ID
+   *     description: |
+   *                  ### Del search scroll
+   *                  Deletes scroll Id
    *     parameters:
    *       - scroll
    *     responses:

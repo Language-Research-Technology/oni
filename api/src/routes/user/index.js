@@ -15,7 +15,9 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /user:
    *   get:
-   *     description: User Info
+   *     description: |
+   *                  ### User
+   *                  Get User Information of the authenticated user
    *     security:
    *       - Bearer: []
    *       - OAuth2:
@@ -57,7 +59,9 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /user/token:
    *   get:
-   *     description: Set user token
+   *     description: |
+   *                  ### Get User Token
+   *                  Get user token of the authenticated user
    *     responses:
    *       200:
    *         description: Returns user information including Group Membership.
@@ -91,7 +95,9 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /:
    *   del:
-   *     description: Remove user token
+   *     description: |
+   *                  ### Del User Token
+   *                  Remove token from the authenticated user
    *     responses:
    *       200:
    *         description: Returns user information.

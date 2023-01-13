@@ -14,7 +14,18 @@ import {some} from 'lodash';
 const log = getLogger();
 
 export function setupAuthRoutes({server, configuration}) {
-
+  /**
+   * @openapi
+   * /authenticated:
+   *   get:
+   *     description: |
+   *                  ### Authenticated
+   *                  Test if user is authenticated
+   *     responses:
+   *       200:
+   *         description: |
+   *                      Returns true if authenticated
+   */
   server.get('/authenticated',
     routeUser(async (req, res, next) => {
       log.debug('is authenticated');
@@ -23,6 +34,14 @@ export function setupAuthRoutes({server, configuration}) {
     })
   );
 
+  /**
+   * @openapi
+   * /logout:
+   *   get:
+   *     description: |
+   *                  ### Logout
+   *                  Logs out current user session
+   */
   server.get('/logout', async (req, res, next) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split("Bearer ")[1];
@@ -43,14 +62,15 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /auth/memberships:
    *   get:
-   *    description: Retrieve user permissions from provider
+   *    description: |
+   *                 ### Auth Memberships
+   *                 Retrieve user permissions from provider configured
    *    security:
    *      - Bearer: []
    *    responses:
    *      '200':
-   *        description: returns memberships array
-   *      '401':
-   *        description: Unauthorized
+   *        description: |
+   *                     Returns memberships array
    *   */
   server.get('/auth/memberships',
     routeUser(async function (req, res, next) {

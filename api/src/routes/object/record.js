@@ -82,6 +82,7 @@ export async function getRecordMemberOfTop({req, res, next}) {
 }
 
 export async function getRecordMembers({req, res, next}) {
+  //TODO: Add pagination
   let memberOfs = await getRootMemberOfs({crateId: req.query.memberOf});
   if (memberOfs) {
     res.json(memberOfs).status(200);
