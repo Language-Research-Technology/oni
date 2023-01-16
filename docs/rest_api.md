@@ -65,7 +65,7 @@ Then run that URL returned in a browser
 Then save the `code` returned, example:
 
 ```sh
-https://data-uat.ldaca.edu.au/auth/cilogon/callback?code=NB2HI4DTHIXS65DFON2C4Y3JNRXWO33OFZXXEZZPN5QXK5DIGIXTCOBRMI2TIOJXGBSGEOLBMFSTCZRVGA2TAMRXGJRDEYJXGAYTEP3UPFYGKPLBOV2GQ6SHOJQW45BGORZT2MJWG4ZTQMRUGQYDCMJUHETHMZLSONUW63R5OYZC4MBGNRUWMZLUNFWWKPJZGAYDAMBQ&state=cilogon
+https://data-uat.ldaca.edu.au/auth/cilogon/callback?code=ABCDE&state=cilogon
 ```
 
 Your browser will receive a session token: Example:
@@ -78,7 +78,27 @@ Your browser will receive a session token: Example:
 
 Note: You can then use this token to authorize in subsequent calls
 
-7. /
+7. /oauth/{provider}/code
+
+Authorizes user with code returned
+
+Provide a request body with
+
+```json
+{
+  "code": "ABCDE",
+  "state": "cilogon"
+}
+```
+The response will be:
+
+```json
+{
+  "token": "12345.78910.111223"
+}
+```
+
+8. /
 
 List of Api endpoints available
 
