@@ -29,6 +29,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *     parameters:
    *       - in: query
    *         name: memberOf
+   *         type: string
+   *         nullable: true
    *         description: Indicates when an object is a member Of another object.
    *       - in: query
    *         name: conformsTo
@@ -46,12 +48,24 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *       '200':
    *         description: |
    *                      Returns
-   *                      - memberOf=id&conformsTo=Collection/Object --> Get members of an ID that conforms to a collection
    *                      - memberOf=id --> Get all the children of id (Not paginated)
+   *                        - Example:
+   *                        - /object?memberOf=arcp://name,sydney-speaks/corpus/root
+   *                      - memberOf=id&conformsTo=Collection/Object --> Get members of an ID that conforms to a collection
+   *                        - Example:
+   *                        - /object?memberOf=arcp://name,sydney-speaks/corpus/root&conformsTo=https://purl.archive.org/language-data-commons/profile#Object
    *                      - memberOf=null --> (ie top-level) Get ALL objects which are not part of ANY collection
+   *                        - Example:
+   *                        - /object?memberOf=null
    *                      - memberOf=null&conformsTo=collectionProfileURI --> All TOP level collections
+   *                        - Example:
+   *                        - /object?memberOf=null&conformsTo=https://purl.archive.org/language-data-commons/profile#Collection
    *                      - id=id --> Get a single record
+   *                        - Example:
+   *                        - /object?id=arcp://name,sydney-speaks/corpus/root
    *                      - no parameters --> Get all root ConformsTos paginated
+   *                        - Example:
+   *                        - /object
    */
   server.get("/object", async (req, res, next) => {
     if (!isUndefined(req.query.memberOf) && !isUndefined(req.query.conformsTo)) {
@@ -196,15 +210,9 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *     parameters:
    *       - in: query
    *         name: id
-   *         description: object id
    *         required: true
-   *         schema:
-   *           type: string
    *       - in: query
    *         name: path
-   *         description: path to file
-   *       - in: query
-   *         name: noUrid
    *     responses:
    *       '200':
    *         description: |

@@ -29,6 +29,8 @@ export function setupOauthRoutes({server, configuration}) {
    *       '200':
    *         description: |
    *                      Returns a json with URL, code_verifier and provider
+   *                      Use URL to authenticate with browser. Browser will return an URL
+   *                      Example: http://localhost:10000/auth/cilogon/callback?code=NB2HI4DTHIXS65DFON2C4Y3JNRXWO33OFZXXEZZPN5QXK5DIGIXTCN3CMI4DMNTDMMZTOMLFMZRWKYJZGI2DANDEGEZTKMBQME3TEMJ7OR4XAZJ5MF2XI2D2I5ZGC3TUEZ2HGPJRGY3TGOBSGU2TANRYGAYCM5TFOJZWS33OHV3DELRQEZWGSZTFORUW2ZJ5HEYDAMBQGA&state=cilogon
    */
   server.get("/oauth/:provider/login", async function (req, res, next) {
     const provider = req.params.provider;
@@ -111,7 +113,7 @@ export function setupOauthRoutes({server, configuration}) {
    *     responses:
    *       '200':
    *         description: |
-   *                      Return session token to authorize user with corresponding code.
+   *                      Return session token to authorize user with corresponding code. The session ID is returned in a cookie named oni-session-token. You need to include this cookie in subsequent requests.
    */
   server.post("/oauth/:provider/code", async function (req, res, next) {
     if (!req.body.code) {

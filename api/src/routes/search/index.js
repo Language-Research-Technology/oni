@@ -15,7 +15,7 @@ export function setupSearchRoutes({server, configuration}) {
    *   get:
    *     description: |
    *                  ### Search Index
-   *                  Searches Index provided
+   *                  Searches the `index` provided in path
    *     security:
    *      - Bearer: []
    *     parameters:
