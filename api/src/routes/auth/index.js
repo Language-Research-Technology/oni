@@ -18,6 +18,14 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /authenticated:
    *   get:
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     description: |
    *                  ### Authenticated
    *                  Test if user is authenticated
@@ -41,6 +49,14 @@ export function setupAuthRoutes({server, configuration}) {
    *     description: |
    *                  ### Logout
    *                  Logs out current user session
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    */
   server.get('/logout', async (req, res, next) => {
     if (req.headers.authorization) {
@@ -62,16 +78,23 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /auth/memberships:
    *   get:
-   *    description: |
-   *                 ### Auth Memberships
-   *                 Retrieve user permissions from provider configured
-   *    security:
-   *      - Bearer: []
-   *    responses:
-   *      '200':
-   *        description: |
-   *                     Returns memberships array
-   *   */
+   *     description: |
+   *                  ### Auth Memberships
+   *                  Retrieve user permissions from provider configured
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
+   *     responses:
+   *       '200':
+   *         description: |
+   *                      Returns memberships array
+   *
+   */
   server.get('/auth/memberships',
     routeUser(async function (req, res, next) {
       log.debug('checking memberships');

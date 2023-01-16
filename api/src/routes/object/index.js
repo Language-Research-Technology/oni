@@ -26,6 +26,12 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                  Structural search and (limited) discovery end-point. Returns summaries only
    *     security:
    *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: query
    *         name: memberOf
@@ -99,6 +105,12 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                  Get an RO-Crate Metadata Document with either IDs translated to api compatible or not
    *     security:
    *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: query
    *         name: id
@@ -172,6 +184,12 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                  ### Object Metadata Version
    *     security:
    *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: query
    *         name: id
@@ -206,7 +224,13 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                  if path is not included return the ro-crate with parts resolved.
    *                  Same as /object/open but /stream requires the Bearer Token and object/open the browser session
    *     security:
-   *      - Bearer: []
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: query
    *         name: id
@@ -251,7 +275,13 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                  ### Object Open
    *                  Returns an object from path if path is not sent resolve its parts of the ro-crate. Same as /stream but /object/open uses the browser session and /stream requires the Bearer Token.
    *     security:
-   *      - Bearer: []
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: query
    *         name: id

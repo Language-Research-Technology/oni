@@ -17,7 +17,13 @@ export function setupSearchRoutes({server, configuration}) {
    *                  ### Search Index
    *                  Searches the `index` provided in path
    *     security:
-   *      - Bearer: []
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - in: path
    *         name: index
@@ -165,11 +171,19 @@ export function setupSearchRoutes({server, configuration}) {
   }));
   /**
    * @openapi
-   * /:
+   * /search/scroll:
    *   del:
    *     description: |
    *                  ### Del search scroll
    *                  Deletes scroll Id
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     parameters:
    *       - scroll
    *     responses:
