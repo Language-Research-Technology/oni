@@ -62,9 +62,17 @@ export function setupUserRoutes({server, configuration}) {
    *     description: |
    *                  ### Get User Token
    *                  Get user token of the authenticated user
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
    *     responses:
    *       200:
-   *         description: Returns user information including Group Membership.
+   *         description: Generates and returns a new apiToken for logged in user
    */
   server.get("/user/token", routeUser(async (req, res, next) => {
       try {
