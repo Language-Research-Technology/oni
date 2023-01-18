@@ -29,16 +29,20 @@ export async function filterResults({userId, results, configuration}) {
         log.silly(`Not authorized for ${id} with license: ${license['@id']}`);
         //What to do? Do we mutate the array adding a not authorized
         const source = results.hits.hits[index]?._source;
-        results.hits.hits[index]._source = {
-          '@id': id,
-          '@type': source['@type'] || null,
-          '_memberOf': source['_memberOf'] || null,
-          '_parent': source['_parent'] || null,
-          '_crateId': source['_crateId'] || null,
-          name: source?.name, //TODO: add pseudonym to names
-          license: source?.license,
-          error: 'not_authorized',
-          _access: pass
+        if (source?._metadataIsPublic) {
+          results.hits.hits[index]._source['_access'] = pass;
+        } else {
+          results.hits.hits[index]._source = {
+            '@id': id,
+            '@type': source['@type'] || null,
+            '_memberOf': source['_memberOf'] || null,
+            '_parent': source['_parent'] || null,
+            '_crateId': source['_crateId'] || null,
+            name: source?.name, //TODO: add pseudonym to names
+            license: source?.license,
+            error: 'not_authorized',
+            _access: pass
+          }
         }
         //What to do? Ask Peter; Do we remove the item of the search result with this and pullAt
         //itemsToFilter.push(index);
