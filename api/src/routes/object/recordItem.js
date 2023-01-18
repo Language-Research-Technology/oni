@@ -51,7 +51,7 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
       }
     } else {
       message = 'Not authorized';
-      res.status(404);
+      res.status(403);
       res.json({ id: req.query.id, path: req.query.path, message: message });
       next();
     }
