@@ -21,9 +21,10 @@ export async function getGroupMembership({configuration, user}) {
     if (response.status === 200) {
       const userInfo = await response.json();
       const groups = [];
-      console.log('------')
+      log.debug('------');
+      log.debug('REMS Group Membership');
       log.debug(JSON.stringify(userInfo));
-      console.log('------')
+      log.debug('------');
       forEach(userInfo, (g) => {
         groups.push({group: g["resource"]});
       });

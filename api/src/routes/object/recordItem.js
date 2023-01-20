@@ -14,11 +14,16 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
       const user =req?.session?.user ||  req?.user;
       const userId = user?.id;
       const access = await checkIfAuthorized({userId, license: record.data['license'], configuration});
+      log.debug('getRecordItem:checkIfAuthorized');
+      log.debug(JSON.stringify(access));
       pass = access.hasAccess;
     } else {
       pass = true;
     }
     //Check thruthy for pass and if foundAuthorization from isAuthorized
+    log.debug('----');
+    log.debug('getRecordItem');
+    log.debug(`Id: ${req.query.id} with license: ${record.data['license']} pass: ${JSON.stringify(pass)}`);
     if (pass) {
       const fileObj = await getFile({
         itemId: req.query.id,
@@ -53,6 +58,8 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
       message = 'Not authorized';
       res.status(403);
       res.json({ id: req.query.id, path: req.query.path, message: message });
+      log.debug(`Id: ${req.query.id} with license: ${record.data['license']} pass: ${JSON.stringify(pass)} message: ${message}`);
+
       next();
     }
   } else {

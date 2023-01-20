@@ -113,7 +113,7 @@ export function setupOauthRoutes({server, configuration}) {
    *     responses:
    *       '200':
    *         description: |
-   *                      Return session token to authorize user with corresponding code. The session ID is returned in a cookie named oni-session-token. You need to include this cookie in subsequent requests.
+   *                      Return JSON Web Token to authorize user with corresponding code. The JWT is named oni-user-token. You need to include this JWT in subsequent requests. Configure its lifetime in session:lifetime:hours in configuration.json
    */
   server.post("/oauth/:provider/code", async function (req, res, next) {
     if (!req.body.code) {
