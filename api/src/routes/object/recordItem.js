@@ -19,6 +19,9 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
       pass = true;
     }
     //Check thruthy for pass and if foundAuthorization from isAuthorized
+    log.debug('----');
+    log.debug('getRecordItem');
+    log.debug(`Id: ${req.query.id} with license: ${record.data['license']} pass: ${JSON.stringify(pass)}`);
     if (pass) {
       const fileObj = await getFile({
         itemId: req.query.id,

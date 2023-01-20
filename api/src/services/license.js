@@ -1,23 +1,24 @@
-import { getLogger } from '../services';
+import {getLogger} from '../services';
 import {getUserMemberships} from "../controllers/userMembership";
+
 const log = getLogger();
 
-export function isAuthorized({ memberships, license, licenseConfiguration }) {
+export function isAuthorized({memberships, license, licenseConfiguration}) {
   const needsLicense = licenseConfiguration.find(l => l['license'] === license);
   log.silly(`isAuthorized: needsLicense ${JSON.stringify(needsLicense)}`);
   if (needsLicense) {
-    const foundAuthorization = memberships.find(membership => {
+    const access = {
+      hasAccess: false,
+      group: needsLicense['group']
+    }
+    memberships.map(membership => {
       const group = membership['group'];
       log.silly(group);
-      return group === needsLicense['group'];
+      if (group === needsLicense['group']) {
+        access.hasAccess = true;
+      }
     });
-    //If just for debugging!
-    if (foundAuthorization) {
-      log.silly(`Found Authorization: ${ foundAuthorization['group'] }`);
-      return {hasAccess: true, group: needsLicense['group']};
-    } else {
-      return {hasAccess: false, group: needsLicense['group']};
-    }
+    return access;
   } else {
     log.silly(`Not required or not configured for ${license}`);
     return {hasAccess: true};
@@ -34,7 +35,7 @@ export async function checkIfAuthorized({userId, license, configuration}) {
     //The licenses are not checked if not in your configuration file.
     let memberships = [];
     if (userId) {
-      memberships = await getUserMemberships({where: { userId }});
+      memberships = await getUserMemberships({where: {userId}});
     }
     access = isAuthorized({
       memberships,
