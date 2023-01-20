@@ -6,6 +6,8 @@ import {routeUser} from '../../middleware/auth';
 import {getGithubMemberships} from "../../controllers/github";
 import {getCiLogonMemberships} from "../../controllers/cilogon";
 import * as utils from '../../services/utils';
+import {UnauthorizedError} from "restify-errors";
+import {getUserMemberships} from "../../controllers/userMembership";
 
 const log = getLogger();
 
@@ -130,6 +132,45 @@ export function setupUserRoutes({server, configuration}) {
         res.status(500);
         res.send({error: e['message']})
         next();
+      }
+    })
+  );
+
+  /**
+   * @openapi
+   * /user/memberships:
+   *   get:
+   *     description: |
+   *                  ### Retrieves User Memberships
+   *                  gets the memberships of authenticated user. This is different to /auth/memberships as it only checks for current memberships. Use /auth/memberships to update /user/memberships
+   *     security:
+   *       - Bearer: []
+   *       - OAuth2:
+   *         - openid
+   *         - profile
+   *         - email
+   *         - org.cilogon.userinfo
+   *         - offline_access
+   *     responses:
+   *       200:
+   *         description: Generates and returns a new apiToken for logged in user
+   */
+  server.get('/user/memberships',
+    routeUser(async function (req, res, next) {
+      log.debug('checking memberships');
+      log.debug('User: ' + req.session?.user?.id);
+      if (!req.session?.user?.id) {
+        res.json({accessDenied: true});
+        next(new UnauthorizedError());
+      } else {
+        const user = await getUser({where: {id: req.session?.user?.id}});
+        const memberships = await getUserMemberships({where: {userId: user.id}});
+        if (memberships.error) {
+          res.json({memberships: [], error: memberships.error});
+        } else {
+          res.json({memberships});
+          next();
+        }
       }
     })
   );

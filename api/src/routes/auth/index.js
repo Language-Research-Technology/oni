@@ -10,6 +10,7 @@ import {setupLoginRoutes} from './openid-auth';
 import {setupOauthRoutes} from './oauth2-auth';
 import {routeUser, routeAdmin, routeBearer} from '../../middleware/auth';
 import {some} from 'lodash';
+import {getUserMemberships} from "../../controllers/userMembership";
 
 const log = getLogger();
 
@@ -116,9 +117,9 @@ export function setupAuthRoutes({server, configuration}) {
           next();
         } else {
           log.debug(`user.providerUsername: ${user?.providerUsername}`);
-          if(authorization.provider === "rems") {
+          if (authorization.provider === "rems") {
             memberships = await getREMSMemberships({configuration, user, group});
-          } else if(authorization.provider === "github"){
+          } else if (authorization.provider === "github") {
             memberships = await getGithubMemberships({configuration, user, group});
           } else if (authorization.provider === "cilogon") {
             memberships = await getCiLogonMemberships({configuration, user, group});
@@ -148,4 +149,5 @@ export function setupAuthRoutes({server, configuration}) {
       }
     })
   )
+
 }
