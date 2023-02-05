@@ -81,7 +81,7 @@ export function setupAuthRoutes({server, configuration}) {
    *   get:
    *     description: |
    *                  ### Auth Memberships
-   *                  Retrieve user permissions from provider configured
+   *                  Retrieve user permissions from provider configured and store them in user database. Use /user/memberships for only getting stored memberships
    *     security:
    *       - Bearer: []
    *       - OAuth2:

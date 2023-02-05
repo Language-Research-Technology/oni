@@ -31,6 +31,9 @@ export async function filterResults({userId, results, configuration}) {
         const source = results.hits.hits[index]?._source;
         if (source?._metadataIsPublic) {
           results.hits.hits[index]._source['_access'] = pass;
+          //What to do with indexed text in elastic? Delete field or clear it?
+          //results.hits.hits[index]._source['_text'] = '';
+          delete results.hits.hits[index]._source['_text'];
         } else {
           results.hits.hits[index]._source = {
             '@id': id,
