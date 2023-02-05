@@ -67,7 +67,9 @@ export async function search({configuration, index, searchBody, explain = false,
       opts['scroll'] = elastic?.scrollTimeout || '10m';
     }
     const {body} = await client.search(opts);
+    log.debug("----- searchBody ----");
     log.debug(JSON.stringify(searchBody));
+    log.debug("----- searchBody ----");
     return body;
   } catch (e) {
     log.error(e.message);
