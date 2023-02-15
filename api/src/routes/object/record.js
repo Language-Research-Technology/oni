@@ -117,6 +117,7 @@ export async function getAllRecords({req, res, next}) {
 }
 
 export async function getResolveParts({req, res, next, configuration, select, repository}) {
+  log.debug('getResolveParts');
   let getUrid = true;
   if(!isUndefined(req.query.noUrid)) {
     getUrid = false;
@@ -129,9 +130,11 @@ export async function getResolveParts({req, res, next, configuration, select, re
         parts = parts.concat(graph['hasPart']);
       }
     }
-    res.json({parts});
-  } else {
-    res.json({data});
+    const crate = parts['data'];
+    res.json(crate);
+  } else {  
+    const crate = data;
+    res.json(crate);
   }
 }
 

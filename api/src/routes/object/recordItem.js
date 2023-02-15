@@ -9,11 +9,11 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
   let record = await getRecord({ crateId: req.query.id });
   let pass = false;
   let message = 'Not Found';
-  if (record.data) {
-    if (configuration['api']['licenses'] && record.data['license'] && !passthrough) {
-      const user =req?.session?.user ||  req?.user;
+  if (record) {
+    if (configuration['api']['licenses'] && record['license'] && !passthrough) {
+      const user = req?.session?.user || req?.user;
       const userId = user?.id;
-      const access = await checkIfAuthorized({userId, license: record.data['license'], configuration});
+      const access = await checkIfAuthorized({userId, license: record['license'], configuration});
       log.debug('getRecordItem:checkIfAuthorized');
       log.debug(JSON.stringify(access));
       pass = access.hasAccess;
@@ -23,7 +23,7 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
     //Check thruthy for pass and if foundAuthorization from isAuthorized
     log.debug('----');
     log.debug('getRecordItem');
-    log.debug(`Id: ${req.query.id} with license: ${record.data['license']} pass: ${JSON.stringify(pass)}`);
+    log.debug(`Id: ${req.query.id} with license: ${record['license']} pass: ${JSON.stringify(pass)}`);
     if (pass) {
       const fileObj = await getFile({
         itemId: req.query.id,
@@ -58,7 +58,7 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
       message = 'Not authorized';
       res.status(403);
       res.json({ id: req.query.id, path: req.query.path, message: message });
-      log.debug(`Id: ${req.query.id} with license: ${record.data['license']} pass: ${JSON.stringify(pass)} message: ${message}`);
+      log.debug(`Id: ${req.query.id} with license: ${record['license']} pass: ${JSON.stringify(pass)} message: ${message}`);
 
       next();
     }

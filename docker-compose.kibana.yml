@@ -1,0 +1,18 @@
+version: "3.8"
+
+networks:
+  oni:
+    name: oni
+    driver: bridge
+
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.2
+    hostname: kibana
+    tty: true
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    ports:
+      - "5601:5601"
+
+

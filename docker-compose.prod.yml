@@ -44,6 +44,21 @@ services:
       - "8080:8080"
     command: ["/wait-for-it.sh", "db:5432", "-t", "20", "elasticsearch:9200", "-t", "20", "--", "node", "./server.bundle.js"]
 
+  api-docs:
+    restart: always
+    image: arkisto/oni-api-docs:1.2.3
+    user: "1000:1000"
+    hostname: api-docs
+    tty: true
+    environment:
+      PORT: "3000"
+      HOST: "localhost"
+      BASE: "/docs"
+      URL: 'https://localhost/api'
+      DESCRIPTION: 'Oni Api Docs'
+    ports:
+      - "3000:3000"
+      -
   ui:
     image: arkisto/oni-ui:latest
     hostname: ui

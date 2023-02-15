@@ -46,9 +46,10 @@ export async function getRecord({crateId}) {
     }]
   });
   if (record) {
-    return {data: record.get()}
+    const rec = record.get();
+    return rec;
   } else {
-    return {data: null}
+    return {}
   }
 }
 
@@ -163,7 +164,7 @@ export async function decodeHash({id}) {
 
 export async function getRawCrate({repository, crateId, version}) {
   // TODO: return a specific version
-  console.log('getRawCrate')
+  log.debug(`getRawCrate, ${crateId}`);
   const object = repository.object({id: crateId});
   const crateFile = await object.getFile({logicalPath: 'ro-crate-metadata.json'}).asString();
   const json = JSON.parse(crateFile);

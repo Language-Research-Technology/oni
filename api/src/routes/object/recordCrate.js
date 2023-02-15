@@ -39,6 +39,7 @@ export async function getRecordCrate({req, res, next, configuration, repository}
         res.json(crate);
       } else {
         crate = await getRawCrate({repository, crateId: req.query.id});
+        console.log(JSON.stringify(crate.data));
         res.json(crate);
       }
     }

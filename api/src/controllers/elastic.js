@@ -87,6 +87,9 @@ export function aggsQueries({aggregations}) {
     .query(esb.matchQuery('not', 'important'))
     .aggs(aggsArray);
   const aggsQueryJson = aggsQuery.toJSON();
+  log.debug('----- aggsQueries ----')
+  log.debug(JSON.stringify(aggsQueryJson))
+  log.debug('----- aggsQueries ----')
   return aggsQueryJson.aggs;
 }
 

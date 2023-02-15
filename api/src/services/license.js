@@ -20,7 +20,7 @@ export function isAuthorized({memberships, license, licenseConfiguration}) {
     });
     return access;
   } else {
-    log.silly(`Not required or not configured for ${license}`);
+    log.silly(`Not required or not configured for ${JSON.stringify(license)}`);
     return {hasAccess: true};
   }
 }
@@ -44,4 +44,32 @@ export async function checkIfAuthorized({userId, license, configuration}) {
     });
   }
   return access;
+}
+
+export async function licensesWithoutAccess({userId, configuration}) {
+  console.log('filterByLicenses');
+  let memberships = [];
+  if (userId) {
+    memberships = await getUserMemberships({where: {userId}});
+  }
+  const filterLicenses = [];
+  const licenses = configuration['api']['licenses'] || [];
+  console.log('licenses with access:');
+  for (let license of licenses) {
+    let access = {hasAccess: false};
+    memberships.map(membership => {
+      const group = membership['group'];
+      const member = licenses.find(l => l['license'] === license['group']);
+      if (group === member?.['group']) {
+        access.hasAccess = true;
+      }
+    });
+    if (access.hasAccess) {
+      //skip log for debugging
+      console.log(license['group']);
+    } else {
+      filterLicenses.push(license);
+    }
+  }
+  return filterLicenses;
 }

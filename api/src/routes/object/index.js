@@ -152,6 +152,9 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                        - Return an RO-Crate resolving all parts
    *                        - /api/object/meta?resolve-parts&noUrid&id=arcp://name,sydney-speaks/corpus/root
    *                      - Example:
+   *                        - another example of returning an RO-Crate resolving all parts.
+   *                        - /api/object/meta?resolve-parts&noUrid&id=arcp://name,sydney-speaks/SYDS/item/8
+   *                      - Example:
    *                        - Return an RO-Crate resolving all parts and return each id prefixed with the https endpoint of the object so another machine can fetch all items
    *                        - /api/object/meta?resolve-parts&id=arcp://name,cooee-corpus/corpus/root
    *

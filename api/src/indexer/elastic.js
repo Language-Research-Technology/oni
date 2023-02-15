@@ -55,21 +55,24 @@ export async function elasticIndex({configuration, repository}) {
   }
 }
 
-export async function search({configuration, index, searchBody, explain = false, needsScroll = false}) {
+export async function search({configuration, index, searchBody, filterPath, explain = false, needsScroll = false}) {
   try {
+    log.debug("----- searchBody ----");
+    log.debug(JSON.stringify(searchBody));
+    log.debug("----- searchBody ----");
     const elastic = configuration['api']['elastic'];
     const opts = {
       index: index,
       body: searchBody,
       explain: explain,
     }
+    if (filterPath) {
+      opts['filter_path'] = filterPath
+    }
     if (needsScroll) {
       opts['scroll'] = elastic?.scrollTimeout || '10m';
     }
     const {body} = await client.search(opts);
-    log.debug("----- searchBody ----");
-    log.debug(JSON.stringify(searchBody));
-    log.debug("----- searchBody ----");
     return body;
   } catch (e) {
     log.error(e.message);
@@ -87,7 +90,7 @@ export async function scroll({configuration, scrollId}) {
     return body;
   } catch (e) {
     log.error(e.message);
-    return {error: e.message}
+    throw new Error(e);
   }
 }
 

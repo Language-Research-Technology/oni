@@ -1,6 +1,6 @@
 require('regenerator-runtime/runtime');
 const path = require('path');
-const {languageProfileURI} = require("language-data-node-tools");
+const {languageProfileURI} = require("language-data-commons-vocabs");
 const {generateArcpId} = require('oni-ocfl');
 
 const fs = require('fs-extra');
