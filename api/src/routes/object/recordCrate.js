@@ -12,7 +12,7 @@ export async function getRecordCrate({req, res, next, configuration, repository}
     getUrid = false;
   }
   let record = await getRecord({crateId: req.query.id});
-  if (record.data) {
+  if (record) {
     let crate;
     let version = undefined;
     if (!isUndefined(req.query.version)) {
