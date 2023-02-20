@@ -21,6 +21,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /object:
    *   get:
+   *     tags:
+   *       - object
    *     description: |
    *                  ### Object
    *                  Structural search and (limited) discovery end-point. Returns summaries only
@@ -100,6 +102,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /object/meta:
    *   get:
+   *     tags:
+   *       - object
    *     description: |
    *                  ### Object Meta
    *                  Get an RO-Crate Metadata Document with either IDs translated to api compatible or not
@@ -183,6 +187,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /object/meta/versions:
    *   get:
+   *     tags:
+   *       - object
    *     description: |
    *                  ### Object Metadata Version
    *     security:
@@ -221,6 +227,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /stream:
    *   get:
+   *     tags:
+   *       - object
    *     description: |
    *                  ### Stream File
    *                  Streams file with bearer token
@@ -274,6 +282,8 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    * @openapi
    * /object/open:
    *   get:
+   *     tags:
+   *       - object
    *     description: |
    *                  ### Object Open
    *                  Returns an object from path if path is not sent resolve its parts of the ro-crate. Same as /stream but /object/open uses the browser session and /stream requires the Bearer Token.

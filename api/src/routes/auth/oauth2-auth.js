@@ -17,6 +17,8 @@ export function setupOauthRoutes({server, configuration}) {
    * @openapi
    * /oauth/{provider}/login:
    *   get:
+   *     tags:
+   *       - auth
    *     description: |
    *                  ### Oauth Provider Login
    *                  Logs in with provider passed in path
@@ -85,6 +87,8 @@ export function setupOauthRoutes({server, configuration}) {
    * @openapi
    * /oauth/{provider}/code:
    *   post:
+   *     tags:
+   *       - auth
    *     description: |
    *                  ### Oauth Provider Code
    *                  Authorizes user with code returned

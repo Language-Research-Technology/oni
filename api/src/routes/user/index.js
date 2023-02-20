@@ -17,6 +17,8 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /user:
    *   get:
+   *     tags:
+   *       - user
    *     description: |
    *                  ### User
    *                  Get User Information of the authenticated user
@@ -61,6 +63,8 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /user/token:
    *   get:
+   *     tags:
+   *       - user
    *     description: |
    *                  ### Get User Token
    *                  Get user token of the authenticated user
@@ -103,8 +107,10 @@ export function setupUserRoutes({server, configuration}) {
   );
   /**
    * @openapi
-   * /:
-   *   del:
+   * /user/token:
+   *   delete:
+   *     tags:
+   *       - user
    *     description: |
    *                  ### Del User Token
    *                  Remove token from the authenticated user
@@ -140,6 +146,8 @@ export function setupUserRoutes({server, configuration}) {
    * @openapi
    * /user/memberships:
    *   get:
+   *     tags:
+   *       - user
    *     description: |
    *                  ### Retrieves User Memberships
    *                  gets the memberships of authenticated user. This is different to /auth/memberships as it only checks for current memberships. Use /auth/memberships to update /user/memberships

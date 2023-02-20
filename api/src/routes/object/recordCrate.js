@@ -1,6 +1,6 @@
 import {getRecord, getRawCrate, getUridCrate} from '../../controllers/record';
 import {getLogger} from '../../services';
-import {isUndefined} from 'lodash';
+import {isUndefined, isEmpty} from 'lodash';
 import {getCrate} from "../../controllers/recordResolve";
 
 const log = getLogger();
@@ -12,7 +12,7 @@ export async function getRecordCrate({req, res, next, configuration, repository}
     getUrid = false;
   }
   let record = await getRecord({crateId: req.query.id});
-  if (record) {
+  if (!isEmpty(record)) {
     let crate;
     let version = undefined;
     if (!isUndefined(req.query.version)) {
@@ -39,7 +39,7 @@ export async function getRecordCrate({req, res, next, configuration, repository}
         res.json(crate);
       } else {
         crate = await getRawCrate({repository, crateId: req.query.id});
-        console.log(JSON.stringify(crate.data));
+        console.log(JSON.stringify(crate));
         res.json(crate);
       }
     }

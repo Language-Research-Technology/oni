@@ -16,6 +16,8 @@ export function setupAdminRoutes({server, configuration, repository}) {
    * @openapi
    * /admin/elastic/index:
    *   get:
+   *     tags:
+   *       - general
    *     description: |
    *                  ### Admin Elastic Index
    *                  Runs elastic indexer used only with the admin api key
@@ -47,6 +49,8 @@ export function setupAdminRoutes({server, configuration, repository}) {
    * @openapi
    * /admin/database/index:
    *   get:
+   *     tags:
+   *       - general
    *     description: |
    *                  ### Admin Database Index
    *                  Runs structural indexer used only with the admin api key

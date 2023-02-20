@@ -31,6 +31,7 @@ const swaggerDefinition = {
     },
   ],
   components: {
+    schemas: {},
     securitySchemes: {
       Bearer: {
         type: 'http',
@@ -38,7 +39,8 @@ const swaggerDefinition = {
         bearerFormat: 'JWT'
       }
     },
-  }
+  },
+  definitions: {}
 };
 
 const options = {

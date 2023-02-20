@@ -21,8 +21,10 @@ export function setupSearchRoutes({ server, configuration }) {
    * @openapi
    * /search/{index}:
    *   get:
+   *     tags:
+   *       - search
    *     description: |
-   *                  ### Search Index
+   *                  ### Search Index (This endpoint is disabled)
    *                  Searches the `index` provided in path
    *     security:
    *       - Bearer: []
@@ -187,6 +189,8 @@ export function setupSearchRoutes({ server, configuration }) {
  * @openapi
  * /search/scroll:
  *   get:
+ *     tags:
+ *       - search
  *     description: |
  *                  ### Get search usign scroll id
  *                  gets search results with current scroll Id
@@ -235,7 +239,9 @@ export function setupSearchRoutes({ server, configuration }) {
   /**
    * @openapi
    * /search/scroll:
-   *   del:
+   *   delete:
+   *     tags:
+   *       - search
    *     description: |
    *                  ### Del search scroll
    *                  Deletes scroll Id
@@ -248,7 +254,9 @@ export function setupSearchRoutes({ server, configuration }) {
    *         - org.cilogon.userinfo
    *         - offline_access
    *     parameters:
-   *       - scroll
+   *       - in: query
+   *         name: id
+   *         description: scroll id  
    *     responses:
    *       200:
    *         description: Deletes scroll id.
@@ -269,13 +277,14 @@ export function setupSearchRoutes({ server, configuration }) {
   })
   );
 
-    /**
+/**
   * @openapi
   * /search/fields/{index}:
   *   get:
+  *     tags:
+  *       - search
   *     description: |
-  *                  ### Get search usign scroll id
-  *                  gets search results with current scroll Id
+  *                  ### Find an elastic object
   *     security:
   *       - Bearer: []
   *       - OAuth2:
@@ -285,6 +294,12 @@ export function setupSearchRoutes({ server, configuration }) {
   *         - org.cilogon.userinfo
   *         - offline_access
   *     parameters:
+  *       - in: path
+  *         name: index
+  *         description: Elastic index name
+  *         required: true
+  *         schema:
+  *           type: string
   *       - in: query
   *         name: field
   *         description: Elastic field
@@ -293,15 +308,16 @@ export function setupSearchRoutes({ server, configuration }) {
   *           type: string
   *       - in: query
   *         name: value
-  *         description: Elastic value
+  *         description: Elastic value (Should be url encoded)
   *         required: true
   *         schema:
   *           type: string
   *     responses:
   *       200:
-  *         description: Returns a search result based on a field and a value
-  * - Example:
-  *   - /search/fields/items?field=license.@id&value=https://www.ldaca.edu.au/licenses/gcsae/audio/v1/
+  *         description: |
+  *                      Returns a search result based on a field and a value
+  *                      - Example
+  *                          - /search/fields/items?field=license.@id&value=https%3A%2F%2Fwww.ldaca.edu.au%2Flicenses%2Fltcsause%2Ftranscripts%2Fv1%2F
   */
   server.get('/search/fields/:index', routeBrowse(async (req, res, next) => {
     try {
@@ -388,13 +404,16 @@ export function setupSearchRoutes({ server, configuration }) {
   // })
   // );
 
-  /**
+ /**
    * @openapi
-   * /search/index-post/{index}
-   *   get:
+   * /search/index-post/{index}:
+   *   post:
+   *     tags:
+   *       - search
    *     description: |
    *                  ### Search Index
    *                  Searches the `index` provided in path
+   *                  - ### TODO: To be renamed to /search/index/{index} when we decide whether to to post-fitlering or pre-filtering
    *     security:
    *       - Bearer: []
    *       - OAuth2:
@@ -407,42 +426,61 @@ export function setupSearchRoutes({ server, configuration }) {
    *       - in: path
    *         name: index
    *         description: Elastic index name
+   *         example: 'items'
    *         required: true
    *         schema:
    *           type: string
    *       - in: query
    *         name: withScroll
    *         description: request a scroll id for pagination
-   *       - in: body
-   *         name: body
-   *         description: Elastic query body
-   *         required: false
-   *         schema:
-   *           type: string 
+   *     requestBody:    
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *           example:
+   *             { "query": {"bool":{"must":{"terms":{"@type.keyword":["RepositoryCollection"]}}}} }
    *     responses:
    *       '200':
    *         description: |
    *                      Search results either unique or a list of results
-   *                      - Example:
+   *                      - Example
    *                        - Search in index items with filters: @type=Dataset,RepositoryCollection, _isTopLevel=true
    *                        - /api/search/index-post/items
-   *                        - JSON: { "query": {"bool":{"must":{"terms":{"@type.keyword":["RepositoryCollection"]}}}} }
-   *                      - Example:
+   *                        - Request body: 
+   *                           ```json
+   *                           { "query": {"bool":{"must":{"terms":{"@type.keyword":["RepositoryCollection"]}}}} }
+   *                           ```
+   *                      - Example
    *                        - Search in index items and request a Scroll Id with filters memberOf cooee that conformsTo Objects
    *                        - /api/search/items?withScroll=true
-   *                        - JSON: { "query": {"bool":{"must":[{"terms":{"_memberOf.@id.keyword":["arcp://name,cooee-corpus/corpus/root"]}},{"terms":{"conformsTo.@id.keyword":["https://purl.archive.org/language-data-commons/profile#Object"]}}]}} }
-   *                      - Example:
+   *                        - Request body:
+   *                           ```json
+   *                           { "query": {"bool":{"must":[{"terms":{"_memberOf.@id.keyword":["arcp://name,cooee-corpus/corpus/root"]}},{"terms":{"conformsTo.@id.keyword":["https://purl.archive.org/language-data-commons/profile#Object"]}}]}} }
+   *                           ```
+   *                      - Example
    *                        - Search in index vocabs the exact match of the citation vocab
    *                        - /api/search/index-post/vocabs
-   *                        - JSON: { "query": {"match":{"_id":"schema:identifier"}} }
-   *                      - Example:
+   *                        - Request body: 
+   *                           ```json
+   *                           { "query": {"match":{"_id":"schema:identifier"}} }
+   *                           ```
+   *                      - Example
    *                        - Search in index items the files that are of type csv
    *                        - /api/search/items?withScroll=true
-     *                      - Example: { "query":  {"bool":{"must":{"terms":{"encodingFormat.@value.keyword":["text/csv"]}}}} }
+   *                        - Request body: 
+   *                           ```json
+   *                           { "query":  {"bool":{"must":{"terms":{"encodingFormat.@value.keyword":["text/csv"]}}}} }
+   *                           ```
+   *                      - Example
    *                        - Search for the object with id data/1-215-plain.txt in the cooee corpus
    *                        - /api/search/items
-   *                        - JSON: { "query": {"dis_max":{"queries":[{"match":{"@id":"data/1-215-plain.txt"}},{"match":{"_crateId":"arcp://name,cooee-corpus/corpus/root"}}]}} }
+   *                        - Request body: 
+   *                           ```json
+   *                           { "query": {"dis_max":{"queries":[{"match":{"@id":"data/1-215-plain.txt"}},{"match":{"_crateId":"arcp://name,cooee-corpus/corpus/root"}}]}} }
+   *                           ```
    */
+  //TODO: change the endpoint path to just /search/index/:items
   server.post('/search/index-post/:index', routeBrowse(async (req, res, next) => {
     try {
       let user = {};

@@ -24,6 +24,8 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /:
    *   get:
+   *     tags:
+   *       - general
    *     description: |
    *                  ### Root
    *                  List of Api endpoints available
@@ -45,6 +47,8 @@ export function setupRoutes({server, configuration, repository}) {
       user: '/user',
       user_token: '/user/token',
       search_index: '/search/:index',
+      search_fields_index: '/search/fields/:index',
+      search_index_post_index: '/search/index-post/:index',
       search_scroll: '/search/scroll',
       auth_memberships: '/auth/memberships',
       oauth_provider_login: '/oauth/:provider/login',
@@ -60,6 +64,8 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /configuration:
    *   get:
+   *     tags:
+   *       - general
    *     description: |
    *                  ### Configuration
    *                  Configuration
@@ -84,6 +90,8 @@ export function setupRoutes({server, configuration, repository}) {
    * @openapi
    * /version:
    *   get:
+   *     tags:
+   *       - general
    *     description: |
    *                  ### Version
    *                  Oni Version

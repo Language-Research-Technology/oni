@@ -49,7 +49,7 @@ export async function getRecord({crateId}) {
     const rec = record.get();
     return rec;
   } else {
-    return {}
+    return {};
   }
 }
 

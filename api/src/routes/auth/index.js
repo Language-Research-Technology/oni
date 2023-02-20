@@ -19,6 +19,8 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /authenticated:
    *   get:
+   *     tags:
+   *       - auth
    *     security:
    *       - Bearer: []
    *       - OAuth2:
@@ -47,6 +49,8 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /logout:
    *   get:
+   *     tags:
+   *       - auth
    *     description: |
    *                  ### Logout
    *                  Logs out current user session
@@ -79,6 +83,8 @@ export function setupAuthRoutes({server, configuration}) {
    * @openapi
    * /auth/memberships:
    *   get:
+   *     tags:
+   *       - auth
    *     description: |
    *                  ### Auth Memberships
    *                  Retrieve user permissions from provider configured and store them in user database. Use /user/memberships for only getting stored memberships

@@ -58,7 +58,7 @@ services:
       DESCRIPTION: 'Oni Api Docs'
     ports:
       - "3000:3000"
-      -
+
   ui:
     image: arkisto/oni-ui:latest
     hostname: ui
