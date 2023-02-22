@@ -83,7 +83,14 @@ let repository;
   }
 
   const ocflConf = configuration.api.ocfl;
-  const repository = ocfl.storage({root: ocflConf.ocflPath, workspace: ocflConf.ocflScratch, ocflVersion: '1.0'});
+  const repository = ocfl.storage({
+      root: ocflConf.ocflPath, 
+      workspace: ocflConf.ocflScratch, 
+      ocflVersion: '1.1', 
+      layout: {
+        extensionName: '000N-path-direct-storage-layout'
+      }
+    });
   await repository.load();
 
   await elasticInit({configuration});

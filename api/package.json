@@ -42,7 +42,7 @@
     },
     "dependencies": {
         "@elastic/elasticsearch": "^7.16.0",
-        "@ocfl/ocfl-fs": "^0.1.1",
+        "@ocfl/ocfl-fs": "^0.2.0",
         "@octokit/core": "^3.5.1",
         "client-oauth2": "^4.3.3",
         "client-sessions": "^0.8.0",

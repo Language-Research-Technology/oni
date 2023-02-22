@@ -31,8 +31,8 @@ export async function getRecordItem({ req, res, next, configuration, passthrough
         filePath: req.query.path
       });
       log.debug('getRecordItem:getFile');
-      log.debug(fileObj.objectRoot);
-      log.debug(fileObj.fileStream?.path);
+      log.debug(JSON.stringify(fileObj));
+      log.debug(fileObj?.fileStream?.path);
       //TODO: send the correct mimeType
       if (fileObj && fileObj.fileStream) {
         res.writeHead(200, {

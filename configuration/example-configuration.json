@@ -9,7 +9,13 @@
         "navHeight": "80px",
         "showNotebooks": false,
         "help": {
-            "mainText": "For access please email help@ldaca.edu.au"
+            "mainText": "For access please email help@example.com",
+            "helpUrl": "https://www.example.com"
+        },
+        "terms": {
+          "text": "Example terms of service",
+          "href": "/terms",
+          "title": "Terms of Service"
         },
         "email": {
             "help": "help@ldaca.edu.au"

@@ -50,7 +50,7 @@ export async function bootstrapObject({configuration, object}) {
         lic = license?.default?.['@id'];
       }
       const crateId = crate.rootId;
-      //console.log(`${crateId} license: ${lic}`);
+      console.log(`${crateId} license: ${lic}`);
       if (crateId !== './') {
         const rec = {
           crateId: crateId,
@@ -83,7 +83,14 @@ export async function initOCFL({configuration}) {
   return new Promise(async (resolve, reject) => {
     try {
       const ocflConf = configuration.api.ocfl;
-      const storage = ocfl.storage({root: ocflConf.ocflPath, workspace: ocflConf.ocflScratch, ocflVersion: '1.0'});
+      const storage = ocfl.storage({
+        root: ocflConf.ocflPath, 
+        workspace: ocflConf.ocflScratch, 
+        ocflVersion: '1.1', 
+        layout: {
+          extensionName: '000N-path-direct-storage-layout'
+        }
+      });
       storage.load();
       let objectsCount = 0;
       for await (let object of storage) {
