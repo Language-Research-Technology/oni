@@ -491,13 +491,17 @@ export function setupSearchRoutes({ server, configuration }) {
       let index = req.params?.index;
       let searchBody = req.body;
       const needsScroll = req.query.withScroll;
-      console.log(JSON.stringify(searchBody));
+      log.silly(JSON.stringify(searchBody));
       let results = await search({ configuration, index, searchBody, needsScroll });
-      const filtered = await filterResults({ userId, results, configuration });
-      res.send(filtered);
+      if(results) {
+        const filtered = await filterResults({ userId, results, configuration });
+        res.send(filtered);
+      } else {
+       res.send({});
+      }
       next();
     } catch (e) {
-      console.log(e);
+      log.error(e);
       res.status(500);
       res.send({ error: 'Error searching index', message: e.message });
       next();

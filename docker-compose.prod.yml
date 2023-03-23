@@ -75,12 +75,14 @@ services:
       - "9000:9000"
 
   elasticsearch:
-    image: elasticsearch:7.14.2
+    image: elasticsearch:8.6.2
     hostname: elasticsearch
     tty: true
     environment:
-      TERM: "xterm-256color"
-      discovery.type: "single-node"
+      - TERM="xterm-256color"
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
     ports:
       - "9200:9200"
       - "9300:9300"

@@ -100,7 +100,7 @@ export async function demandAuthenticatedUser(req, res, next) {
  * @return {Promise<*>}
  */
 export async function softAuthenticateUser(req, res, next) {
-  console.log('softAuthenticateUser')
+  log.silly('softAuthenticateUser');
   if (!req.headers.authorization) {
     return next();
   } else {
@@ -116,8 +116,6 @@ export async function softAuthenticateUser(req, res, next) {
     } catch (error) {
       return next();
     }
-    log.error('heee')
-
     return next();
   }
 }

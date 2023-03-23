@@ -41,7 +41,7 @@
         "webpack-node-externals": "^3.0.0"
     },
     "dependencies": {
-        "@elastic/elasticsearch": "^7.16.0",
+        "@elastic/elasticsearch": "^8.6.0",
         "@ocfl/ocfl-fs": "^0.2.0",
         "@octokit/core": "^3.5.1",
         "client-oauth2": "^4.3.3",

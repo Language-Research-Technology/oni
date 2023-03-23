@@ -12,20 +12,20 @@ export async function elasticInit({configuration}) {
     });
     log.debug('Init elastic client');
     await configureCluster({configuration, client});
-    if (configuration.api?.elastic?.log === 'debug') {
-      //For details about observability in elastic index, an event emitter is attached to log the responses
-      //ES 7.x -> https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.17/observability.html
-      client.on('response', (err, result) => {
-        if (err) {
-          const error = {
-            type: err?.meta?.body?.type,
-            message: err?.message,
-            meta: err.meta?.body?.error?.caused_by
-          };
-          log.error(JSON.stringify(error));
-        }
-      });
-    }
+    // if (configuration.api?.elastic?.log === 'debug') {
+    //   //For details about observability in elastic index, an event emitter is attached to log the responses
+    //   //ES 7.x -> https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.17/observability.html
+    //   client.on('response', (err, result) => {
+    //     if (err) {
+    //       const error = {
+    //         type: err?.meta?.body?.type,
+    //         message: err?.message,
+    //         meta: err.meta?.body?.error?.caused_by
+    //       };
+    //       log.error(JSON.stringify(error));
+    //     }
+    //   });
+    // }
   } catch (e) {
     log.error(e.message);
   }
@@ -72,8 +72,9 @@ export async function search({configuration, index, searchBody, filterPath, expl
     if (needsScroll) {
       opts['scroll'] = elastic?.scrollTimeout || '10m';
     }
-    const {body} = await client.search(opts);
-    return body;
+    log.debug(JSON.stringify(opts));
+    const result = await client.search(opts);
+    return result;
   } catch (e) {
     log.error(e.message);
     return {error: e.message}
@@ -83,11 +84,11 @@ export async function search({configuration, index, searchBody, filterPath, expl
 export async function scroll({configuration, scrollId}) {
   try {
     const elastic = configuration['api']['elastic'];
-    const {body} = await client.scroll({
-      scrollId: scrollId,
+    const results = await client.scroll({
+      scroll_id: scrollId,
       scroll: elastic?.scrollTimeout || '10m'
     });
-    return body;
+    return results;
   } catch (e) {
     log.error(e.message);
     throw new Error(e);
