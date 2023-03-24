@@ -107,10 +107,10 @@ export async function configureMappings({configuration, client}) {
     });
     await client.indices.putSettings({
       index: elastic['index'],
-      body: {mapping: {total_fields: {limit: elastic['mappingFieldLimit'] || 1000}}}
+      body: elastic['indexConfiguration']
     });
   } catch (e) {
-    log.error('configureMappings');
+    log.error('configureIndex');
     log.error(JSON.stringify(e.message));
     throw new Error(e);
   }
