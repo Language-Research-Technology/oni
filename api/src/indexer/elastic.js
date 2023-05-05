@@ -55,7 +55,7 @@ export async function elasticIndex({configuration, repository}) {
   }
 }
 
-export async function search({configuration, index, searchBody, filterPath, explain = false, needsScroll = false}) {
+export async function search({configuration, index, searchBody, filterPath, explain = false}) {
   try {
     log.debug("----- searchBody ----");
     log.debug(JSON.stringify(searchBody));
@@ -69,29 +69,12 @@ export async function search({configuration, index, searchBody, filterPath, expl
     if (filterPath) {
       opts['filter_path'] = filterPath
     }
-    if (needsScroll) {
-      opts['scroll'] = elastic?.scrollTimeout || '10m';
-    }
     log.debug(JSON.stringify(opts));
     const result = await client.search(opts);
     return result;
   } catch (e) {
     log.error(e.message);
     return {error: e.message}
-  }
-}
-
-export async function scroll({configuration, scrollId}) {
-  try {
-    const elastic = configuration['api']['elastic'];
-    const results = await client.scroll({
-      scroll_id: scrollId,
-      scroll: elastic?.scrollTimeout || '10m'
-    });
-    return results;
-  } catch (e) {
-    log.error(e.message);
-    throw new Error(e);
   }
 }
 
@@ -135,17 +118,6 @@ export async function configureCluster({configuration, client}) {
     }
   } catch (e) {
     log.error('configureCluster');
-    log.error(JSON.stringify(e.message));
-    throw new Error(e);
-  }
-}
-
-export async function clearScroll({scrollId}) {
-  try {
-    log.debug(scrollId)
-    return await client.clearScroll({scroll_id: scrollId});
-  } catch (e) {
-    log.error('clearScroll');
     log.error(JSON.stringify(e.message));
     throw new Error(e);
   }
