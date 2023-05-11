@@ -1,13 +1,13 @@
 // these endpoints will only return data they are responsible for
 //
-import {routeUser, loadConfiguration} from '../services';
+import {routeUser, loadConfiguration, swaggerDoc} from '../services';
 import {setupObjectRoutes} from './object';
 import {setupUserRoutes} from './user';
 import {setupAuthRoutes} from './auth';
 import {setupSearchRoutes} from './search';
 import {setupAdminRoutes} from "./admin";
 
-const version = require('../../package.json')['version'];
+const {version, name, homepage} = require('../../package.json');
 
 export function setupRoutes({server, configuration, repository}) {
 
@@ -37,6 +37,7 @@ export function setupRoutes({server, configuration, repository}) {
     res.json({
       configuration: '/configuration',
       version: '/version',
+      swagger: '/swagger.json',
       admin_elastic_index: '/admin/elastic/index',
       admin_database_index: '/admin/database/index',
       object: '/object{memberOf}{id}',
@@ -102,6 +103,25 @@ export function setupRoutes({server, configuration, repository}) {
   server.get('/version', (req, res, next) => {
     res.send({version});
   });
+
+    /**
+   * @openapi
+   * /swagger.json:
+   *   get:
+   *     tags:
+   *       - general
+   *     description: |
+   *                  ### swagger spec
+   *                  swagger.json
+   *     responses:
+   *       200:
+   *         description: Returns swagger spec of this api
+   */
+    server.get('/swagger.json', async (req, res, next) => {
+      let configuration = await loadConfiguration();
+      const spec = swaggerDoc({configuration, version, name, homepage});
+      res.send(spec)
+    });
 
   setupObjectRoutes({server, configuration, repository});
   setupUserRoutes({server, configuration});

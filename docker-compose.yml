@@ -51,20 +51,6 @@ services:
             - "8080:8080"
             - "9229:9229"
 
-    api-docs:
-        image: arkisto/oni-api-docs:latest
-        user: "1000:1000"
-        hostname: api-docs
-        tty: true
-        environment:
-            PORT: "3000"
-            HOST: "localhost"
-            BASE: "/docs"
-            URL: 'http://localhost:8080'
-            DESCRIPTION: 'Development server'
-        ports:
-            - "3000:3000"
-
     elasticsearch:
         image: elasticsearch:8.6.2
         hostname: elasticsearch

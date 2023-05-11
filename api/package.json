@@ -1,7 +1,8 @@
 {
-    "name": "api",
+    "name": "oni",
     "version": "1.5.0",
     "description": "",
+    "homepage": "http://github.com/arkisto-Platform/oni",
     "main": "src/index.js",
     "scripts": {
         "dev": "./node_modules/.bin/nodemon --no-deprecation --exec npm run babel-node -- src/index.js",
@@ -9,6 +10,7 @@
         "develop": "npm run develop:server",
         "babel-node": "babel-node --require dotenv/config ",
         "develop:server": "npm install && ./node_modules/.bin/nodemon --exec npm run babel-node -- src/index.js",
+        "develop:swaggerExpress": "node swagger.js",
         "test": "./node_modules/.bin/jest",
         "test:watch": "./node_modules/.bin/jest --watch",
         "test:load": "./node_modules/.bin/jest test/load/load.spec.js -i --runInBand --no-cache",
@@ -35,7 +37,6 @@
         "mockdate": "^3.0.5",
         "nodemon": "^2.0.12",
         "swagger-jsdoc": "^6.2.8",
-        "swagger-ui-express": "^4.6.0",
         "webpack": "^5.65.0",
         "webpack-cli": "^4.9.1",
         "webpack-node-externals": "^3.0.0"
@@ -69,6 +70,8 @@
         "ro-crate": "^3.2.1",
         "sequelize": "^6.21.2",
         "simple-oauth2": "^4.3.0",
+        "swagger-ui-dist": "^4.18.3",
+        "swagger-ui-express": "^4.6.3",
         "uuid": "^8.3.2",
         "winston": "^3.3.3"
     }

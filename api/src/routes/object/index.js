@@ -151,7 +151,7 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                      Returns a single whole RO-Crate metadata document
    *                      - Example:
    *                        - Return a complete ro-crate from storage
-   *                        - /api/object/meta?id=arcp://name,cooee-corpus/corpus/root&noUrid
+   *                        - /api/object/meta?id=arcp://name,corpus-of-oz-early-english&noUrid
    *                      - Example:
    *                        - Return an RO-Crate resolving all parts
    *                        - /api/object/meta?resolve-parts&noUrid&id=arcp://name,sydney-speaks/corpus/root
@@ -160,7 +160,7 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                        - /api/object/meta?resolve-parts&noUrid&id=arcp://name,sydney-speaks/SYDS/item/8
    *                      - Example:
    *                        - Return an RO-Crate resolving all parts and return each id prefixed with the https endpoint of the object so another machine can fetch all items
-   *                        - /api/object/meta?resolve-parts&id=arcp://name,cooee-corpus/corpus/root
+   *                        - /api/object/meta?resolve-parts&id=arcp://name,corpus-of-oz-early-english
    *
    */
   server.get('/object/meta', async (req, res, next) => {
@@ -254,7 +254,7 @@ export function setupObjectRoutes({ server, configuration, repository }) {
    *                      Streams file requested
    *                      Example:
    *                      Stream the file of coooee with path data/1-215-plain.txt
-   *                      /api/object/open?id=arcp://name,cooee-corpus/corpus/root&path=data/1-215-plain.txt
+   *                      /api/object/open?id=arcp://name,corpus-of-oz-early-english&path=data/1-215-plain.txt
    */
   server.get('/stream',
     routeBearer(

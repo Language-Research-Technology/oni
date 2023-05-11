@@ -13,3 +13,4 @@ export {
   testIdentifier,
   testCreate,
 } from './test-utils';
+export { swaggerDoc } from './swagger';

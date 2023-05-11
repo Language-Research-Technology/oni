@@ -22,17 +22,7 @@ if [ "$resp" == "y" ] ; then
       -t arkisto/oni-api:${VERSION} \
       -f Dockerfile.api-build .
     echo
-    echo '>> Build Open API Docs'
-    docker buildx build --platform linux/amd64,linux/arm64 \
-      --rm \
-      -t arkisto/oni-api-docs:latest \
-      -t arkisto/oni-api-docs:${VERSION} \
-      -f Dockerfile.api-docs-build .
-    docker buildx build --load \
-      -t arkisto/oni-api-docs:latest \
-      -t arkisto/oni-api-docs:${VERSION} \
-      -f Dockerfile.api-docs-build .
-    echo
+
 fi
 
 read -p '>> Tag the containers? [y|N] ' resp
@@ -58,19 +48,10 @@ if [ "$resp" == "y" ] ; then
       -t arkisto/oni-api:${VERSION} \
       -f Dockerfile.api-build .
 
-    echo "Pushing oni-api-docs containers to docker hub"
-    docker buildx build --platform=linux/amd64,linux/arm64 \
-      --push \
-      --rm \
-      -t arkisto/oni-api-docs:latest \
-      -t arkisto/oni-api-docs:${VERSION} \
-      -f Dockerfile.api-docs-build .
 fi
 
 read -p '>> Remove local container copies? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     docker rmi arkisto/oni-api:latest
     docker rmi arkisto/oni-api:${VERSION}
-    docker rmi arkisto/oni-api-docs:latest
-    docker rmi arkisto/oni-api-docs:${VERSION}
 fi
