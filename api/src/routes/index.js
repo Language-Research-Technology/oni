@@ -11,6 +11,9 @@ const {version, name, homepage} = require('../../package.json');
 
 export function setupRoutes({server, configuration, repository}) {
 
+  //Moved here so swaggerSpec is generated only at setup
+  const swaggerSpec = swaggerDoc({configuration, version, name, homepage});
+
   setupAuthRoutes({server, configuration});
 
   if (process.env.NODE_ENV === 'development') {
@@ -118,9 +121,7 @@ export function setupRoutes({server, configuration, repository}) {
    *         description: Returns swagger spec of this api
    */
     server.get('/swagger.json', async (req, res, next) => {
-      let configuration = await loadConfiguration();
-      const spec = swaggerDoc({configuration, version, name, homepage});
-      res.send(spec)
+      res.send(swaggerSpec);
     });
 
   setupObjectRoutes({server, configuration, repository});
