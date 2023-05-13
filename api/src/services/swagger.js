@@ -1,7 +1,11 @@
-const swaggerJsdoc = require('swagger-jsdoc');
+import {getLogger} from "./logger";
+import swaggerJSDocs from 'swagger-jsdoc';
+
+const log = getLogger();
 
 export function swaggerDoc({configuration, version, name, homepage}) {
-
+  log.debug('generating swaggerDoc');
+  
   const serverUrl = configuration.api.host || 'http://localhost:8080'
   const serverDescription = configuration.ui.siteName || 'Development server'
 
@@ -43,7 +47,7 @@ export function swaggerDoc({configuration, version, name, homepage}) {
     apis: ['./src/routes/**/*.js']
   };
 
-  const swaggerSpec = swaggerJsdoc(options);
+  const swaggerSpec = swaggerJSDocs(options);
 
   return swaggerSpec;
 }
