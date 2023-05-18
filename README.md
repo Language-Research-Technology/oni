@@ -4,7 +4,6 @@
   - [Start developing](#start-developing)
   - [Running the tests](#running-the-tests)
   - [Tech](#tech)
-    - [Frontend - VueJS and friends](#frontend---vuejs-and-friends)
     - [Backend - Restify and sequelize](#backend---restify-and-sequelize)
   - [Repo layout](#repo-layout)
   - [Documentation](#documentation)
@@ -49,8 +48,7 @@ test file) does not re-run the tests.
 - configuration: application configuration
 - scripts: script helpers to run the code
 - production: production configuration - compose file and nginx code
-- build-production-containers.sh: script to build the containers, tag and push to docker hub -
-    REQUIRES WORK : COMMENTED OUT FOR NOW
+- build-production-containers.sh: script to build the containers, tag and push to docker hub
 
 ## Documentation
 

@@ -1,3 +1,4 @@
+#! /bin/bash
 echo Building with hooks by moisbo
 docker buildx create --name multiarch --use
 docker buildx build . -t oni-api -f Dockerfile --platform linux/arm64/v8,linux/amd64 --push
