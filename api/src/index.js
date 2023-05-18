@@ -3,10 +3,10 @@ import assert from "assert";
 require('regenerator-runtime');
 import restify from 'restify';
 import models from './models';
-import {loadConfiguration, getLogger} from './services/index';
-import {setupRoutes} from './routes';
-import {bootstrap} from './services/bootstrap';
-import {elasticInit, elasticBootstrap, elasticIndex} from './indexer/elastic';
+import { loadConfiguration, getLogger } from './services/index';
+import { setupRoutes } from './routes';
+import { bootstrap } from './services/bootstrap';
+import { elasticInit, elasticBootstrap, elasticIndex } from './indexer/elastic';
 
 import corsMiddleware from 'restify-cors-middleware2';
 import * as fs from "fs-extra";
@@ -79,29 +79,37 @@ let repository;
   }
 
   if (configuration['api']['bootstrap']) {
-    await bootstrap({configuration});
+    await bootstrap({ configuration });
   }
 
   const ocflConf = configuration.api.ocfl;
-  const repository = ocfl.storage({
-      root: ocflConf.ocflPath, 
-      workspace: ocflConf.ocflScratch, 
-      ocflVersion: '1.1', 
+  let repository;
+  try {
+    repository = ocfl.storage({
+      root: ocflConf.ocflPath,
+      workspace: ocflConf.ocflScratch,
+      ocflVersion: '1.1',
       layout: {
         extensionName: '000N-path-direct-storage-layout'
       }
     });
-  await repository.load();
-
-  await elasticInit({configuration});
+    await repository.load();
+  } catch (e) {
+    log.error('=======================================');
+    log.error(e.message);
+    log.error('Repository Error please check your OCFL');
+    log.error(JSON.stringify(ocflConf));
+    log.error('=======================================');
+  }
+  await elasticInit({ configuration });
   if (configuration['api']['elastic']?.bootstrap) {
-    await elasticBootstrap({configuration});
-    await elasticIndex({configuration, repository});
+    await elasticBootstrap({ configuration });
+    await elasticIndex({ configuration, repository });
   }
 
-  setupRoutes({server, configuration, repository});
+  setupRoutes({ server, configuration, repository });
 
   server.listen("8080", function () {
-    log.debug(`ready on ${server.url}`);
+    log.debug(`Server ready on ${server.url}`);
   });
 })();

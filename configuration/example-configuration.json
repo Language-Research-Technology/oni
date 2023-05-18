@@ -1,10 +1,15 @@
 {
     "ui": {
-        "siteName": "Language Data",
-        "siteNameX": "Commons of Australia",
+        "siteName": "Oni",
+        "siteNameX": "Portal",
         "publicPath": "http://localhost:9000/",
-        "title": "Language Data Commons of Australia",
-        "shortTitle": "LDaCA",
+        "title": "Oni Portal",
+        "shortTitle": "Oni",
+        "splashText": "LDaCA acknowledges all Aboriginal and Torres Strait Islander Traditional Custodians of Country and recognises their continuing connection to land, sea, culture and community. We pay our respects to Elders past and present.",
+        "splashTextClass": "text-5xl text-[#F4EDE4] pb-10",
+        "splashImage": "splash-background-1.png",
+        "splashEnabled": true,
+        "splashLauncher": "Acknowledgement of Country",
         "showLogo": true,
         "navHeight": "80px",
         "showNotebooks": false,
@@ -21,7 +26,7 @@
             "help": "help@ldaca.edu.au"
         },
         "footer": {
-            "copyright": "© 2022 UQ Text Commons Group",
+            "copyright": "© 2023 UQ Text Commons Group",
             "link": {
                 "href": "https://ldaca.edu.au",
                 "text": "LDaCA"
