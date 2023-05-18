@@ -16,11 +16,11 @@ if [ "$resp" == "y" ] ; then
       --rm \
       -t arkisto/oni-api:latest \
       -t arkisto/oni-api:${VERSION} \
-      -f Dockerfile.api-build .
+      -f Dockerfile .
     docker buildx build --load \
       -t arkisto/oni-api:latest \
       -t arkisto/oni-api:${VERSION} \
-      -f Dockerfile.api-build .
+      -f Dockerfile .
     echo
 
 fi
@@ -46,7 +46,7 @@ if [ "$resp" == "y" ] ; then
       --rm \
       -t arkisto/oni-api:latest \
       -t arkisto/oni-api:${VERSION} \
-      -f Dockerfile.api-build .
+      -f Dockerfile .
 
 fi
 
