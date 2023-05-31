@@ -74,7 +74,7 @@ export async function search({configuration, index, searchBody, filterPath, expl
     return result;
   } catch (e) {
     log.error(e.message);
-    return {error: e.message}
+    throw new Error( e.message );
   }
 }
 

@@ -83,6 +83,7 @@ export function setupRoutes({server, configuration, repository}) {
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.searchFields = configuration?.api?.elastic?.fields;
     ui.searchHighlights = configuration?.api?.elastic?.highlightFields;
+    ui.hightlight = configuration?.api?.elastic.indexConfiguration?.highlight;
     ui.licenses = configuration?.api?.licenses;
     ui.conformsTo = configuration?.api?.conformsTo;
     ui.enrollment = configuration?.api?.authorization?.enrollment;

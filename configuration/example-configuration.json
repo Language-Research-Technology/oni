@@ -32,6 +32,10 @@
                 "text": "LDaCA"
             }
         },
+        "authorizationProvider": {
+            "label": "REMS",
+            "url": "https://rems-uat.ldaca.edu.au/applications"
+        },
         "loginProviders": [
             {
                 "name": "github",
@@ -186,113 +190,125 @@
             "scrollTimeout": "10m",
             "log": "debug",
             "index": "items",
-            "fields": [
-                "@id",
-                "name.@value",
-                "description.@value",
-                "_text"
-            ],
-            "aggregations": [
-                {
-                    "display": "Root",
-                    "order": 0,
-                    "name": "_root.name.@value",
-                    "field": "_root.name.@value.keyword"
-                },
-                {
-                    "display": "Member Of",
-                    "order": 1,
-                    "name": "_memberOf.name.@value",
-                    "field": "_memberOf.name.@value.keyword"
-                },
-                {
-                    "display": "License",
-                    "order": 2,
-                    "name": "license.name.@value",
-                    "field": "license.name.@value.keyword"
-                },
-                {
-                    "display": "Record Type",
-                    "order": 3,
-                    "name": "@type",
-                    "field": "@type.keyword"
-                },
-                {
-                    "display": "Language",
-                    "order": 4,
-                    "name": "language.name.@value",
-                    "field": "language.name.@value.keyword"
-                },
-                {
-                    "display": "Modality",
-                    "order": 5,
-                    "name": "modality.name.@value",
-                    "field": "modality.name.@value.keyword"
-                },
-                {
-                    "display": "Linguistic Genre",
-                    "order": 6,
-                    "name": "linguisticGenre.name.@value",
-                    "field": "linguisticGenre.name.@value.keyword"
-                },
-                {
-                    "display": "Encoding Format",
-                    "order": 7,
-                    "name": "encodingFormat.@value",
-                    "field": "encodingFormat.@value.keyword"
-                },
-                {
-                    "display": "Annotation Type",
-                    "order": 8,
-                    "name": "annotationType.@value",
-                    "field": "annotationType.@value.keyword"
+            "indexConfiguration": {
+              "mapping": {
+                "total_fields": {
+                  "limit": 1000
                 }
+              },
+              "highlight":{
+                "max_analyzed_offset": 1000000
+              }
+            },
+            "fields": {
+              "@id": {"label": "ID", "selected": true},
+              "name.@value": {"label": "Name", "selected": true},
+              "description.@value": {"label": "Description", "selected": true},
+              "_text": {"label": "Text", "selected": true}
+            },      
+            "aggregations": [
+              {
+                "display": "Collection",
+                "order": 1,
+                "name": "_memberOf.name.@value",
+                "field": "_memberOf.name.@value.keyword"
+              },
+              {
+                "display": "Access",
+                "order": 2,
+                "name": "license.name.@value",
+                "field": "license.name.@value.keyword"
+              },
+              {
+                "display": "License",
+                "order": 0,
+                "name": "license.@id",
+                "field": "license.@id.keyword",
+                "hide": true
+              },
+              {
+                "display": "Record Type",
+                "order": 3,
+                "name": "@type",
+                "field": "@type.keyword"
+              },
+              {
+                "display": "Language",
+                "order": 4,
+                "name": "language.name.@value",
+                "field": "language.name.@value.keyword"
+              },
+              {
+                "display": "Modality",
+                "order": 5,
+                "name": "modality.name.@value",
+                "field": "modality.name.@value.keyword"
+              },
+              {
+                "display": "Linguistic Genre",
+                "order": 6,
+                "name": "linguisticGenre.name.@value",
+                "field": "linguisticGenre.name.@value.keyword"
+              },
+              {
+                "display": "File Format",
+                "order": 7,
+                "name": "encodingFormat.@value",
+                "field": "encodingFormat.@value.keyword"
+              },
+              {
+                "display": "Annotation Type",
+                "order": 8,
+                "name": "annotationType.@value",
+                "field": "annotationType.@value.keyword"
+              }
             ],
             "highlightFields": [
-                "_text"
+              "_text"
             ],
             "test": {
-                "filters": {
-                    "hasFile.language.name": [
-                        "Arabic, Standard",
-                        "Chinese, Mandarin",
-                        "Persian, Iranian",
-                        "Turkish",
-                        "Vietnames"
-                    ]
-                },
-                "@type": [
-                    "TextDialogue"
+              "filters": {
+                "hasFile.language.name": [
+                  "Arabic, Standard",
+                  "Chinese, Mandarin",
+                  "Persian, Iranian",
+                  "Turkish",
+                  "Vietnames"
                 ]
+              },
+              "@type": [
+                "TextDialogue"
+              ]
             },
             "mappingFieldLimit": 3000,
             "mappings": {
-                "date_detection": false,
-                "properties": {
-                    "@id": {
-                        "type": "keyword"
-                    },
-                    "hasFile": {
-                        "type": "nested",
-                        "properties": {
-                            "language": {
-                                "type": "nested",
-                                "properties": {
-                                    "name": {
-                                        "type": "nested",
-                                        "properties": {
-                                            "@value": {
-                                                "type": "keyword"
-                                            }
-                                        }
-                                    }
-                                }
+              "date_detection": false,
+              "properties": {
+                "@id": {
+                  "type": "keyword"
+                },
+                "hasPart": {},
+                "hasFile": {
+                  "type": "nested",
+                  "properties": {
+                    "language": {
+                      "type": "nested",
+                      "properties": {
+                        "name": {
+                          "type": "nested",
+                          "properties": {
+                            "@value": {
+                              "type": "keyword"
                             }
+                          }
                         }
+                      }
                     }
+                  }
                 }
+              }
             }
-        },
+          },
         "admin": {
             "indexRoutes": true
         }
