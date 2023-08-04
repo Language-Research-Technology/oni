@@ -65,6 +65,7 @@
         "restify": "^8.5.1",
         "restify-cors-middleware2": "^2.1.2",
         "restify-errors": "^8.0.2",
+        "restify-errors-options": "0.3.2",
         "rimraf": "^3.0.2",
         "ro-crate": "^3.2.1",
         "sequelize": "^6.21.2",

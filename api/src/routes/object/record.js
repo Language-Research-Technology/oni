@@ -9,10 +9,10 @@ import {first, isUndefined} from 'lodash';
 const log = getLogger();
 
 export async function getRecordSingle({req, res, next}) {
-  log.debug(`Get data ${req.query.id}`);
+  log.silly(`Get data ${req.query.id}`);
   let record = await getRecord({crateId: req.query.id});
-  if (record.data) {
-    res.send(record.data);
+  if (record) {
+    res.send(record);
   } else {
     res.status(404);
     res.send({id: req.query.id, message: 'Not Found'})
@@ -62,9 +62,8 @@ export async function getRecordConformsTo({req, res, next}) {
 export async function getRecordMemberOfTop({req, res, next}) {
   let record = await getRecord({crateId: req.query.id});
   let memberOfTopLevel = '';
-  if (record.data) {
-    log.debug(JSON.stringify(record.data));
-    const data = record.data;
+  if (record) {
+    const data = record;
     memberOfTopLevel = data.memberOfTopLevel;
   }
   if (memberOfTopLevel) {

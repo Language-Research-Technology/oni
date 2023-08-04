@@ -97,6 +97,7 @@ export async function initOCFL({configuration}) {
         await object.load();
         objectsCount++;
         log.info(`Found: ${objectsCount} : ${object.id}`);
+        log.debug(`${JSON.stringify(object)}`);
         await bootstrapObject({configuration, storage, object});
       }
       resolve(objectsCount);

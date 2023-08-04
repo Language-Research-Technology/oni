@@ -15,7 +15,8 @@
         "showNotebooks": false,
         "help": {
             "mainText": "For access please email help@example.com",
-            "helpUrl": "https://www.example.com"
+            "helpUrl": "https://www.example.com",
+            "citationText": "How to cite: <add in configuration>"
         },
         "terms": {
           "text": "Example terms of service",
