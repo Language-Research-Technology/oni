@@ -24,7 +24,7 @@ export async function transformURIs({host, crateId, uridTypes, repository}) {
       const ref = crate.getItem(i['@id']);
       if (ref) {
         log.silly(ref['@id']);
-        crate.changeGraphId(ref, `${host}/stream?id=${crateId}&path=${ref['@id']}`);
+        crate.changeGraphId(ref, `${host}/stream?id=${encodeURIComponent(crateId)}&path=${encodeURIComponent(ref['@id'])}`);
       }
     });
   }

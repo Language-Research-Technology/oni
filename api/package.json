@@ -1,6 +1,6 @@
 {
     "name": "oni",
-    "version": "1.6.1",
+    "version": "1.6.2",
     "description": "",
     "homepage": "http://github.com/arkisto-Platform/oni",
     "main": "src/index.js",
