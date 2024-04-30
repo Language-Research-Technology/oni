@@ -7,7 +7,7 @@ networks:
 
 services:
     db:
-        image: postgres:13-alpine
+        image: postgres:16-alpine
         hostname: db
         tty: true
         environment:
@@ -46,20 +46,22 @@ services:
             - ./configuration:/srv/configuration
             - /opt/storage/oni:/opt/storage/oni
         working_dir: /srv/api
-        command: ["/wait-for-it.sh", "db:5432", "elasticsearch:9200", "--", "npm", "run", "develop"]
+        command: ["/wait-for-it.sh", "db:5432", "opensearch:9200", "--", "npm", "run", "develop"]
         ports:
             - "8080:8080"
             - "9229:9229"
 
-    elasticsearch:
-        image: elasticsearch:8.6.2
-        hostname: elasticsearch
+    opensearch:
+        image: opensearchproject/opensearch:2.13.0
+        hostname: opensearch
         tty: true
         environment:
             - TERM="xterm-256color"
             - discovery.type=single-node
             - ES_JAVA_OPTS=-Xms2g -Xmx2g
-            - xpack.security.enabled=false
+            #- xpack.security.enabled=false # for elasticsearch
+            - plugins.security.disabled=true # for opensearch
+            - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ASd8asfhqu2i3r@#$1546
         ports:
             - "9200:9200"
             - "9300:9300"

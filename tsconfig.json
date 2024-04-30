@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": "..",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "resolveJsonModule": true,
+    "outDir": "dist"
+  },
+  "include": [
+    "index.js",
+    "src/**/*.js",
+    "src/**/*.d.ts",
+    "node_modules/ro-crate/**/*",
+    "node_modules/@ocfl/**/*"
+  ],
+  "typedocOptions": {
+    "entryPoints": [
+      "index.js"
+    ],
+    "out": "./docs",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "includeVersion": true
+  }
+}

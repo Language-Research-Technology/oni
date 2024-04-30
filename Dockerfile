@@ -1,5 +1,5 @@
 FROM --platform=$TARGETPLATFORM node:16 AS api-builder
-LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oniapi"
+LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oni"
 WORKDIR /srv
 COPY api/ /srv/
 RUN npm install

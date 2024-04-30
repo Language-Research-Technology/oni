@@ -14,12 +14,12 @@ if [ "$resp" == "y" ] ; then
     echo '>> Building the API code'
     docker buildx build --platform linux/amd64,linux/arm64 \
       --rm \
-      -t arkisto/oni-api:latest \
-      -t arkisto/oni-api:${VERSION} \
+      -t rrkive/oni-api:latest \
+      -t rrkive/oni-api:${VERSION} \
       -f Dockerfile .
     docker buildx build --load \
-      -t arkisto/oni-api:latest \
-      -t arkisto/oni-api:${VERSION} \
+      -t rrkive/oni-api:latest \
+      -t rrkive/oni-api:${VERSION} \
       -f Dockerfile .
     echo
 
@@ -41,17 +41,12 @@ if [ "$resp" == "y" ] ; then
     docker login
 
     echo "Pushing oni-api containers to docker hub"
-    docker buildx build --platform=linux/amd64,linux/arm64 \
-      --push \
-      --rm \
-      -t arkisto/oni-api:latest \
-      -t arkisto/oni-api:${VERSION} \
-      -f Dockerfile .
-
+    docker image push rrkive/oni-api:latest
+    docker image push rrkive/oni-api:${VERSION}
 fi
 
 read -p '>> Remove local container copies? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
-    docker rmi arkisto/oni-api:latest
-    docker rmi arkisto/oni-api:${VERSION}
+    docker rmi rrkive/oni-api:latest
+    docker rmi rrkive/oni-api:${VERSION}
 fi
