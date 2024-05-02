@@ -63,6 +63,227 @@ export default {
     "enrollment": {
       "enforced": true,
       "URL": ""
+    },
+    "topNavItems": [ {
+      "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%252C%2522_isTopLevel.%2540value%2522%253A%255B%2522true%2522%255D%257D",
+      "display": "Top Collections"
+      }, {
+        "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%257D",
+        "display": "Collections"
+        },
+      {
+      "route": "/search?f=%257B%2522%2540type%2522%253A%255B%2522SoftwareApplication%2522%255D%257D",
+      "display": "Notebooks"
+    }],
+    "search": {
+      "sorting": [
+        {"value": "relevance", "label": "Relevance"},
+        {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
+        {"value": "name", "label": "Name", "field": "name.@value.keyword"}
+      ],
+      "searchSorting": {"value": "relevance", "label": "Relevance"},
+      "startSorting": {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
+      "defaultSorting": {"value": "relevance", "label": "Relevance"},
+      "ordering": [
+        {"value": "asc", "label": "Ascending"},
+        {"value": "desc", "label": "Descending"}
+      ],
+      "defaultOrder": {"value": "desc", "label": "Descending"},
+      "searchDetails": [
+        {"field":"inLanguage", "label": "Language", "name": "inLanguage.name.@value"}
+      ]
+    },
+    "main": {
+      "fields": [
+        {
+          "display": "Language",
+          "name": "language.name.@value"
+        },
+        {
+          "display": "Linguistic Genre",
+          "name": "linguisticGenre.name.@value"
+        },
+        {
+          "display": "Modality",
+          "name": "modality.name.@value"
+        },
+        {
+          "display": "Annotation Type",
+          "name": "annotationType.@value"
+        },
+        {
+          "display": "File Formats",
+          "name": "encodingFormat.@value"
+        }
+      ],
+      "byteFields": [
+        "size",
+        "contentSize"
+      ],
+      "expand": [
+        "speaker",
+        "citation",
+        "spatialCoverage"
+      ]
+    },
+    "collection": {
+      "name": {
+        "display": "Name",
+        "name": "name"
+      },
+      "top": [
+        {
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
+          "name": "description"
+        },
+        {
+          "display": "Date Published",
+          "name": "datePublished"
+        }
+      ],
+      "meta": {
+        "hide": [
+          "name",
+          "description",
+          "datePublished",
+          "license",
+          "@type",
+          "_containsTypes",
+          "_crateId",
+          "_isRoot",
+          "_isTopLevel",
+          "_root",
+          "hasPart",
+          "hasMember",
+          "_memberOf",
+          "_isSubLevel",
+          "memberOf",
+          "_access",
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense",
+          "identifier",
+          "_mainCollection",
+          "_subCollection"
+        ],
+        "displayHasMember": false,
+        "displayHasPart": true
+      },
+      "relationships": [{"name":"notebook", "display":"Notebooks", "type":"SoftwareApplication"}]
+    },
+    "object": {
+      "name": {
+        "display": "Name",
+        "name": "name"
+      },
+      "top": [
+        {
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
+          "name": "description"
+        },
+        {
+          "display": "Date Published",
+          "name": "datePublished"
+        }
+      ],
+      "meta": {
+        "hide": [
+          "_memberOf",
+          "name",
+          "description",
+          "datePublished",
+          "identifier",
+          "license",
+          "@type",
+          "_containsTypes",
+          "_crateId",
+          "_isRoot",
+          "_isTopLevel",
+          "_root",
+          "hasPart",
+          "hasMember",
+          "error",
+          "_parent",
+          "_access",
+          "indexableText",
+          "_access",
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense",
+          "_mainCollection",
+          "_subCollection"
+        ]
+      }
+    },
+    "file": {
+      "meta": {
+        "hide": [
+          "name",
+          "@type",
+          "_access",
+          "_crateId",
+          "_parent",
+          "_memberOf",
+          "_root",
+          "_text",
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense",
+          "_mainCollection",
+          "_subCollection"
+        ]
+      }
+    },
+    "notebook": {
+      "name": {
+        "display": "Name",
+        "name": "name"
+      },
+      "top": [
+        {
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
+          "name": "description"
+        },
+        {
+          "display": "Date Published",
+          "name": "datePublished"
+        }
+      ],
+      "meta": {
+        "hide": [
+          "name",
+          "description",
+          "@type",
+          "datePublished",
+          "gitName",
+          "gitRepo",
+          "url",
+          "binderLink",
+          "base64",
+          "_access",
+          "_metadataIsPublic",
+          "_metadataLicense",
+          "_mainCollection",
+          "_subCollection"
+        ],
+        "displayHasMember": false,
+        "displayHasPart": false
+      }
+    },
+     "analytics": {
+      "gaMeasurementId": "G-YK7QTG4116"
     }
   },
   "api": {
@@ -391,6 +612,13 @@ export default {
     "admin": {
       "indexRoutes": true
     },
-    "skipByMatch": []
+    "conformsTo": {
+      "collection": "https://w3id.org/ldac/profile#Collection",
+      "object": "https://w3id.org/ldac/profile#Object",
+      "notebook": "https://w3id.org/ldac/profile#Notebook"
+    },
+    "skipByMatch": [
+      "arcp://name,austalk/*."
+    ]
   }
 }

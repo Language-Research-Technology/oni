@@ -5,6 +5,10 @@ networks:
         name: oni
         driver: bridge
 
+volumes:
+    postgres_data:
+    opensearch_data:
+
 services:
     db:
         image: postgres:16-alpine
@@ -18,14 +22,15 @@ services:
             POSTGRES_PASSWORD: ""
             POSTGRES_HOST_AUTH_METHOD: "trust"
             PGDATA: /postgresql/data
-        # volumes:
-        #     - describo_online_db_test:/postgresql
+        volumes:
+             - postgres_data:/postgresql
         ports:
           - "5432:5432"
 
     api:
-        #image: node:18-buster
-        build: api
+        #image: node:22-alpine
+        image: oni-api
+        build: .
         user: "1000:1000"
         hostname: api
         tty: true
@@ -39,14 +44,14 @@ services:
             DB_PASSWORD: ""
             DB_DATABASE: "oni"
         volumes:
-            #- api_node_modules:/srv/api/node_modules:delegated
-            - ./api:/srv/api:delegated
-            - ./.git:/srv/api/.git:delegated
+            #- oni_node_modules:/srv/node_modules:delegated
+            - .:/srv:delegated
             - ./scripts/wait-for-it.sh:/wait-for-it.sh
-            - ./configuration:/srv/configuration
+            # - ./configuration:/srv/configuration
             - /opt/storage/oni:/opt/storage/oni
-        working_dir: /srv/api
-        command: ["/wait-for-it.sh", "db:5432", "opensearch:9200", "--", "npm", "run", "develop"]
+        working_dir: /srv
+        command: ["/wait-for-it.sh", "db:5432", "opensearch:9200", "--", "npm", "run", "dev:docker"]
+        #command: ["npm", "run", "dev:docker"]
         ports:
             - "8080:8080"
             - "9229:9229"
@@ -62,6 +67,8 @@ services:
             #- xpack.security.enabled=false # for elasticsearch
             - plugins.security.disabled=true # for opensearch
             - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ASd8asfhqu2i3r@#$1546
+        volumes:
+             - opensearch_data:/usr/share/opensearch/data    
         ports:
             - "9200:9200"
             - "9300:9300"

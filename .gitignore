@@ -9,3 +9,6 @@ test-data/*.development.json
 test-data/perf/
 test-data/perf*
 cilogon-token-response.json
+!configuration/default.js
+!configuration/testing-configuration.json
+configuration/*

@@ -2,10 +2,11 @@
   "name": "oni",
   "version": "2.0.0~alpha",
   "description": "",
-  "homepage": "http://github.com/Language-Research-Technology/oni-api",
+  "homepage": "http://github.com/Language-Research-Technology/oni",
   "main": "src/index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "dev:docker": "npm rebuild && node --watch src/index.js",
     "test": "mocha --require './src/test-init.js' 'src/**/*.test.js'",
     "test-single": "mocha --require './src/test-init.js'"
   },

@@ -58,8 +58,7 @@ const app = setupRoutes({ configuration, repository });
 
 const server = serve({
   fetch: app.fetch,
-  //port: process.env.ONI_PORT || 8080
-  port: 8081
+  port: process.env.ONI_PORT || 8080
 }, ({ address, port }) => {
   log.info(`Oni server listening at http://${address}:${port}`);
 

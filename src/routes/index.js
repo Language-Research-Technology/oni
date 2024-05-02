@@ -25,6 +25,9 @@ import { Session } from '../models/session.js';
 const log = getLogger();
 
 export function setupRoutes({ configuration, repository }) {
+  console.log("======")
+  console.log("Setup Routes")
+  console.log("======")
   const secret = configuration.api.session.secret;
   const tokenSecret = configuration.api.tokens.secret;
   const tokenPassword = configuration.api.tokens.accessTokenPassword;
@@ -145,7 +148,7 @@ export function setupRoutes({ configuration, repository }) {
    *       200:
    *         description: Returns ui configuration including licenses and aggregations.
    */
-  app.get('/configuration', ({ json }) => {
+  app.get('/configuration', ({ json }) => {    
     const ui = configuration.ui;
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.searchFields = configuration?.api?.elastic?.fields;
@@ -246,9 +249,10 @@ export function setupRoutes({ configuration, repository }) {
 
   const factory = createFactory();
   const streamHandlers = factory.createHandlers((c, next) => {
-    const { id, path } = c.req.query();
+    const { id, path } = c.req.query();  
     if (id) {
-      let newLoc = '/object/'+ encodeURIComponent(id);
+      let newLoc = '//' + c.get('host') + '/object/'+ encodeURIComponent(id);
+      console.log(c.req.url)
       if (path) newLoc = newLoc + '/' + path;
       else newLoc += '?meta=all';
       return c.redirect(newLoc, 301);

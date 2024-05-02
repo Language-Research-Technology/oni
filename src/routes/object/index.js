@@ -11,6 +11,9 @@ const log = getLogger();
 const factory = createFactory();
 
 export function setupObjectRoutes({ configuration, repository, softAuth, streamHandlers }) {
+  console.log("==========")
+  console.log("setupObjectRoutes")
+  console.log("==========")
   const app = new Hono({ strict: false });
 
   /**
@@ -72,8 +75,14 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    *                        - /object
    */
   app.get("/", pagination(), async (c) => {
+    console.log("=============")
+    console.log("object/")
+    console.log("=============")
+    console.log("=============")
+    console.log("=============")
+    console.log("=============")
     const id = c.req.query('id');
-    if (id) {
+    if (id) {    
       return c.redirect(c.req.path + '/' + encodeURIComponent(id), 301);
     } else {
       const params = {};
@@ -274,6 +283,12 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
   app.get('/open', ...streamHandlers);
 
   app.get('/:id', async (c, next) => {
+    console.log("=============")
+    console.log("object/:id")
+    console.log("=============")
+    console.log("=============")
+    console.log("=============")
+    console.log("=============")
     const crateId = c.req.param('id');
     const query = c.req.query();
     let raw = false; //if true, return the ro-crate-metadata as it is, no modification
