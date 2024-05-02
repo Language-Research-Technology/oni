@@ -14,7 +14,7 @@ const log = getLogger();
  * @param {*} param0 
  * @returns 
  */
-export function transformURIs({host='', crateId='', types, crate}) {
+export function transformURIs({baseUrl='', crateId='', types, crate}) {
   //log.debug('transformURIs');
   const roc = new ROCrate(crate, {link: true, array: true});
   const rootId = crateId || roc.rootId;
@@ -29,7 +29,7 @@ export function transformURIs({host='', crateId='', types, crate}) {
     //roc.updateEntityId(item['@id'], `${host}/stream?id=${crateId}&path=${item['@id']}`);
     const id = encodeURIComponent(rootId);
     const filePath = item['@id'].split('/').filter(n => n).map(n => encodeURIComponent(n)).join('/');
-    roc.updateEntityId(item['@id'], `${host}/object/${id}/${filePath}`);
+    roc.updateEntityId(item['@id'], `${baseUrl}/object/${id}/${filePath}`);
   }
   return roc.toJSON();
 }
@@ -289,7 +289,7 @@ export async function decodeHash({ id }) {
   // hash it and then find it by it.
 }
 
-async function getSingleCrate({ repository, crateId, host, types, raw, json = false }) {
+async function getSingleCrate({ repository, crateId, baseUrl, types, raw, json = false }) {
   // TODO: return a specific version
   log.debug(`getCrate, ${crateId}`);
   const object = repository.object({ id: crateId });
@@ -299,21 +299,21 @@ async function getSingleCrate({ repository, crateId, host, types, raw, json = fa
     else return Readable.toWeb(await crateFile.asStream());
   } else {
     const crate = JSON.parse(await crateFile.asString());
-    return transformURIs({host, crateId, types, crate});
+    return transformURIs({baseUrl, crateId, types, crate});
   }
 }
 
-export async function getCrate({ repository, crateId, host, types, raw, deep }) {
+export async function getCrate({ repository, crateId, baseUrl, types, raw, deep }) {
   // first get the parent/root
   if (deep) {
-    let crate = await getSingleCrate({ repository, crateId, host, types, raw, json: true });
+    let crate = await getSingleCrate({ repository, crateId, baseUrl, types, raw, json: true });
     let stack = [crateId];
     const rocrate = new ROCrate(crate, {array: true, link: true});
     while (crateId = stack.pop()) {
       // get children id
       const children = await RootMemberOf.findAll({ where: { memberOf: crateId } });
       for (let c of children) {
-        crate = await getSingleCrate({ repository, crateId:c.crateId, host, types, raw, json: true });
+        crate = await getSingleCrate({ repository, crateId:c.crateId, baseUrl, types, raw, json: true });
         for (let entity of crate['@graph']) {
           if (entity['@id'] && !rocrate.getEntity(entity['@id'])) {
             rocrate.addEntity(entity);
@@ -324,7 +324,7 @@ export async function getCrate({ repository, crateId, host, types, raw, deep }) 
     }
     return rocrate.toJSON();
   } else {
-    return getSingleCrate({ repository, crateId, host, types, raw });
+    return getSingleCrate({ repository, crateId, baseUrl, types, raw });
   }
 }
 

@@ -1,7 +1,6 @@
 import './test-env.js'; // this is important to be placed in the first line.
 import { expect } from "expect";
 import assert from "node:assert";
-//import { setupRoutes } from "./routes/index.js";
 import { loadConfiguration } from "./services/configuration.js";
 import { indexRepository } from "./services/indexer.js";
 import ocfl from "@ocfl/ocfl-fs";

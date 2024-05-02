@@ -1,7 +1,22 @@
 //import { loadConfiguration, generateToken } from '../services/index.js';
 //import { User } from '../models/user.js';
 import { createJwtToken } from '#src/test-utils.js';
+import { setupRoutes } from "#src/routes/index.js";
 
+describe('base path', function () {
+  /** @type {import('hono').Hono} */
+  var app;
+  before(function () {
+    const configuration = JSON.parse(JSON.stringify(this.configuration));
+    configuration.api.basePath = '/api';
+    app = setupRoutes({configuration, repository: {}});
+  });
+
+  it('can correctly handle base path', async () => {
+    const res = await app.request('/api/version');
+    expect(res.status).toEqual(200);
+  });
+});
 
 describe('Test end point /', function () {
   /** @type {import('hono').Hono} */

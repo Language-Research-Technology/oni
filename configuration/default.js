@@ -296,6 +296,7 @@ export default {
       "logFolder": "/opt/storage/oni/logs"
     },
     "host": "",
+    "basePath": "/api",
     "ocfl": {
       "ocflPath": "/opt/storage/oni/ocfl",
       "ocflScratch": "/opt/storage/oni/scratch-ocfl",
@@ -446,7 +447,7 @@ export default {
     },
     "elastic": {
       "bootstrap": false,
-      "node": "http://opensearch:9200",
+      "node": `http://${process.env.OS_HOST || 'opensearch'}:${process.env.OS_PORT || '9200'}`,
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "log": "debug",

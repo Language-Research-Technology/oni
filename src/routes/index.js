@@ -25,16 +25,14 @@ import { Session } from '../models/session.js';
 const log = getLogger();
 
 export function setupRoutes({ configuration, repository }) {
-  console.log("======")
-  console.log("Setup Routes")
-  console.log("======")
   const secret = configuration.api.session.secret;
   const tokenSecret = configuration.api.tokens.secret;
   const tokenPassword = configuration.api.tokens.accessTokenPassword;
-  const app = new Hono({ strict: false });
   /** auth middleware */  
   const softAuth = authenticateUser({secret, tokenSecret, tokenPassword});
   const auth = authenticateUser({secret, tokenSecret, tokenPassword, isRequired: true});
+  const basePath = configuration.api.basePath || '';
+  const app = new Hono({ strict: false,  }).basePath(basePath);
 
   app.use(cors({
     maxAge: 5,
@@ -46,8 +44,11 @@ export function setupRoutes({ configuration, repository }) {
   app.use(async function detectHost(c, next) {
     const url = new URL(c.req.url);
     //console.log(c.req.header());
-    c.set('protocol', configuration.api.protocol || c.req.header('x-forwarded-proto') || url.protocol.slice(0,-1));
-    c.set('host', configuration.api.host || c.req.header('host') || url.host);
+    const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || url.protocol.slice(0,-1);
+    const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
+    c.set('protocol', protocol);
+    c.set('host', host);
+    c.set('baseUrl', protocol + '://' + host + (configuration.api.basePath || ''));
     //console.log(c.get('protocol'));
     await next();
   });
@@ -251,7 +252,7 @@ export function setupRoutes({ configuration, repository }) {
   const streamHandlers = factory.createHandlers((c, next) => {
     const { id, path } = c.req.query();  
     if (id) {
-      let newLoc = '//' + c.get('host') + '/object/'+ encodeURIComponent(id);
+      let newLoc = basePath + '/object/'+ encodeURIComponent(id);
       console.log(c.req.url)
       if (path) newLoc = newLoc + '/' + path;
       else newLoc += '?meta=all';

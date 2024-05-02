@@ -10,7 +10,7 @@ describe('controllers/record', function () {
     it('can transform file uri', async function () {
       const crate = await readJSON(path.resolve(import.meta.dirname, '../../test-data/ocfl/corpus-of-oni/ro-crate-metadata.json'));
       const c = transformURIs({
-        host: 'https://test.com',
+        baseUrl: 'https://test.com',
         crate,
         types: ['File']
       });

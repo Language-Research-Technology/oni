@@ -3,6 +3,7 @@
     "openapi": {
       "enabled": false
     },
+    "basePath": "",
     "origins": [
       {
         "host": "http://localhost:8090",
