@@ -34,7 +34,10 @@ export class SearchIndexer extends Indexer {
       try {
         await this.client.indices.create({
           index: elastic.index,
-          body: { mappings: elastic['mappings'] }
+          body: { 
+            max_result_window: elastic.max_result_window,
+            mappings: elastic.mappings
+          }
         });
         await this.client.indices.putSettings({
           index: elastic.index,

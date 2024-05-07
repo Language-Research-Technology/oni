@@ -5,6 +5,7 @@
   "homepage": "http://github.com/Language-Research-Technology/oni",
   "main": "src/index.js",
   "scripts": {
+    "prod": "NODE_ENV=production node src/index.js",
     "dev": "node --watch src/index.js",
     "dev:docker": "npm rebuild && node --watch src/index.js",
     "test": "mocha --require './src/test-init.js' 'src/**/*.test.js'",
@@ -46,7 +47,6 @@
     "@types/node": "^20.11.17",
     "expect": "^29.7.0",
     "mocha": "^10.3.0",
-    "oauth2-mock-server": "^7.1.1",
     "typedoc": "*"
   },
   "//mocha": {

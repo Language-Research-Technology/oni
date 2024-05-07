@@ -1,4 +1,6 @@
 .git
 .vscode
-api/node_modules
-api/test-data
+docs
+hooks
+node_modules
+test-data
