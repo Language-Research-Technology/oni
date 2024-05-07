@@ -1,11 +1,13 @@
 import { readJSON } from "fs-extra/esm";
 import { readFile } from "node:fs/promises";
 import defaultConf from "../../configuration/default.js";
+import { resolve } from "node:path";
 
 const privateFields = ["clientSecret"];
+
 /** @typedef { typeof defaultConf } Configuration */
 /** @type {Configuration} */
-var configuration;
+export var configuration = await loadConfiguration();
 
 async function readFirstFound(paths) {
   for (const p of paths) {
@@ -36,9 +38,16 @@ function overrideDefault(defConf, conf) {
  */
 export async function loadConfiguration(confPath, force = false) {
   if (!force && configuration) return configuration;
+  const projectPath = resolve(import.meta.dirname, '../../configuration');
   const nodeEnv = process.env.NODE_ENV || 'development';
   const configPath = confPath || process.env.ONI_CONFIG_PATH || `/srv/configuration/${nodeEnv}-configuration.json`;
-  const [actualPath, jsonContent] = await readFirstFound([configPath, `/srv/configuration/${nodeEnv}.json`, '/srv/configuration.json']);
+  const [actualPath, jsonContent] = await readFirstFound([
+    configPath, 
+    `/srv/configuration/${nodeEnv}.json`, 
+    '/srv/configuration.json',
+    resolve(projectPath, nodeEnv + '-configuration.json'),
+    resolve(projectPath, nodeEnv + '.json'),
+  ]);
   if (jsonContent) {
     console.log('Loading configuration from:', actualPath);
     try {

@@ -1,19 +1,30 @@
-export function badRequest({ body = '400 Bad Request', json = undefined, headers = {} }={}) {
-  body = json ? JSON.stringify(json) : body;
-  return new Response(body, { status: 400, headers });
+/**
+ * @callback CreateResponse
+ * @param {object|string} [body]
+ * @param {object} [headers]
+ * @returns {Response}
+ **/ 
+
+/**
+ * @param {number} code
+ * @param {string} label
+ * @returns {CreateResponse}
+ **/  
+function createErrorResponse(code, label) {
+  return function (body = {}, headers = {}) {
+    const text = JSON.stringify({
+      error: {
+        status: code + ' ' + label,
+        ...(typeof body === 'object' ? body : { message: body })
+      }
+    });
+    return new Response(text, { status: code, headers });
+  }
 }
 
-export function unauthorized({ body = '401 Unauthorized', json = undefined, headers = {} }={}) {
-  body = json ? JSON.stringify(json) : body;
-  return new Response(body, { status: 401, headers });
-}
-
-export function forbidden({ body = '403 Forbidden', json = undefined, headers = {} }={}) {
-  body = json ? JSON.stringify(json) : body;
-  return new Response(body, { status: 403, headers });
-}
-
-export function notFound({ body = '404 Not Found', json = undefined, headers = {} }={}) {
-  body = json ? JSON.stringify(json) : body;
-  return new Response(body, { status: 404, headers });
-}
+export const badRequest = createErrorResponse(400, 'Bad Request');
+export const unauthorized = createErrorResponse(401, 'Unauthorized');
+export const forbidden = createErrorResponse(403, 'Forbidden');
+export const notFound = createErrorResponse(404, 'Not Found');
+export const conflict = createErrorResponse(409, 'Conflict');
+export const internal = createErrorResponse(500, 'Internal Server Error');

@@ -2,7 +2,7 @@ import './test-env.js'; // this is important to be placed in the first line.
 import { expect } from "expect";
 import assert from "node:assert";
 import { loadConfiguration } from "./services/configuration.js";
-import { indexRepository } from "./services/indexer.js";
+import { indexRepository, loadIndexers } from "./services/indexer.js";
 import ocfl from "@ocfl/ocfl-fs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -14,9 +14,10 @@ global.testDataRootPath = path.resolve(import.meta.dirname, '../test-data');
 
 var app;
 var users;
-const configuration = await loadConfiguration(path.resolve(import.meta.dirname, '../configuration/testing-configuration.json'));
+const configuration = await loadConfiguration();
 
 configuration.api.openapi.enabled = false;
+configuration.api.elastic.index = 'test';
 
 const testSeq = new Sequelize({
   username: process.env.DB_USER,
@@ -91,11 +92,8 @@ export async function mochaGlobalSetup() {
       users[name]._tokenHeader = `Bearer ${token}`;
     }
 
-    await indexRepository({
-      repository, types: ['structural'],
-      defaultLicense: configuration.api.license?.default?.['@id'],
-      skipByMatch: configuration.api.skipByMatch
-    });
+    await loadIndexers({ configuration, repository });
+    await indexRepository({ repository, types: ['structural'], skipByMatch: configuration.api.skipByMatch });
   } catch (error) {
     console.error(error);
   }
@@ -105,7 +103,7 @@ export async function mochaGlobalSetup() {
 
   //mock fetch
   const _fetch = global.fetch;
-  global.fetch = async function(input, init) {
+  global.fetch = async function (input, init) {
     console.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
     console.log(input);
     return _fetch(input, init);

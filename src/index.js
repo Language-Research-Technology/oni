@@ -6,10 +6,9 @@ import ocfl from "@ocfl/ocfl-fs";
 import { loadConfiguration } from './services/configuration.js';
 import { getLogger } from './services/logger.js';
 import { sequelize } from './models/sequelize.js';
-import { indexRepository } from './services/indexer.js';
+import { indexRepository, loadIndexers } from './services/indexer.js';
 //import { elasticInit, elasticBootstrap, elasticIndex } from './indexer/elastic';
 import { setupRoutes } from './routes/index.js';
-import { elasticInit } from './indexer/elastic.js';
 const log = getLogger();
 
 let configuration;
@@ -42,23 +41,19 @@ try {
   log.error('=======================================');
   process.exit(1);
 }
-
 const types = [
   ... configuration.api.bootstrap ? ['structural'] : [],
   ... configuration.api.elastic.bootstrap ? ['search'] : [],
 ];
 
-await elasticInit({ configuration });
-await indexRepository({ types, repository, 
-  skipByMatch: configuration.api.skipByMatch,
-  defaultLicense: configuration.api.license?.default?.['@id']
-});
+await loadIndexers({configuration, repository});
+await indexRepository({ types, repository, skipByMatch: configuration.api.skipByMatch });
 
 const app = setupRoutes({ configuration, repository });
 
 const server = serve({
   fetch: app.fetch,
-  port: process.env.ONI_PORT || 8080
+  port: +process.env.ONI_PORT || 8080
 }, ({ address, port }) => {
   log.info(`Oni server listening at http://${address}:${port}`);
 

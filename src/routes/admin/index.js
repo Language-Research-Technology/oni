@@ -2,9 +2,8 @@ import { Hono } from 'hono';
 import { bearerAuth } from 'hono/bearer-auth';
 
 import { getLogger } from "../../services/logger.js";
-import { deleteRecords } from '#src/controllers/record.js';
-import { indexRepository } from '#src/services/indexer.js';
-import { Record } from '#src/models/record.js';
+import { createIndex, getState, deleteIndex } from '#src/services/indexer.js';
+import { conflict, internal, notFound } from '#src/helpers/responses.js';
 
 const log = getLogger();
 const elastic = {};
@@ -13,84 +12,77 @@ export function setupAdminRoutes({ configuration, repository }) {
 
   const token = configuration.api?.tokens?.admin;
   const app = new Hono({ strict: false });
-  const state = { structural: '', search: '' };
 
   app.get("/info", (c) => c.json({}));
 
   app.use(bearerAuth({ token }));
 
   /**
- * @openapi
- * /admin/index/{type}:
- *   get:
- *     tags:
- *       - general
- *     description: Runs indexer of the specified type, used only with the admin api key
- *     security:
- *       - Bearer: []
- *     responses:
- *       '202':
- *         description: |
- *                      - Returns a message that it has started indexing.
- */
-  app.post("/index/:type", ({ req, json, notFound }) => {
+   * @openapi
+   * /admin/index/{type}:
+   *   get:
+   *     tags:
+   *       - general
+   *     description: Runs indexer of the specified type, used only with the admin api key
+   *     security:
+   *       - Bearer: []
+   *     responses:
+   *       '202':
+   *         description: |
+   *                      - Returns a message that it has started indexing.
+   */
+  app.post("/index/:type", async ({ req, json }) => {
     const { type } = req.param();
-    if (type in state) {
+    const { force } = req.query();
+    const state = await getState(type);
+    if (state) {
       try {
-        if (state[type] === 'deleting') {
-          return json({ state: state[type] }, 409);
+        if (state.isIndexed && !force) {
+          return conflict('Index already exists');
+        } else if (state.isDeleting) {
+          return conflict('Deleting is in progress');
         }
-        if (state[type] !== 'indexing') {
+        if (!state.isIndexing) {
           log.debug(`running [${type}] indexer`);
-          state[type] = 'indexing';
-          indexRepository({
-            types: [type],
-            repository,
-            defaultLicense: configuration.api.license?.default?.['@id'],
-            skipByMatch: configuration.api.skipByMatch
-          }).catch(e => log.error(e)).then((counts) => state[type] = counts[type] ? 'indexed' : '');
+          createIndex(type, !!force);
         }
-        return json({ state: state[type] }, 202);
+        return json(state, 202);
       } catch (e) {
         log.error(e);
-        return json({ error: `Error indexing [${type}]`, message: e.message }, 500);
+        return internal({ message: `Error indexing [${type}] ${e.message}`, stack: e.stack });
       }
     } else {
-      return notFound();
+      return notFound('Indexer does not exist');
     }
   });
 
-  app.get("/index/:type", async ({ req, json, notFound }) => {
+  app.get("/index/:type", async ({ req, json }) => {
     const { type } = req.param();
-    if (!state[type] || state[type] === 'indexed') {
-      let count = 0;
-      if (type === 'structural') {
-        count = await Record.count();
+    const state = await getState(type);
+    if (state) {
+      if (state.isIndexed) {
+        return json(state);
+      } else {
+        return notFound('Index does not exist');
       }
-      state[type] = count ? 'indexed' : '';
-    }
-    if (state[type]) {
-      return json({ state: state[type] });
     } else {
-      return notFound();
+      return notFound('Indexer does not exist');
     }
   });
 
-  app.delete("/index/:type", ({ req, json, notFound }) => {
+  app.delete("/index/:type", async ({ req, json }) => {
     const { type } = req.param();
-    if (state[type]) {
-      if (state[type] === 'indexing') {
-        return json({ state: state[type] }, 409);
+    const state = await getState(type);
+    if (state) {
+      if (state.isIndexing) {
+        return conflict('Indexing is in progress');
       }
-      if (state[type] !== 'deleting') {
-        state[type] = 'deleting';
-        if (type === 'structural') {
-          deleteRecords().catch(e => e).then(() => state[type] = '');
-        }
+      if (!state.isDeleting) {
+        deleteIndex(type);
       }
-      return json({ state: state[type] }, 202);
+      return json(state, 202);
     } else {
-      return notFound();
+      return notFound('Indexer does not exist');
     }
   });
 

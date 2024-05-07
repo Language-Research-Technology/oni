@@ -447,7 +447,7 @@ export default {
     },
     "elastic": {
       "bootstrap": false,
-      "node": `http://${process.env.OS_HOST || 'opensearch'}:${process.env.OS_PORT || '9200'}`,
+      "node": `http://${process.env.OS_HOST || 'localhost'}:${process.env.OS_PORT || '9200'}`,
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "log": "debug",

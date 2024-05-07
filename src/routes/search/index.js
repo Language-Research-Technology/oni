@@ -1,12 +1,16 @@
 import { Hono } from 'hono';
-import { search } from '../../indexer/elastic.js';
+import { getIndexer } from '#src/services/indexer.js';
 import { getLogger } from '../../services/logger.js';
 
 //import { routeBrowse } from "../../middleware/auth";
 import { filterResults } from "../../services/elastic.js";
 
-
 const log = getLogger();
+/**@type {import('#src/indexer/search.js').SearchIndexer}*/
+const searchIndexer = getIndexer('search');
+async function search({ index, searchBody }) {
+  return searchIndexer.search({ index, searchBody });
+}
 
 export function setupSearchRoutes({ configuration, softAuth }) {
   const app = new Hono({ strict: false });
@@ -64,7 +68,7 @@ export function setupSearchRoutes({ configuration, softAuth }) {
         const field = req.query['field'].trim();
         searchBody.query = { match: {} };
         searchBody.query['match'][field] = decodeURIComponent(req.query['value']);
-        results = await search({ configuration, index, searchBody });
+        results = await search({ index, searchBody });
         log.debug(`Total: ${results?.hits?.total?.value}`);
       }
       const userId = user?.id;
@@ -158,7 +162,7 @@ export function setupSearchRoutes({ configuration, softAuth }) {
       // filter object based on access?
       
       log.silly(JSON.stringify(searchBody));
-      let results = await search({ configuration, index, searchBody });
+      let results = await search({ index, searchBody });
       if(results) {
         const filtered = await filterResults({ userId, results, configuration });
         return json(filtered);
