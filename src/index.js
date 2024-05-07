@@ -1,6 +1,7 @@
 /**
  * @fileoverview The main entry point of the app. Create the routing app (Hono) and connect it with Node HTTP server
  */
+import { setTimeout } from 'node:timers/promises';
 import { serve } from '@hono/node-server';
 import ocfl from "@ocfl/ocfl-fs";
 import { loadConfiguration } from './services/configuration.js';
@@ -20,7 +21,15 @@ try {
   process.exit(1);
 }
 
-await sequelize.sync();
+while (true) {
+  try {
+    await sequelize.sync();
+    break;
+  } catch (error) {
+    log.error('Waiting for postgres..');
+    await setTimeout(60000);
+  }
+}
 
 const ocflConf = configuration.api.ocfl;
 const repository = ocfl.storage({
