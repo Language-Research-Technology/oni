@@ -7,11 +7,16 @@ export class SearchIndexer extends Indexer {
   defaultLicense;
   /** @type {Client} */
   client;
+  conformsTo;
   constructor({ configuration }) {
     super();
     this.defaultLicense = configuration.api.license?.default?.['@id'];
     this.conf = configuration.api.elastic || {};
     this.client = new Client({ node: configuration.api.elastic.node });
+    this.conformsTo = {
+      [configuration.api.conformsTo.collection]: indexCollection,
+      [configuration.api.conformsTo.object]: indexObject
+    };
   }
 
   async init() {
@@ -34,7 +39,7 @@ export class SearchIndexer extends Indexer {
       try {
         await this.client.indices.create({
           index: elastic.index,
-          body: { 
+          body: {
             max_result_window: elastic.max_result_window,
             mappings: elastic.mappings
           }
@@ -53,7 +58,23 @@ export class SearchIndexer extends Indexer {
     }
   }
 
+  /**
+   * 
+   * @param {object} p
+   * @param {any} p.ocflObject
+   * @param {import('ro-crate').ROCrate} p.crate
+   * @param {any} p.rootDataset
+   * @returns 
+   */
   async _index({ ocflObject, crate }) {
+    const rootDataset = crate.rootDataset;
+    const indexTypes = (rootDataset.conformsTo || []).map(id => this.conformsTo[id]).filter(o => o);
+    if (indexTypes.length) {
+
+      for (const index of indexTypes) {
+        index();
+      }
+    }
   }
 
   async _delete() {
@@ -73,7 +94,7 @@ export class SearchIndexer extends Indexer {
     }
   }
 
-  async search({index = this.conf.index, searchBody, filterPath=undefined, explain = false}) {
+  async search({ index = this.conf.index, searchBody, filterPath = undefined, explain = false }) {
     try {
       logger.debug("----- searchBody ----");
       logger.debug(JSON.stringify(searchBody));
@@ -99,3 +120,28 @@ export class SearchIndexer extends Indexer {
 // elasticInit({configuration});
 // elasticBootstrap({configuration});
 // elasticIndex({configuration, repository});
+
+function indexCollection() {
+
+}
+
+function indexObject() {
+
+}
+
+/**
+ * Find the license of an item with its id if not and id or undefined return a default license from
+ * config, if passed an Id and not found it will also return a default license.
+ * @param {object[]} licenses - Array of licences
+ * @param {import('ro-crate').ROCrate} crate
+ * @returns a license object
+ *
+ */
+function resolveLicense(licenses, crate) {
+  for (const license of (licenses || [])) {
+    const id = typeof license === 'string' ? license : license?.['@id'];
+    const entity = crate.getEntity(id);
+    if (entity) return entity;
+    else logger.warn(`Invalid license: ${id}`);
+  }
+}

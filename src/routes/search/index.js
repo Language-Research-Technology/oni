@@ -6,13 +6,13 @@ import { getLogger } from '../../services/logger.js';
 import { filterResults } from "../../services/elastic.js";
 
 const log = getLogger();
-/**@type {import('#src/indexer/search.js').SearchIndexer}*/
-const searchIndexer = getIndexer('search');
-async function search({ index, searchBody }) {
-  return searchIndexer.search({ index, searchBody });
-}
 
 export function setupSearchRoutes({ configuration, softAuth }) {
+  /**@type {import('#src/indexer/search.js').SearchIndexer}*/
+  const searchIndexer = getIndexer('search');
+  async function search({ index, searchBody }) {
+    return searchIndexer.search({ index, searchBody });
+  }
   const app = new Hono({ strict: false });
   app.use(softAuth);
 

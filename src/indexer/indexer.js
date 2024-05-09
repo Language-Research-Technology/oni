@@ -1,3 +1,5 @@
+import { logger } from "#src/services/logger.js";
+
 class State {
   static DELETING = "deleting";
   static INDEXING = "indexing";
@@ -66,6 +68,17 @@ export class Indexer {
   async index({ ocflObject, crate }) {
     if (this.__state.isIndexing || this.__state.isDeleting) return;
     this.__state.state = State.INDEXING;
+
+    const rootDataset = crate.rootDataset;
+    const crateId = crate.rootId;
+    if (!rootDataset) {
+      logger.warn(`${ocflObject.root}: Does not contain an ROCrate with a valid root dataset`);
+      return;
+    }
+    if (crateId !== './') {
+      logger.warn(`${ocflObject.root}: Cannot process a crate with invalid identifier ('./').`);
+      return;
+    }
     await this._index({ ocflObject, crate });
     this.__state.state = '';
   }

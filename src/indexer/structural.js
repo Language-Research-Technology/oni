@@ -10,33 +10,24 @@ export class StructuralIndexer extends Indexer {
     this.defaultLicense = configuration.api.license?.default?.['@id'];
   }
   async _index({ ocflObject, crate }) {
-    const objectRoot = ocflObject.root;
-    const root = crate.rootDataset;
-    if (!root) {
-      logger.warn(`${objectRoot} : does not contain an ROCrate with a valid root dataset`);
-      return;
-    }
-    const license = root.license?.[0]?.['@id'] || this.defaultLicense;
+    const rootDataset = crate.rootDataset;
     const crateId = crate.rootId;
+    const license = rootDataset.license?.[0]?.['@id'] || this.defaultLicense;
     //console.log(`${crateId} license: ${lic}`);
-    if (crateId !== './') {
-      const rec = {
-        crateId,
-        license,
-        name: root.name[0],
-        description: root.description[0] || '',
-        objectRoot
-      }
-      logger.info(`Loading ${rec.crateId}`);
-      await createRecord({
-        data: rec,
-        memberOfs: root['memberOf'] || [],
-        atTypes: root['@type'] || [],
-        conformsTos: root['conformsTo'] || []
-      });
-    } else {
-      logger.error(`Cannot insert a crate with Id: './' please use arcp`);
+    const rec = {
+      crateId,
+      license,
+      name: rootDataset.name[0],
+      description: rootDataset.description[0] || '',
+      objectRoot: ocflObject.root
     }
+    logger.info(`[structural] Indexing ${rec.crateId}`);
+    await createRecord({
+      data: rec,
+      memberOfs: rootDataset.memberOf || [],
+      atTypes: rootDataset['@type'] || [],
+      conformsTos: rootDataset.conformsTo || []
+    });
 
   }
   async _delete() {
