@@ -7,7 +7,7 @@ export function swaggerDoc({configuration, version, name, homepage}) {
   log.debug('generating swaggerDoc');
   
   //const serverUrl = configuration.api.host || 'http://localhost:8080'
-  //const serverDescription = configuration.ui.siteName || 'Development server'
+  const serverDescription = configuration.ui.siteName || 'Development server'
 
   const options = {
     definition: {
@@ -26,12 +26,12 @@ export function swaggerDoc({configuration, version, name, homepage}) {
           url: homepage,
         },
       },
-      // servers: [
-      //   {
-      //     url: serverUrl,
-      //     description: serverDescription
-      //   },
-      // ],
+      servers: [
+        {
+          //url: serverUrl,
+          description: serverDescription
+        },
+      ],
       components: {
         schemas: {},
         securitySchemes: {

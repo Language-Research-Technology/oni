@@ -48,7 +48,7 @@ export function setupRoutes({ configuration, repository }) {
     const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
     c.set('protocol', protocol);
     c.set('host', host);
-    c.set('baseUrl', protocol + '://' + host + (configuration.api.basePath || ''));
+    c.set('baseUrl', configuration.api.baseUrl || (protocol + '://' + host + (configuration.api.basePath || '')));
     //console.log(c.get('protocol'));
     await next();
   });
@@ -191,7 +191,10 @@ export function setupRoutes({ configuration, repository }) {
      *       200:
      *         description: Returns swagger spec of this api
      */
-    app.on('GET', ['/openapi.json', '/swagger.json'], ({ json }) => json(swaggerSpec));
+    app.on('GET', ['/openapi.json', '/swagger.json'], ({ get, json }) => {
+      swaggerSpec.servers[0].url = get('baseUrl');
+      return json(swaggerSpec);
+    });
   }
 
   /**
