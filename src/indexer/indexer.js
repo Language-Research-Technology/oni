@@ -1,33 +1,6 @@
 import { logger } from "#src/services/logger.js";
 
-class State {
-  static DELETING = "deleting";
-  static INDEXING = "indexing";
-  state;
-  count = 0;
-  constructor() {}
-  get isIndexed() {
-    return this.count > 0;
-  }
-  get isIndexing() {
-    return this.state === State.INDEXING;
-  }
-  get isDeleting() {
-    return this.state === State.DELETING;
-  }
-  toJSON() {
-    return {
-      state: this.state || (this.isIndexed ? 'indexed' : ''),
-      count: this.count,
-      isIndexed: this.isIndexed,
-      isIndexing: this.isIndexing,
-      isDeleting: this.isDeleting
-    }
-  }
-}
-
 export class Indexer {
-  __state = new State();
   constructor(opt) {}
 
   static async create({configuration}) {
@@ -37,15 +10,6 @@ export class Indexer {
   }
 
   async init() {}
-
-  async state() {
-    this.__state.count = await this.count();
-    return this.__state;
-  }
-
-  async _delete() {
-    throw new Error('Not Implemented');
-  }
 
   async _index({ ocflObject, crate }) {
     throw new Error('Not Implemented');
@@ -59,28 +23,21 @@ export class Indexer {
   }
 
   async delete() {
-    if (this.__state.isIndexing || this.__state.isDeleting) return;
-    this.__state.state = State.DELETING;
-    await this._delete();
-    this.__state.state = '';
+    throw new Error('Not Implemented');
   }
 
   async index({ ocflObject, crate }) {
-    if (this.__state.isIndexing || this.__state.isDeleting) return;
-    this.__state.state = State.INDEXING;
-
     const rootDataset = crate.rootDataset;
     const crateId = crate.rootId;
     if (!rootDataset) {
       logger.warn(`${ocflObject.root}: Does not contain an ROCrate with a valid root dataset`);
-      return;
-    }
-    if (crateId !== './') {
+    } else if (crateId === './') {
       logger.warn(`${ocflObject.root}: Cannot process a crate with invalid identifier ('./').`);
-      return;
+    } else {
+      //logger.debug('index ' + ocflObject.root);
+      //console.log(this.__state);
+      await this._index({ ocflObject, crate });
     }
-    await this._index({ ocflObject, crate });
-    this.__state.state = '';
   }
 
 }

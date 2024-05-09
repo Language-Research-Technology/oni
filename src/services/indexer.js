@@ -11,6 +11,54 @@ const indexer = {};
 var skipByMatch = [];
 var repo;
 
+class State {
+  static DELETING = "deleting";
+  static INDEXING = "indexing";
+  /** @typedef {State.DELETING|State.INDEXING} STATE*/
+  /** @type {STATE} */
+  state;
+  count = 0;
+  constructor() {}
+  get isIndexed() {
+    return this.count > 0;
+  }
+  get isIndexing() {
+    return this.state === State.INDEXING;
+  }
+  get isDeleting() {
+    return this.state === State.DELETING;
+  }
+  get isBusy() {
+    return !!this.state;
+  }
+  startIndexing() {
+    if (!this.state) this.state = State.INDEXING;
+  }
+  stopIndexing() {
+    if (this.isIndexing) this.state = '';
+  }
+  startDeleting() {
+    if (!this.state) this.state = State.DELETING;
+  }
+  stopDeleting() {
+    if (this.isDeleting) this.state = '';
+  }
+  toJSON() {
+    return {
+      state: this.state || (this.isIndexed ? 'indexed' : ''),
+      count: this.count,
+      isIndexed: this.isIndexed,
+      isIndexing: this.isIndexing,
+      isDeleting: this.isDeleting
+    }
+  }
+}
+
+const states = {
+  structural: new State(),
+  search: new State()
+};
+
 export async function loadIndexers({ configuration, repository }) {
   skipByMatch = configuration.api.skipByMatch;
   repo = repository;
@@ -42,18 +90,27 @@ export function getIndexer(type) {
  * @param {string} type 
  */
 export async function getState(type) {
-  return indexer[type]?.state();
+  if (states[type]) {
+    states[type].count = await indexer[type]?.count();
+  }
+  return states[type];
 }
 
 export async function deleteIndex(type) {
-  return indexer[type]?.delete();
+  if (!states[type] || states[type].isBusy) return;
+  states[type].startDeleting();
+  await indexer[type]?.delete();
+  states[type].stopDeleting();
 }
 
 export async function createIndex(type, force = false) {
+  if (!states[type] || states[type].isBusy) return;
   if (force) {
     await deleteIndex(type);
   }
-  return indexRepository({ repository: repo, skipByMatch, types: [type] });
+  states[type].startIndexing();
+  await indexRepository({ repository: repo, skipByMatch, types: [type] });
+  states[type].stopIndexing();
 }
 
 /**

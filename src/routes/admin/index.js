@@ -37,14 +37,14 @@ export function setupAdminRoutes({ configuration, repository }) {
     const state = await getState(type);
     if (state) {
       try {
-        if (state.isIndexed && !force) {
+        if (state.isIndexed && force == null) {
           return conflict('Index already exists');
         } else if (state.isDeleting) {
           return conflict('Deleting is in progress');
         }
         if (!state.isIndexing) {
           log.debug(`running [${type}] indexer`);
-          createIndex(type, !!force);
+          createIndex(type, force != null);
         }
         return json(state, 202);
       } catch (e) {
@@ -60,11 +60,7 @@ export function setupAdminRoutes({ configuration, repository }) {
     const { type } = req.param();
     const state = await getState(type);
     if (state) {
-      if (state.isIndexed) {
-        return json(state);
-      } else {
-        return notFound('Index does not exist');
-      }
+      return json(state, state.isIndexed ? 200 : 404);
     } else {
       return notFound('Indexer does not exist');
     }

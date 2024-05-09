@@ -30,7 +30,7 @@ export class StructuralIndexer extends Indexer {
     });
 
   }
-  async _delete() {
+  async delete() {
     await Record.destroy({ truncate: true, cascade: true });
   }
   async count() {

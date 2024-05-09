@@ -77,7 +77,7 @@ export class SearchIndexer extends Indexer {
     }
   }
 
-  async _delete() {
+  async delete() {
     try {
       await this.client.indices.delete({ index: this.conf.index });
     } catch (e) {
