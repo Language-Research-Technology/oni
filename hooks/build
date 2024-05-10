@@ -17,8 +17,7 @@ docker buildx create --name multiarch --use
 docker buildx build \
     --push \
     --platform "${BUILDPLATFORM}" \
-    --tag "${DOCKER_REPO}:${DOCKER_TAG}" \
-    --tag "${DOCKER_REPO}:latest" \
+    --tag "${IMAGE_NAME}" \
     --file "${DOCKERFILE_PATH}" .
 
 echo "### RUN build END"
