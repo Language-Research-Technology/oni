@@ -15,9 +15,10 @@ echo "Architectures=${BUILDPLATFORM}"
 
 docker buildx create --name multiarch --use
 docker buildx build \
---tag "rrkive/oni:${DOCKER_TAG}" \
---platform "${BUILDPLATFORM}" \
---file "${DOCKERFILE_PATH}" \
---push .
+    --push \
+    --platform "${BUILDPLATFORM}" \
+    --tag "rrkive/oni:${DOCKER_TAG}" \
+    --tag "rrkive/oni:latest" \
+    --file "${DOCKERFILE_PATH}" .
 
 echo "### RUN build END"
