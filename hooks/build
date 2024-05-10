@@ -17,8 +17,8 @@ docker buildx create --name multiarch --use
 docker buildx build \
     --push \
     --platform "${BUILDPLATFORM}" \
-    --tag "rrkive/oni:${DOCKER_TAG}" \
-    --tag "rrkive/oni:latest" \
+    --tag "${DOCKER_REPO}:${DOCKER_TAG}" \
+    --tag "${DOCKER_REPO}:latest" \
     --file "${DOCKERFILE_PATH}" .
 
 echo "### RUN build END"
