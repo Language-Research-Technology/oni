@@ -446,8 +446,8 @@ export default {
       "main": "LDaCA"
     },
     "elastic": {
-      "bootstrap": false,
-      "node": `http://${process.env.OS_HOST || 'localhost'}:${process.env.OS_PORT || '9200'}`,
+      "bootstrap": false, 
+      "node": `http://${process.env.SEARCH_HOST || 'localhost'}:${process.env.SEARCH_PORT || '9200'}`,
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "log": "debug",

@@ -26,11 +26,23 @@ services:
              - postgres_data:/postgresql
         ports:
           - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -d oni"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
 
     api:
         #image: node:22-alpine
-        image: oni-api
-        build: .
+        image: oni
+        build: 
+            context: .
+            dockerfile: Dev.Dockerfile
+        depends_on:
+            db:
+                condition: service_healthy
+            opensearch:
+                condition: service_healthy
         user: "1000:1000"
         hostname: api
         tty: true
@@ -43,15 +55,13 @@ services:
             DB_USER: "root"
             DB_PASSWORD: ""
             DB_DATABASE: "oni"
-        volumes:
-            #- oni_node_modules:/srv/node_modules:delegated
+            SEARCH_HOST: "opensearch"
+        volumes:    
             - .:/srv:delegated
-            - ./scripts/wait-for-it.sh:/wait-for-it.sh
-            # - ./configuration:/srv/configuration
+            # - ./{NODE_ENV}-configuration:/srv/configuration
             - /opt/storage/oni:/opt/storage/oni
         working_dir: /srv
-        command: ["/wait-for-it.sh", "db:5432", "opensearch:9200", "--", "npm", "run", "dev:docker"]
-        #command: ["npm", "run", "dev:docker"]
+        command: ["npm", "run", "dev:docker"]
         ports:
             - "8080:8080"
             - "9229:9229"
@@ -72,3 +82,8 @@ services:
         ports:
             - "9200:9200"
             - "9300:9300"
+        healthcheck:
+            test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
