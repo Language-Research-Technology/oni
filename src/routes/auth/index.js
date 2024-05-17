@@ -101,7 +101,7 @@ export function setupAuthRoutes({ configuration, auth }) {
     const client = new issuer.Client({
       client_id: configuration.clientId,
       client_secret: configuration.clientSecret,
-      redirect_uris: [configuration.redirectUri || get('host') + configuration.redirectPath],
+      redirect_uris: [configuration.redirect_uri || configuration.redirectUri || get('baseUrl') + configuration.redirectPath],
       response_types: ["code"],
     });
     const code_verifier = generators.codeVerifier();

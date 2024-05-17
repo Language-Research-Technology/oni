@@ -68,7 +68,7 @@ export function setupOauthRoutes({ configuration }) {
     //   state: provider,
     // });
     const url = client.authorizeURL({
-      redirect_uri: conf.redirect_uri,
+      redirect_uri: conf.redirect_uri || conf.redirectUri || c.get('baseUrl') + conf.redirectPath,
       scope: conf.scope,
       state: conf.state
     });
