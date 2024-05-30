@@ -82,5 +82,22 @@ export function setupAdminRoutes({ configuration, repository }) {
     }
   });
 
+    /**
+   * @openapi
+   * /admin/configuration:
+   *   get:
+   *     tags:
+   *       - general
+   *     description: |
+   *                  ### Configuration
+   *                  Configuration
+   *     responses:
+   *       200:
+   *         description: Returns all configuration
+   */
+    app.get('/configuration', ({ json }) => {  
+      return json(configuration);
+    });
+
   return app;
 }

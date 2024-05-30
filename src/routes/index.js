@@ -150,7 +150,7 @@ export function setupRoutes({ configuration, repository }) {
    *         description: Returns ui configuration including licenses and aggregations.
    */
   app.get('/configuration', ({ json }) => {    
-    const ui = configuration.ui;
+    const ui = {...configuration.ui};
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.searchFields = configuration?.api?.elastic?.fields;
     ui.searchHighlights = configuration?.api?.elastic?.highlightFields;
@@ -158,7 +158,7 @@ export function setupRoutes({ configuration, repository }) {
     ui.licenses = configuration?.api?.licenses;
     ui.conformsTo = configuration?.api?.conformsTo;
     ui.enrollment = configuration?.api?.authorization?.enrollment;
-    return json({ ui: configuration.ui });
+    return json({ ui });
   });
 
   /**

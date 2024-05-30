@@ -472,7 +472,7 @@ export default {
           "label": "Description",
           "checked": true
         },
-        "language.name.@value": {
+        "inLanguage.name.@value": {
           "label": "Language",
           "checked": true
         },
@@ -494,7 +494,7 @@ export default {
           "order": 1,
           "name": "_mainCollection.name.@value",
           "field": "_mainCollection.name.@value.keyword",
-          "active": false,
+          "active": true,
           "help": "A group of related objects such as a corpus, a sub-corpus, or items collected in a session with consultants."
         },
         {
@@ -530,15 +530,15 @@ export default {
         {
           "display": "Language",
           "order": 4,
-          "name": "language.name.@value",
-          "field": "language.name.@value.keyword",
+          "name": "inLanguage.name.@value",
+          "field": "inLanguage.name.@value.keyword",
           "help": "The language(s) of the content in this resource."
         },
         {
-          "display": "Modality",
+          "display": "Communication Mode",
           "order": 5,
-          "name": "modality.name.@value",
-          "field": "modality.name.@value.keyword",
+          "name": "communicationMode.name.@value",
+          "field": "communicationMode.name.@value.keyword",
           "help": "The mode(s) (spoken, written, signed, etc.) used in the interaction represented by this resource.",
           "icons": true
         },
