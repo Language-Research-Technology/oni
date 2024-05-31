@@ -1,20 +1,12 @@
-FROM --platform=$TARGETPLATFORM node:16 AS api-builder
-LABEL maintainer="Moises Sacal <moisbo@gmail.com>" image_name="oniapi"
+FROM --platform=$TARGETPLATFORM node:22-alpine AS api-installer
 WORKDIR /srv
-COPY api/ /srv/
-RUN npm install
-RUN npm run build:production
-
-FROM --platform=$TARGETPLATFORM node:16 AS api-module-install
-WORKDIR /srv
-COPY --from=api-builder /srv/dist/ /srv/
-COPY --from=api-builder /srv/src/ /srv/src/
-COPY --from=api-builder /srv/package.json /srv/package.json
-COPY scripts/wait-for-postgres.sh /srv/wait-for-postgres.sh
+COPY . /srv/
+RUN apk add postgresql-client ca-certificates make python3 g++ bash
 RUN npm install
 
-FROM --platform=$TARGETPLATFORM node:16-slim
+FROM --platform=$TARGETPLATFORM node:22-alpine
+LABEL image_name="oni"
 WORKDIR /srv
-RUN apt-get update && apt-get install -y postgresql-client ca-certificates
-COPY --from=api-module-install /srv/ /srv/
-CMD [ "/srv/wait-for-postgres.sh", "node", "./server.bundle.js" ]  
+RUN apk add postgresql-client ca-certificates bash
+COPY --from=api-installer /srv/ /srv/
+CMD [ "npm", "run", "prod" ]

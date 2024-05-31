@@ -1,0 +1,62 @@
+{
+  "api": {
+    "openapi": {
+      "enabled": false
+    },
+    "basePath": "",
+    "origins": [
+      {
+        "host": "http://localhost:8090",
+        "key": "origin1",
+        "secret": "origin1secret"
+      }
+    ],
+    "authentication": {
+      "cilogon": {
+        "authorizeHost": "https://cilogon.aaf.edu.au",
+        "authorizePath": "/authorize",
+        "tokenHost": "https://cilogon.aaf.edu.au",
+        "tokenPath": "/oauth2/token",
+        "user": "https://cilogon.aaf.edu.au/oauth2/userinfo",
+        "bearer": "token",
+        "scope": "openid+profile+email+org.cilogon.userinfo+offline_access",
+        "use_refresh_token": true,
+        "expirationWindowSeconds": 300,
+        "prompt": "consent",
+        "state": "cilogon",
+        "oauthType": "AuthorizationCode",
+        "useFormData": true,
+        "memberOf": "isMemberOf",
+        "userid": "sub",
+        "username": "sub"
+      }
+    },
+    "licenses": [
+      {
+        "license": "https://www.ldaca.edu.au/licenses/austlit/all/v1/",
+        "group": "https://www.ldaca.edu.au/licenses/austlit/all/v1/",
+        "access": "login",
+        "enrollment": {
+          "url": "https://rems.ldaca.edu.au/application?items=1",
+          "label": "apply for access",
+          "class": ""
+        }
+      },
+      {
+        "license": "#restricted",
+        "group": "restricted-users",
+        "access": "loginPlus",
+        "enrollment": {
+          "url": "",
+          "label": "",
+          "class": ""
+        }
+      }
+    ],
+    "conformsTo": {
+      "collection": "https://purl.archive.org/language-data-commons/profile#Collection",
+      "object": "https://purl.archive.org/language-data-commons/profile#Object",
+      "notebook": "https://purl.archive.org/language-data-commons/profile#Notebook"
+    }
+  }
+}

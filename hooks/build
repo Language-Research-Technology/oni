@@ -14,6 +14,13 @@ BUILDPLATFORM="${BUILDPLATFORM:-"linux/amd64,linux/arm64"}"
 echo "Architectures=${BUILDPLATFORM}"
 
 docker buildx create --name multiarch --use
-docker buildx build --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --build-arg VCS_REF="$(git rev-parse --short HEAD)" --tag "arkisto/oni-api:${DOCKER_TAG}" --platform "${BUILDPLATFORM}" --file "${DOCKERFILE_PATH}" --push .
+docker buildx build \
+    --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+    --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+    --push \
+    --platform "${BUILDPLATFORM}" \
+    --tag "${IMAGE_NAME}" \
+    --tag "${DOCKER_REPO}:latest" \
+    --file "${DOCKERFILE_PATH}" .
 
 echo "### RUN build END"

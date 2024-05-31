@@ -5,9 +5,13 @@ networks:
         name: oni
         driver: bridge
 
+volumes:
+    postgres_data:
+    opensearch_data:
+
 services:
     db:
-        image: postgres:13-alpine
+        image: postgres:16-alpine
         hostname: db
         tty: true
         environment:
@@ -18,14 +22,27 @@ services:
             POSTGRES_PASSWORD: ""
             POSTGRES_HOST_AUTH_METHOD: "trust"
             PGDATA: /postgresql/data
-        # volumes:
-        #     - describo_online_db_test:/postgresql
+        volumes:
+             - postgres_data:/postgresql
         ports:
           - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -d oni"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
 
     api:
-        #image: node:18-buster
-        build: api
+        #image: node:22-alpine
+        image: oni
+        build: 
+            context: .
+            dockerfile: Dev.Dockerfile
+        depends_on:
+            db:
+                condition: service_healthy
+            opensearch:
+                condition: service_healthy
         user: "1000:1000"
         hostname: api
         tty: true
@@ -38,28 +55,35 @@ services:
             DB_USER: "root"
             DB_PASSWORD: ""
             DB_DATABASE: "oni"
-        volumes:
-            #- api_node_modules:/srv/api/node_modules:delegated
-            - ./api:/srv/api:delegated
-            - ./.git:/srv/api/.git:delegated
-            - ./scripts/wait-for-it.sh:/wait-for-it.sh
-            - ./configuration:/srv/configuration
+            SEARCH_HOST: "opensearch"
+        volumes:    
+            - .:/srv:delegated
+            # - ./{NODE_ENV}-configuration:/srv/configuration
             - /opt/storage/oni:/opt/storage/oni
-        working_dir: /srv/api
-        command: ["/wait-for-it.sh", "db:5432", "elasticsearch:9200", "--", "npm", "run", "develop"]
+        working_dir: /srv
+        command: ["npm", "run", "dev:docker"]
         ports:
             - "8080:8080"
             - "9229:9229"
 
-    elasticsearch:
-        image: elasticsearch:8.6.2
-        hostname: elasticsearch
+    opensearch:
+        image: opensearchproject/opensearch:2.13.0
+        hostname: opensearch
         tty: true
         environment:
             - TERM="xterm-256color"
             - discovery.type=single-node
             - ES_JAVA_OPTS=-Xms2g -Xmx2g
-            - xpack.security.enabled=false
+            #- xpack.security.enabled=false # for elasticsearch
+            - plugins.security.disabled=true # for opensearch
+            - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ASd8asfhqu2i3r@#$1546
+        volumes:
+             - opensearch_data:/usr/share/opensearch/data    
         ports:
             - "9200:9200"
             - "9300:9300"
+        healthcheck:
+            test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 5

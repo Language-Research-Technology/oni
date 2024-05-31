@@ -30,6 +30,8 @@ Saving API code triggers auto reload.
 When you save a test file the tests will re-run automatically. Saving a changed code file (ie not a
 test file) does not re-run the tests.
 
+mocha --grep pattern
+
 ## Tech
 
 ### Backend - Restify and sequelize
