@@ -11,7 +11,10 @@ declare module 'hono' {
     },
     bearer: string,
     user: UserModel,
-    host: string
+    host: string,
+    protocol: string,
+    baseUrl: string,
+    url: URL,
   }
 }
 

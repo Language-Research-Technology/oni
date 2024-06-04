@@ -42,13 +42,21 @@ export function setupRoutes({ configuration, repository }) {
   }));
 
   app.use(async function detectHost(c, next) {
-    const url = new URL(c.req.url);
+    let url = new URL(c.req.url);
     //console.log(c.req.header());
+    const reqProtocol = url.protocol.slice(0,-1);
     const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || url.protocol.slice(0,-1);
     const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
     c.set('protocol', protocol);
     c.set('host', host);
     c.set('baseUrl', configuration.api.baseUrl || (protocol + '://' + host + (configuration.api.basePath || '')));
+    if (configuration.api.baseUrl) {
+      url = new URL(configuration.api.baseUrl + url.pathname + url.search);
+    } else {
+      if (protocol !== reqProtocol) url.protocol = protocol + ':';
+      if (host !== url.host) url.host = host;
+    }
+    c.set('url', url);
     //console.log(c.get('protocol'));
     await next();
   });

@@ -93,7 +93,7 @@ export async function mochaGlobalSetup() {
     }
 
     await loadIndexers({ configuration, repository });
-    await indexRepository({ repository, types: ['structural'], skipByMatch: configuration.api.skipByMatch });
+    await indexRepository({ repository, types: ['structural','search'], skipByMatch: configuration.api.skipByMatch });
   } catch (error) {
     console.error(error);
   }
@@ -104,7 +104,6 @@ export async function mochaGlobalSetup() {
   //mock fetch
   const _fetch = global.fetch;
   global.fetch = async function (input, init) {
-    console.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
     console.log(input);
     return _fetch(input, init);
   }
