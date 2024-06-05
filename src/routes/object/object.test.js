@@ -91,6 +91,34 @@ describe('Test end point /object', function () {
       }
     });
 
+    it('include a link to the complete metadata in the summary results', async function () {
+      let res = await app.request('/object?limit=1');
+      expect(res.status).toEqual(200);
+      let result = await res.json();
+      let summary = result.data[0];
+      expect(summary).toBeDefined();
+      const id = summary.id || summary.crateId;
+      const url = 'http://localhost/object/' + encodeURIComponent(id) + '?meta';
+      expect(summary.url).toEqual(url);
+    });
+
+    it('include prev and next url in the paginated results', async function () {
+      let res = await app.request('/object?limit=3');
+      expect(res.status).toEqual(200);
+      let result = await res.json();
+      expect(result.nextUrl).toEqual('http://localhost/object?limit=3&offset=3');
+      expect(result.prevUrl).toBeUndefined();
+      res = await app.request('/object?limit=2&offset=2');
+      result = await res.json();
+      expect(result.prevUrl).toEqual('http://localhost/object?limit=2&offset=0');
+      expect(result.nextUrl).toBeUndefined();
+      res = await app.request('/object?limit=1&offset=1');
+      result = await res.json();
+      expect(result.prevUrl).toEqual('http://localhost/object?limit=1&offset=0');
+      expect(result.nextUrl).toEqual('http://localhost/object?limit=1&offset=2');
+    });
+
+
   });
 
   describe('/object/meta', function () {

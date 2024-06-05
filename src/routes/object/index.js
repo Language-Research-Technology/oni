@@ -88,10 +88,23 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       }
       //console.log(params);
       const records = await getFullRecords(params);
-      //const records2 = await getRecords(params);
-      //console.log(records2);
       const end = Math.min(params.offset + params.limit, records.total);
       c.set('range', { start: params.offset, end, size: records.total });
+      let url = c.get('url');
+      for (const r of records.data) {
+        let base = new URL(url);
+        base.search = '?meta';
+        base.pathname = join(base.pathname, encodeURIComponent(r.crateId));
+        r.url = base.href;
+      }
+      if (params.offset) {
+        url.searchParams.set('offset', '' + (params.offset < params.limit ? 0 : params.offset - params.limit));
+        records.prevUrl = url.href;
+      }
+      if (end < records.total) {
+        url.searchParams.set('offset', '' + (params.offset + params.limit));
+        records.nextUrl = url.href;
+      }
       //return c.json(records.data);
       return c.json(records);
     }
