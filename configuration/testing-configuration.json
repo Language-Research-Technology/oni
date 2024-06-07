@@ -52,11 +52,6 @@
           "class": ""
         }
       }
-    ],
-    "conformsTo": {
-      "collection": "https://purl.archive.org/language-data-commons/profile#Collection",
-      "object": "https://purl.archive.org/language-data-commons/profile#Object",
-      "notebook": "https://purl.archive.org/language-data-commons/profile#Notebook"
-    }
+    ]
   }
 }

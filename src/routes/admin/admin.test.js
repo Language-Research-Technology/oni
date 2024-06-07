@@ -31,8 +31,7 @@ describe('Test end point /admin', function () {
     it('can get the state', async function () {
       const res = await this.app.request('admin/index/search', { headers });
       expect(res.status).toEqual(200);
-      console.log(await res.json());
-      //expect((await res.json()).state).toEqual('indexed');
+      expect((await res.json()).state).toEqual('indexed');
     });
   });
 

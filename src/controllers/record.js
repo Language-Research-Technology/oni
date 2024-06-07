@@ -362,7 +362,7 @@ export async function getFilePath({ crateId, repository, filePath }) {
     const inv = await object.getInventory();
     const contentPath = inv.getContentPath(inv.getDigest(filePath));
     if (contentPath) {
-      const p = '/ocfl/' + repository.objectRoot(crateId) + '/' + contentPath;
+      const p = repository.objectRoot(crateId) + '/' + contentPath;
       //console.log(p);
       return p;
     }

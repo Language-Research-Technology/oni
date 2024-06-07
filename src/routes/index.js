@@ -45,7 +45,7 @@ export function setupRoutes({ configuration, repository }) {
     let url = new URL(c.req.url);
     //console.log(c.req.header());
     const reqProtocol = url.protocol.slice(0,-1);
-    const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || url.protocol.slice(0,-1);
+    const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || reqProtocol;
     const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
     c.set('protocol', protocol);
     c.set('host', host);

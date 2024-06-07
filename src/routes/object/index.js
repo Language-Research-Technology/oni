@@ -365,7 +365,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       if (fp) {
         c.header('Content-Disposition', 'attachment; filename=' + basename(path));
         console.log(fp);
-        c.header('X-Accel-Redirect', fp);
+        c.header('X-Accel-Redirect', encodeURI('/ocfl/' + fp));
         return c.body('');
       }
     } else {
