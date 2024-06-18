@@ -206,12 +206,20 @@ export class SearchIndexer extends Indexer {
 // elasticBootstrap({configuration});
 // elasticIndex({configuration, repository});
 
+/**
+ * Copy one or more properties from exisiting object
+ * @param {string[]} props An array of prop names
+ * @param {object} obj Object to copy from
+ * @returns {object} 
+ */
 function pick(props, obj = {}) {
   return Object.fromEntries(props.filter(k => k in obj).map(k => [k, obj[k]]));
 }
+
 function pickBasic(obj) {
   return pick(['@id', '@type', 'name'], obj);
 }
+
 function mapCollection() {
 
 }

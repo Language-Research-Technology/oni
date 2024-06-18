@@ -1,17 +1,31 @@
 import { resolve, join, basename } from 'node:path/posix';
+import { text } from 'node:stream/consumers';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { getLogger } from '../../services/logger.js';
 import { getRecord, getFullRecords, getOauthToken, getCrate, getFilePath, getFile } from '../../controllers/record.js';
 import { pagination } from '../../middleware/pagination.js';
 import { checkIfAuthorized } from '../../services/license.js';
-import { forbiddenError, notFoundError } from '../../helpers/errors.js'
+import { forbiddenError, notFoundError } from '#src/helpers/errors.js'
+import { streamMultipart } from '#src/helpers/multipart.js';
+import { badRequest } from '#src/helpers/responses.js';
+import { createWriteStream } from 'node:fs';
 
 const log = getLogger();
 const factory = createFactory();
 
+/**
+ * 
+ * @param {object} p
+ * @param {import('#src/services/configuration.js').Configuration} p.configuration
+ * @param {import('@ocfl/ocfl').OcflStorage} p.repository
+ * @param {*} p.softAuth
+ * @param {*} p.streamHandlers
+ * @returns 
+ */
 export function setupObjectRoutes({ configuration, repository, softAuth, streamHandlers }) {
   const app = new Hono({ strict: false });
+  const catalogFilename = configuration.api.ocfl.catalogFilename;
 
   /**
    * @openapi
@@ -73,7 +87,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    */
   app.get("/", pagination(), async (c) => {
     const id = c.req.query('id');
-    if (id) {    
+    if (id) {
       return c.redirect(c.req.path + '/' + encodeURIComponent(id), 301);
     } else {
       const params = {};
@@ -334,6 +348,79 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
     }
   });
 
+  // create a new object, imply id from the crate
+  app.post('/', async (c, next) => {
+    // must read root id from req body 
+  });
+  // update existing object with partial data
+  app.post('/:id', async (c, next) => {
+
+  });
+
+  // create or replace object, if content type is json, it is an alias for PUT /:id/ro-crate-metadata.json
+  app.put('/:id', async (c, next) => {
+    const { id } = c.req.param();
+    const contentType = c.req.header('content-type');
+    let files;
+    let errorMsg = 'No metadata file found in the request body';
+    if (c.req.header('content-type') === 'application/json') {
+      files = (async function* () {
+        yield ['file', { name: catalogFilename, stream: c.req.raw.body, type: 'application/json' }];
+      })();
+    } else if (contentType.startsWith('multipart/')) {
+      files = streamMultipart(c.req.raw.body, { headers: c.req.header(), preservePath: true });
+      // let form = await c.req.parseBody({ all: true });
+      // let files = [].concat(form?.['file'] || []);
+    }
+    if (files) {
+      let meta;
+      //save to ocfl
+      const ocflObject = repository.object(id);
+      const trx = await ocflObject.update();
+      // todo: remove all existing files
+      for await (const [name, value] of files) {
+        if (typeof value !== 'string') {
+          const { name, type, stream } = value;
+          /** @type {string|ReadableStream} */
+          let content = stream;
+          if (name === catalogFilename && type === 'application/json') {
+            content = await (new Response(stream)).text();
+            try {
+              meta = JSON.parse(content);
+            } catch (error) {
+              errorMsg = `Cannot parse ${catalogFilename}: Invalid JSON format`;
+            }
+          }
+          //todo: update ocfl-js to accept aysnciterable
+          await trx.write(name, content);
+        }
+      }
+      // check ro-crate-metadata.json
+      if (meta) {
+        await trx.commit();
+        //index the rocrate
+        //await indexCrate(meta)
+        return c.json({});
+      } else {
+        await trx.rollback();
+      }
+    }
+    return badRequest('Invalid request payload');
+  });
+
+  app.put('/:id/:path{.+$}', async (c, next) => {
+    const { id, path } = c.req.param();
+    const contentType = c.req.header('content-type');
+    if (contentType.includes('multipart/form-data')) {
+    } else {
+      const ocflObject = repository.object(id);
+      await ocflObject.update(async (t) => {
+        const ws = await t.createWriteStream(path);
+      });
+    }
+    return c.json({}, 200);
+  });
+
   function authorize(configuration) {
     return factory.createMiddleware(async (c, next) => {
       const { id, path } = c.req.param();
@@ -345,11 +432,11 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
           const access = await checkIfAuthorized({ userId: user?.id, license: record.license, configuration });
           if (!access.hasAccess) {
             log.debug(`Not authorized, id: ${id} with license: ${record.license}`);
-            throw forbiddenError({json: { id, path, error: { message: 'User is not authorized' } }});
+            throw forbiddenError({ json: { id, path, error: { message: 'User is not authorized' } } });
           }
         }
       } else {
-        throw notFoundError(); 
+        throw notFoundError();
       }
       await next();
     });
@@ -377,6 +464,14 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       }
     }
     return c.notFound();
+  });
+
+  const uploadHandlers = factory.createHandlers((c, next) => {
+    const { id, path } = c.req.query();
+    if (id) {
+    } else {
+      return c.json({ message: 'id parameter value is required' }, 400);
+    }
   });
 
   return app;

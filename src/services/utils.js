@@ -46,3 +46,10 @@ export function decrypt(securityKey, data, initVector) {
   return decryptedData.toString();
 }
 
+export function findCrateRootId(metadataId, crate) {
+  for (const entity of crate['@graph']) {
+    if (entity['@id'] === metadataId) {
+      return entity.about['@id'];
+    }
+  }
+}
