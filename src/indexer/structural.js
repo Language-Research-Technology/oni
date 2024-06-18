@@ -17,8 +17,8 @@ export class StructuralIndexer extends Indexer {
     const rec = {
       crateId,
       license,
-      name: rootDataset.name[0],
-      description: rootDataset.description[0] || '',
+      name: rootDataset.name?.[0] || crateId,
+      description: rootDataset.description?.[0] || '',
       objectRoot: ocflObject.root
     }
     logger.info(`[structural] Indexing ${rec.crateId}`);
