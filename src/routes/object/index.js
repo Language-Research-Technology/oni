@@ -1,15 +1,14 @@
-import { resolve, join, basename } from 'node:path/posix';
+import { resolve, join, basename, extname } from 'node:path/posix';
 import { text } from 'node:stream/consumers';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { getLogger } from '../../services/logger.js';
 import { getRecord, getFullRecords, getOauthToken, getCrate, getFilePath, getFile } from '../../controllers/record.js';
 import { pagination } from '../../middleware/pagination.js';
-import { checkIfAuthorized } from '../../services/license.js';
-import { forbiddenError, notFoundError } from '#src/helpers/errors.js'
 import { streamMultipart } from '#src/helpers/multipart.js';
 import { badRequest } from '#src/helpers/responses.js';
-import { createWriteStream } from 'node:fs';
+import { zipMulti } from '#src/middleware/zip.js';
+import { File } from '#src/models/file.js';
 
 const log = getLogger();
 const factory = createFactory();
@@ -21,9 +20,10 @@ const factory = createFactory();
  * @param {import('@ocfl/ocfl').OcflStorage} p.repository
  * @param {*} p.softAuth
  * @param {*} p.streamHandlers
+ * @param {*} p.authorize
  * @returns 
  */
-export function setupObjectRoutes({ configuration, repository, softAuth, streamHandlers }) {
+export function setupObjectRoutes({ configuration, repository, softAuth, streamHandlers, authorize }) {
   const app = new Hono({ strict: false });
   const catalogFilename = configuration.api.ocfl.catalogFilename;
 
@@ -300,8 +300,8 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    */
   app.get('/open', ...streamHandlers);
 
-  app.get('/:id', async (c, next) => {
-    const crateId = c.req.param('id');
+  app.get('/:id', zipMulti(), async (c, next) => {
+    let crateId = c.req.param('id');
     const query = c.req.query();
     let raw = false; //if true, return the ro-crate-metadata as it is, no modification
     //log.debug(crateId);
@@ -310,6 +310,20 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
     }
     if (query.raw !== undefined || query.noUrid != undefined || query.nourid != undefined) {
       raw = true;
+    }
+    if (c.get('format') === 'zip') {
+      // get the data in ocfl object as zip
+      crateId = crateId.replace(/\.[^/.]+$/, '');
+      const files = await File.findAll({ where: { crateId } });
+      if (!files.length) {
+        return c.notFound();
+      }
+      if (c.req.method == 'HEAD') {
+        return c.body(null);
+      }
+      const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
+      c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
+      return c.text(textRes);
     }
     /** @type {object} */
     let result = await fetchExternal(crateId);
@@ -421,28 +435,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
     return c.json({}, 200);
   });
 
-  function authorize(configuration) {
-    return factory.createMiddleware(async (c, next) => {
-      const { id, path } = c.req.param();
-      log.debug(`authorize - id: ${id} - path: ${path}`);
-      const record = await getRecord({ crateId: id });
-      if (record) {
-        if (configuration.api.licenses && record.license && !configuration.api.authorization.disabled) {
-          const user = c.get('user');
-          const access = await checkIfAuthorized({ userId: user?.id, license: record.license, configuration });
-          if (!access.hasAccess) {
-            log.debug(`Not authorized, id: ${id} with license: ${record.license}`);
-            throw forbiddenError({ json: { id, path, error: { message: 'User is not authorized' } } });
-          }
-        }
-      } else {
-        throw notFoundError();
-      }
-      await next();
-    });
-  };
-
-  app.get('/:id/:path{.+$}', softAuth, authorize(configuration), async (c, next) => {
+  app.get('/:id/:path{.+$}', softAuth, authorize, async (c, next) => {
     const { id, path } = c.req.param();
     log.debug(`Get object file - id: ${id} - path: ${path}`);
     if (c.req.header('via') === 'nginx') {

@@ -19,10 +19,14 @@ import { setupAuthRoutes } from './auth/index.js';
 import { setupOauthRoutes } from './auth/oauth2-auth.js';
 import { setupSearchRoutes } from './search/index.js';
 import { setupAdminRoutes } from "./admin/index.js";
-import { authenticateUser, authorizationHeader } from '../middleware/auth.js';
+import { authenticateUser, authorizationHeader, authorizeUser } from '../middleware/auth.js';
 import { Session } from '../models/session.js';
 
 const log = getLogger();
+
+async function passMiddleware(c, next) {
+  await next();
+}
 
 export function setupRoutes({ configuration, repository }) {
   const secret = configuration.api.session.secret;
@@ -31,6 +35,7 @@ export function setupRoutes({ configuration, repository }) {
   /** auth middleware */  
   const softAuth = authenticateUser({secret, tokenSecret, tokenPassword});
   const auth = authenticateUser({secret, tokenSecret, tokenPassword, isRequired: true});
+  const authorize = configuration.api.authorization.disabled ? passMiddleware : authorizeUser(configuration.api.licenses);
   const basePath = configuration.api.basePath || '';
   const app = new Hono({ strict: false,  }).basePath(basePath);
 
@@ -311,7 +316,7 @@ export function setupRoutes({ configuration, repository }) {
 
   app.route('/auth', setupAuthRoutes({ configuration, auth }));
   app.route('/oauth', setupOauthRoutes({ configuration }));
-  const appObject = setupObjectRoutes({ configuration, repository, softAuth, streamHandlers });
+  const appObject = setupObjectRoutes({ configuration, repository, softAuth, streamHandlers, authorize });
   app.route('/object', appObject);
   app.route('/objects', appObject);
   app.route('/user', setupUserRoutes({ configuration, auth }));
@@ -332,10 +337,13 @@ export function setupRoutes({ configuration, repository }) {
     }
   });
 
-  app.get('/test', c => {
-    //console.log(c.req.raw);
-    return c.json({});
-  })
+  // app.get('/test/:id', c => {
+  //   console.log(c.req.method);
+  //   var p = c.req.param();
+  //   p.id = 'test';
+  //   console.log(c.req.param());
+  //   return c.body(null);
+  // })
 
   return app;
 }

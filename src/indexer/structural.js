@@ -1,7 +1,11 @@
 import { Record } from "#src/models/record.js";
+import { File } from "#src/models/file.js";
 import { Indexer } from "./indexer.js";
 import { createRecord } from '../controllers/record.js';
 import { logger } from "#src/services/logger.js";
+import { createCRC32 } from 'hash-wasm';
+import { createReadStream } from "node:fs";
+import { join } from "node:path";
 
 export class StructuralIndexer extends Indexer {
   defaultLicense;
@@ -28,11 +32,35 @@ export class StructuralIndexer extends Indexer {
       atTypes: rootDataset['@type'] || [],
       conformsTos: rootDataset.conformsTo || []
     });
+    await File.destroy({ where: { crateId } });
+    const basePath = ocflObject.root;
+    const crc32 = await createCRC32();
+    for await (let f of await ocflObject.files()) {
+      //console.log(f.contentPath);
+      const fp = join(basePath, f.contentPath)
+      const rs = createReadStream(fp);
+      crc32.init();
+      let size = 0;
+      for await (const chunk of rs) {
+        crc32.update(chunk);
+        size += chunk.length;
+      }
+      const hash = crc32.digest('hex');
+      await File.create({
+        path: fp,
+        logicalPath: f.logicalPath,
+        crateId,
+        size,
+        crc32: hash
+      });
+    }
 
   }
+
   async delete() {
     await Record.destroy({ truncate: true, cascade: true });
   }
+
   async count() {
     return await Record.count();
   }

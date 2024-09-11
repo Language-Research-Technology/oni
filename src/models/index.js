@@ -12,6 +12,7 @@ export * from './rootType.js';
 export * from './crateMember.js';
 export * from './crateType.js';
 export * from './log.js';
+export * from './file.js';
 
 // Apply associations
 const models = sequelize.models;

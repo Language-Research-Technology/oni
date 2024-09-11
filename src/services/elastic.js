@@ -24,7 +24,7 @@ export async function filterResults({userId, results, configuration}) {
       pass.hasAccess = true;
     } else {
       log.silly(`Checking authorization for ${id} with license: ${license['@id']}`);
-      pass = await checkIfAuthorized({userId, license: license['@id'], configuration});
+      pass = await checkIfAuthorized({userId, license: license['@id'], licenseConfiguration: configuration.api.licenses});
       if (!pass.hasAccess) {
         log.silly(`Not authorized for ${id} with license: ${license['@id']}`);
         //What to do? Do we mutate the array adding a not authorized

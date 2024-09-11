@@ -7,7 +7,10 @@ import {Readable, Writable} from 'node:stream';
 /** 
  * @typedef {import('node:stream/web').ReadableStream} ReadableStream
  * @typedef {import('hono').MiddlewareHandler} MiddlewareHandler
- *
+ */
+
+/* 
+ * Middleware to serve and stream any resources as zip
  * @return {MiddlewareHandler} 
  */
 export function zip() {
@@ -29,6 +32,23 @@ export function zip() {
       c.res.headers.delete('Content-Length');
       c.res.headers.set('Content-Type', 'application/zip');
       archive.finalize();
+    }
+  };
+}
+
+/** 
+ * Middleware to processs a list of files and stream those files as zip
+ * @return {MiddlewareHandler} 
+ */
+export function zipMulti() {
+  return async function zipMulti(c, next) {
+    //read accept
+    const headerAccept = c.req.header('Accept');
+    const ext = extname(c.req.path);
+    if (headerAccept === 'application/zip' || ext === '.zip') c.set('format', 'zip');
+    await next();
+    if (c.get('format') === 'zip') {
+      c.header('X-Archive-Files', 'zip');
     }
   };
 }
