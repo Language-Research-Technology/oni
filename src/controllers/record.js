@@ -294,12 +294,15 @@ async function getSingleCrate({ repository, crateId, baseUrl, types, raw, json =
   log.debug(`getCrate, ${crateId}`);
   const object = repository.object({ id: crateId });
   const crateFile = object.getFile({ logicalPath: 'ro-crate-metadata.json' });
-  if (raw) {
-    if (json) return JSON.parse(await crateFile.asString());
-    else return Readable.toWeb(await crateFile.asStream());
-  } else {
-    const crate = JSON.parse(await crateFile.asString());
-    return transformURIs({baseUrl, crateId, types, crate});
+  try {
+    if (raw) {
+      if (json) return JSON.parse(await crateFile.asString());
+      else return Readable.toWeb(await crateFile.asStream());
+    } else {
+      const crate = JSON.parse(await crateFile.asString());
+      return transformURIs({baseUrl, crateId, types, crate});
+    }
+  } catch (error) {
   }
 }
 
@@ -307,6 +310,7 @@ export async function getCrate({ repository, crateId, baseUrl, types, raw, deep 
   // first get the parent/root
   if (deep) {
     let crate = await getSingleCrate({ repository, crateId, baseUrl, types, raw, json: true });
+    if (!crate) return;
     let stack = [crateId];
     const rocrate = new ROCrate(crate, {array: true, link: true});
     while (crateId = stack.pop()) {
@@ -314,12 +318,14 @@ export async function getCrate({ repository, crateId, baseUrl, types, raw, deep 
       const children = await RootMemberOf.findAll({ where: { memberOf: crateId } });
       for (let c of children) {
         crate = await getSingleCrate({ repository, crateId:c.crateId, baseUrl, types, raw, json: true });
-        for (let entity of crate['@graph']) {
-          if (entity['@id'] && !rocrate.getEntity(entity['@id'])) {
-            rocrate.addEntity(entity);
+        if (crate) {
+          for (let entity of crate['@graph']) {
+            if (entity['@id'] && !rocrate.getEntity(entity['@id'])) {
+              rocrate.addEntity(entity);
+            }
           }
+          stack.push(c.crateId);
         }
-        stack.push(c.crateId);
       }
     }
     return rocrate.toJSON();
