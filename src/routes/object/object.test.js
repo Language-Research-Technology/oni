@@ -181,12 +181,19 @@ describe('Test end point /object', function () {
       expect(fileEntity).toBeTruthy();
     });
 
+    async function requestfollowRedirect(url, opt) {
+      const res = await app.request(url, opt);
+      if (res.status === 301 || res.status === 302) {
+        return requestfollowRedirect(res.headers.get('location'), opt);
+      }
+      return res;
+    }
     it('can download a file from links in metadata', async function () {
       const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}?meta=original`);
       expect(res.status).toEqual(200);
       const result = await res.json();
       const fileEntity = result['@graph'].find(e => [].concat(e['@type']).includes('File'));
-      const fileRes = await app.request(fileEntity['@id'], { headers: { authorization: users.john._tokenHeader } });
+      const fileRes = await requestfollowRedirect(fileEntity['@id'], { headers: { authorization: users.john._tokenHeader } });
       expect(fileRes.status).toEqual(200);
       const content1 = await readFile(path.join(testDataRootPath, '/ocfl/corpus-of-advanced-oni/logo.svg'), 'utf8');
       const content2 = await fileRes.text();
@@ -202,7 +209,7 @@ describe('Test end point /object', function () {
 
   describe('PUT /object/:id', function () {
     let content, crate, crateId;
-    before(async function(){
+    before(async function () {
       content = await readFile(path.join(testDataRootPath, '/rocrates/basic/ro-crate-metadata.json'), 'utf8');
       crate = JSON.parse(content);
       crateId = findCrateRootId('ro-crate-metadata.json', crate);
@@ -224,7 +231,7 @@ describe('Test end point /object', function () {
 
     });
     it('can accept multipart', async function () {
-        // send as multi part
+      // send as multi part
       const form = new FormData();
       form.set('file', new Blob([content], { type: 'application/json' }), 'ro-crate-metadata.json');
       const res = await app.request(`/object/${encodeURIComponent(crateId)}`, {

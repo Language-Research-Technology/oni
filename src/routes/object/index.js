@@ -319,6 +319,8 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
         return c.notFound();
       }
       if (c.req.method == 'HEAD') {
+        c.header('content-type', 'application/zip; charset=UTF-8');
+        c.header('content-length', '0');
         return c.body(null);
       }
       const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');

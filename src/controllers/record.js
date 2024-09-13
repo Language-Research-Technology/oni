@@ -28,8 +28,10 @@ export function transformURIs({baseUrl='', crateId='', types, crate}) {
     log.silly(item['@id']);
     //roc.updateEntityId(item['@id'], `${host}/stream?id=${crateId}&path=${item['@id']}`);
     const id = encodeURIComponent(rootId);
-    const filePath = item['@id'].split('/').filter(n => n).map(n => encodeURIComponent(n)).join('/');
-    roc.updateEntityId(item['@id'], `${baseUrl}/object/${id}/${filePath}`);
+    //const filePath = item['@id'].split('/').filter(n => n).map(n => encodeURIComponent(n)).join('/');
+    //roc.updateEntityId(item['@id'], `${baseUrl}/object/${id}/${filePath}`);
+    const filePath = encodeURIComponent(item['@id']);
+    roc.updateEntityId(item['@id'], `${baseUrl}/stream?id=${id}&path=${filePath}`);
   }
   return roc.toJSON();
 }

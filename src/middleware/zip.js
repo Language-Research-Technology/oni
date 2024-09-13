@@ -45,10 +45,14 @@ export function zipMulti() {
     //read accept
     const headerAccept = c.req.header('Accept');
     const ext = extname(c.req.path);
-    if (headerAccept === 'application/zip' || ext === '.zip') c.set('format', 'zip');
-    await next();
-    if (c.get('format') === 'zip') {
-      c.header('X-Archive-Files', 'zip');
+    if (headerAccept === 'application/zip' || ext === '.zip') {
+      c.set('format', 'zip');
+      await next();
+      if (c.req.method == 'GET') {
+        c.header('X-Archive-Files', 'zip');
+      }
+    } else {
+      await next();
     }
   };
 }
