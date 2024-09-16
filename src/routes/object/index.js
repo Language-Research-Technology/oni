@@ -318,13 +318,16 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       if (!files.length) {
         return c.notFound();
       }
+      c.header('Archive-File-Count', ''+files.length);
       if (c.req.method == 'HEAD') {
-        c.header('content-type', 'application/zip; charset=UTF-8');
-        c.header('content-length', '0');
+        c.header('Content-Type', 'application/zip; charset=UTF-8');
+        const estimatedSize = files.reduce((total, f) => total + (+f.size), 0);
+        c.header('Content-Length-Estimate', ''+estimatedSize);
         return c.body(null);
       }
       const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
-      c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
+      c.header('Content-Disposition', 'attachment');
+      //c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
       return c.text(textRes);
     }
     /** @type {object} */
