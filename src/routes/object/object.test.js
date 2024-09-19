@@ -129,6 +129,12 @@ describe('Test end point /object', function () {
       expect(res.status).toEqual(301);
       expect(res.headers.get('location')).toEqual(`/object/${id}?meta=original`);
     });
+    it('can get combined metadata', async function () {
+      const id = encodeURIComponent('arcp://name,types-of-oni');
+      const res = await app.request(`/object/meta?id=${id}&resolve-parts&noUrid`);
+      expect(res.status).toEqual(301);
+      expect(res.headers.get('location')).toEqual(`/object/${id}?noUrid&meta=all`);
+    });
   });
 
   describe('/stream and /object/open', function () {

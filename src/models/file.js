@@ -9,6 +9,7 @@ export const File = sequelize.define("file",
       allowNull: false
     },
     logicalPath: {
+      primaryKey: true,
       type: DataTypes.TEXT
     },
     crateId: {

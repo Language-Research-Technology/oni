@@ -42,17 +42,29 @@ export function zip() {
  */
 export function zipMulti() {
   return async function zipMulti(c, next) {
-    //read accept
+    // Check if zip is requested by reading accept header and file extension (.zip) in the url
     const headerAccept = c.req.header('Accept');
     const ext = extname(c.req.path);
     if (headerAccept === 'application/zip' || ext === '.zip') {
       c.set('format', 'zip');
       await next();
       if (c.req.method == 'GET') {
-        c.header('X-Archive-Files', 'zip');
       }
     } else {
       await next();
     }
   };
 }
+
+/**
+ * Handle different processors depending on the reverse proxy (none, nginx, httpd, etc).
+ */
+function handleZip(via) {
+  switch (c.req.header('via')) {
+    case 'nginx':
+      c.header('X-Archive-Files', 'zip');
+      break;
+    default:
+      break;
+  }
+};

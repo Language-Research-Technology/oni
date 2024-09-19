@@ -35,30 +35,38 @@ export class StructuralIndexer extends Indexer {
     await File.destroy({ where: { crateId } });
     const basePath = ocflObject.root;
     const crc32 = await createCRC32();
+    let count = 0;
     for await (let f of await ocflObject.files()) {
-      //console.log(f.contentPath);
-      const fp = join(basePath, f.contentPath)
-      const rs = createReadStream(fp);
-      crc32.init();
-      let size = 0;
-      for await (const chunk of rs) {
-        crc32.update(chunk);
-        size += chunk.length;
+      try {
+        //console.log(f.contentPath);
+        const fp = join(basePath, f.contentPath)
+        const rs = createReadStream(fp);
+        crc32.init();
+        let size = 0;
+        for await (const chunk of rs) {
+          crc32.update(chunk);
+          size += chunk.length;
+        }
+        const hash = crc32.digest('hex');
+        await File.create({
+          path: fp,
+          logicalPath: f.logicalPath,
+          crateId,
+          size,
+          crc32: hash
+        });
+        logger.debug(`[structural] [${rec.crateId}] Indexed file ${f.logicalPath}`);
+        count++;
+      } catch (error) {
+        logger.error(error.message);
       }
-      const hash = crc32.digest('hex');
-      await File.create({
-        path: fp,
-        logicalPath: f.logicalPath,
-        crateId,
-        size,
-        crc32: hash
-      });
     }
-
+    logger.info(`[structural] Indexed ${rec.crateId} | files=${count}`);
   }
 
   async delete() {
     await Record.destroy({ truncate: true, cascade: true });
+    await File.destroy({ truncate: true });
   }
 
   async count() {

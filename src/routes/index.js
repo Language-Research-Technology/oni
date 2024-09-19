@@ -269,7 +269,6 @@ export function setupRoutes({ configuration, repository }) {
     const { id, path } = c.req.query();  
     if (id) {
       let newLoc = basePath + '/object/'+ encodeURIComponent(id);
-      console.log(c.req.url)
       if (path) newLoc = newLoc + '/' + path;
       else newLoc += '?meta=all';
       return c.redirect(newLoc, 301);

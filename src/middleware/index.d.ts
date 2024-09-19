@@ -15,6 +15,7 @@ declare module 'hono' {
     protocol: string,
     baseUrl: string,
     url: URL,
+    format: string
   }
 }
 

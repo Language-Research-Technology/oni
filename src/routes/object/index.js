@@ -217,13 +217,13 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
   app.get('/meta', (c) => {
     const { id, ...q } = c.req.query();
     if (id) {
-      if (q['resolve-parts']) {
+      if (q['resolve-parts'] !== undefined) {
         q.meta = 'all';
         delete q['resolve-parts'];
       } else {
         q.meta = 'original';
       }
-      const newQuery = Object.entries(q).map(([key, value]) => value === undefined ? key : key + '=' + encodeURIComponent(value)).join('&');
+      const newQuery = Object.entries(q).map(([key, value]) => key + (value ? '=' + encodeURIComponent(value) : '')).join('&');
       const basePath = resolve(c.req.path, '..', encodeURIComponent(id));
       return c.redirect(basePath + '?' + newQuery, 301);
     } else {
@@ -312,17 +312,23 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       raw = true;
     }
     if (c.get('format') === 'zip') {
+      try {
+        const ocflObject = repository.object(crateId);
+        const inv = await ocflObject.getInventory();
+        c.header('Last-Modified', (new Date(inv.created)).toUTCString());
+      } catch (e) {
+      }
       // get the data in ocfl object as zip
-      crateId = crateId.replace(/\.[^/.]+$/, '');
+      crateId = crateId.replace(/\.[^/.]+$/, ''); //remove extension if exists
       const files = await File.findAll({ where: { crateId } });
       if (!files.length) {
         return c.notFound();
       }
-      c.header('Archive-File-Count', ''+files.length);
+      c.header('Archive-File-Count', '' + files.length);
       if (c.req.method == 'HEAD') {
         c.header('Content-Type', 'application/zip; charset=UTF-8');
-        const estimatedSize = files.reduce((total, f) => total + (+f.size), 0);
-        c.header('Content-Length-Estimate', ''+estimatedSize);
+        const estimatedSize = 22 + files.reduce((total, f) => total + (+f.size) + (2 * f.logicalPath.length) + 98, 0);
+        c.header('Content-Length-Estimate', '' + estimatedSize);
         return c.body(null);
       }
       const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
