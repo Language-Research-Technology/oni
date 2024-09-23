@@ -1,4 +1,5 @@
 import { verify } from 'hono/jwt';
+import { createMiddleware } from 'hono/factory';
 
 import { getLogger } from "../services/logger.js";
 import { User } from '../models/user.js';
@@ -9,17 +10,13 @@ import { getRecord } from '../controllers/record.js';
 
 const log = getLogger();
 
-/** 
- * Middleware to handle auth bearer with custom user token and jwt
- * @typedef {import('hono').MiddlewareHandler} MiddlewareHandler
- */
-
 /**
  * @param  {boolean} [isRequired] If true, invalid header will throw HTTPException
- * @return {MiddlewareHandler} 
+ * @return
  */
 export function authorizationHeader(isRequired) {
-  return async function authHeader(c, next) {
+  return createMiddleware(async (c, next) => {
+  //return async function authHeader(c, next) {
     c.set('bearer', '');
     const headerToken = c.req.header('Authorization');
     if (!headerToken) {
@@ -33,7 +30,7 @@ export function authorizationHeader(isRequired) {
       }
     }
     await next();
-  };
+  });
 }
 
 /**
@@ -42,10 +39,11 @@ export function authorizationHeader(isRequired) {
  * @param {object} opt.secret
  * @param {object} opt.tokenSecret
  * @param {object} opt.tokenPassword
- * @return {import('hono').MiddlewareHandler<{Variables:{ user: object }}>} 
+ * @return 
  */
 export function authenticateUser({ isRequired, secret, tokenSecret, tokenPassword }) {
-  return async function auth(c, next) {
+  return createMiddleware(async (c, next) => {
+  //return async function auth(c, next) {
     let authToken = c.get('bearer');
     if (authToken == null) {
       await authorizationHeader(isRequired)(c, async () => { });
@@ -80,7 +78,7 @@ export function authenticateUser({ isRequired, secret, tokenSecret, tokenPasswor
       if (isRequired) throw unauthorizedError({ headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } });
     }
     await next();
-  }
+  });
 }
 
 /**
@@ -90,9 +88,9 @@ export function authenticateUser({ isRequired, secret, tokenSecret, tokenPasswor
  * @returns 
  */
 export function authorizeUser(licenseConfiguration) {
-  //return factory.createMiddleware(async (c, next) => {
-  return async function authz(c, next) {
-    const { id } = c.req.param();
+  return createMiddleware(async (c, next) => {
+  //return async function authz(c, next) {
+    const id = c.get('crateId') || c.req.param('id');
     log.debug(`[authorize middleware] check id=${id}`);
     if (id) {
       const record = await getRecord({ crateId: id });
@@ -110,5 +108,5 @@ export function authorizeUser(licenseConfiguration) {
       }
     }
     await next();
-  };
+  });
 };

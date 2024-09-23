@@ -300,18 +300,19 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    */
   app.get('/open', ...streamHandlers);
 
-  app.get('/:id', zipMulti(), async (c, next) => {
+  app.get('/:id', softAuth, zipMulti(), async (c, next) => {
     let crateId = c.req.param('id');
     const query = c.req.query();
-    let raw = false; //if true, return the ro-crate-metadata as it is, no modification
+    //if true, return the ro-crate-metadata as it is, no modification
+    const raw = (query.raw != undefined || query.noUrid != undefined || query.nourid != undefined) ? true: false; 
     //log.debug(crateId);
     if (query.version) {
       return c.json({ message: 'Version is not implemented' }, 400);
     }
-    if (query.raw !== undefined || query.noUrid != undefined || query.nourid != undefined) {
-      raw = true;
-    }
     if (c.get('format') === 'zip') {
+      crateId = crateId.replace(/\.zip$/, ''); //remove extension if exists
+      c.set('crateId', crateId);
+      await authorize(c, async () => { });
       try {
         const ocflObject = repository.object(crateId);
         const inv = await ocflObject.getInventory();
@@ -319,7 +320,6 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       } catch (e) {
       }
       // get the data in ocfl object as zip
-      crateId = crateId.replace(/\.[^/.]+$/, ''); //remove extension if exists
       const files = await File.findAll({ where: { crateId } });
       if (!files.length) {
         return c.notFound();
