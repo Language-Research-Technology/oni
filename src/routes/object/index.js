@@ -449,7 +449,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
   app.get('/:id/:path{.+$}', softAuth, authorize, async (c, next) => {
     const { id, path } = c.req.param();
     log.debug(`Get object file - id: ${id} - path: ${path}`);
-    if (c.req.header('via') === 'nginx') {
+    if (c.req.header('via')?.includes('nginx')) {
       // try to auto-detect nginx proxy using `via` header
       // if detected, use the x-accel feature to let nginx serve the requested file directly
       const fp = await getFilePath({ crateId: id, repository, filePath: path });

@@ -49,22 +49,16 @@ export function zipMulti() {
       c.set('format', 'zip');
       await next();
       if (c.req.method == 'GET') {
+        if (c.req.header('via')?.includes('nginx') && c.req.header('Nginx-Enabled-Modules')?.includes('zip')) {
+          // Use Nginx http_zip module if enabled
+          c.header('X-Archive-Files', 'zip');
+        } else {
+          // Use internal zip handling as default
+
+        }
       }
     } else {
       await next();
     }
   };
 }
-
-/**
- * Handle different processors depending on the reverse proxy (none, nginx, httpd, etc).
- */
-function handleZip(via) {
-  switch (c.req.header('via')) {
-    case 'nginx':
-      c.header('X-Archive-Files', 'zip');
-      break;
-    default:
-      break;
-  }
-};
