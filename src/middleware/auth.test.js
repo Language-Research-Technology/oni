@@ -59,7 +59,7 @@ describe('auth middleware', function () {
     var resUser, app;
     before(function(){
       app = new Hono();
-      console.log({ secret, tokenSecret, tokenPassword });
+      //console.log({ secret, tokenSecret, tokenPassword });
       app.use(authenticateUser({ secret, tokenSecret, tokenPassword }));
       app.get('/test', c => (resUser = c.get('user'), c.text('ok')));
     });

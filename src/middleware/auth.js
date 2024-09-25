@@ -1,5 +1,7 @@
 import { verify } from 'hono/jwt';
 import { createMiddleware } from 'hono/factory';
+import { bearerAuth } from 'hono/bearer-auth';
+import { getCookie } from 'hono/cookie';
 
 import { getLogger } from "../services/logger.js";
 import { User } from '../models/user.js';
@@ -42,13 +44,7 @@ export function authorizationHeader(isRequired) {
  * @return 
  */
 export function authenticateUser({ isRequired, secret, tokenSecret, tokenPassword }) {
-  return createMiddleware(async (c, next) => {
-  //return async function auth(c, next) {
-    let authToken = c.get('bearer');
-    if (authToken == null) {
-      await authorizationHeader(isRequired)(c, async () => { });
-      authToken = c.get('bearer');
-    }
+  async function verifyToken(authToken, c) {
     let user;
     let where;
     if (authToken) {
@@ -73,9 +69,25 @@ export function authenticateUser({ isRequired, secret, tokenSecret, tokenPasswor
       user = filtered;
       if (where.apiToken) user.apiToken = authToken;
       c.set('user', user);
-    } else {
-      // Invalid Token
-      if (isRequired) throw unauthorizedError({ headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } });
+      return true;
+    }
+    return false;
+  }
+
+  const bearer = bearerAuth({ verifyToken });
+
+  return createMiddleware(async (c, next) => {
+  //return async function auth(c, next) {
+    const token = getCookie(c, 'session');
+    let verified = await verifyToken(token, c);
+    //console.log('cookie', cookie);
+    if (!verified) {
+      try {
+        await bearer(c, next);
+        return;
+      } catch (error) {
+        if (isRequired) throw error;
+      }
     }
     await next();
   });

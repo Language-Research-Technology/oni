@@ -300,7 +300,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    */
   app.get('/open', ...streamHandlers);
 
-  app.get('/:id', softAuth, zipMulti(), async (c, next) => {
+  app.get('/:id', softAuth, zipMulti(), async (c) => {
     let crateId = c.req.param('id');
     const query = c.req.query();
     //if true, return the ro-crate-metadata as it is, no modification

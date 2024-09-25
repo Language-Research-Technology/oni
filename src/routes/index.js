@@ -7,6 +7,7 @@ import { cors } from 'hono/cors';
 import { createFactory } from 'hono/factory';
 import { prettyJSON } from 'hono/pretty-json'
 import { HTTPException } from 'hono/http-exception';
+import { bearerAuth } from 'hono/bearer-auth'
 //import { logger } from 'hono/logger';
 import { getLogger } from '../services/logger.js';
 
@@ -255,13 +256,11 @@ export function setupRoutes({ configuration, repository }) {
    *         - org.cilogon.userinfo
    *         - offline_access
    */
-  app.get('/logout', authorizationHeader(), async c => {
-    const token = c.get('bearer');
-    if (token) {
-      const count = await Session.destroy({ where: { token } });
-      if (count > 0) return c.json({}, 204);
-    }
-    return c.json({}, 400);
+  app.get('/logout', bearerAuth({ async verifyToken(token, c){
+    const count = await Session.destroy({ where: { token } });
+    return count > 0;
+  } }), async c => {
+    return c.json({}, 204);
   });
 
   const factory = createFactory();

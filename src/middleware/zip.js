@@ -48,7 +48,7 @@ export function zipMulti() {
     if (headerAccept === 'application/zip' || ext === '.zip') {
       c.set('format', 'zip');
       await next();
-      if (c.req.method == 'GET') {
+      if (c.req.method == 'GET' && c.res.status === 200) {
         if (c.req.header('via')?.includes('nginx') && c.req.header('Nginx-Enabled-Modules')?.includes('zip')) {
           // Use Nginx http_zip module if enabled
           c.header('X-Archive-Files', 'zip');
