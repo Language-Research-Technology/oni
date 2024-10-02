@@ -1,7 +1,9 @@
 import { resolve, join, basename, extname } from 'node:path/posix';
-import { text } from 'node:stream/consumers';
+import { createReadStream } from 'node:fs';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
+import { makeZip, predictLength } from 'client-zip';
+
 import { getLogger } from '../../services/logger.js';
 import { getRecord, getFullRecords, getOauthToken, getCrate, getFilePath, getFile } from '../../controllers/record.js';
 import { pagination } from '../../middleware/pagination.js';
@@ -300,7 +302,69 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
    */
   app.get('/open', ...streamHandlers);
 
-  app.get('/:id', softAuth, zipMulti(), async (c) => {
+  const ocflPath = configuration.api.ocfl.ocflPath;
+  const ocflPathInternal = configuration.api.ocfl.ocflPathInternal;
+  async function zipMulti(c) {
+      // Check if zip is requested by reading accept header and file extension (.zip) in the url
+    const headerAccept = c.req.header('Accept');
+    const ext = extname(c.req.path);
+    if (headerAccept === 'application/zip' || ext === '.zip') {
+      const crateId = c.req.param('id').replace(/\.zip$/, ''); //remove extension if exists
+      c.set('crateId', crateId);
+      await authorize(c, async () => { });
+      // get the data in ocfl object as zip
+      const files = await File.findAll({ where: { crateId } });
+      if (!files.length) {
+        return c.notFound();
+      }
+      let ocflObject;
+      try {
+        ocflObject = repository.object(crateId);
+        const inv = await ocflObject.getInventory();
+        c.header('Last-Modified', (new Date(inv.created)).toUTCString());
+      } catch (e) {
+        return c.notFound();
+      }
+      c.header('Archive-File-Count', '' + files.length);
+      if (c.req.method == 'HEAD') {
+        c.header('Content-Type', 'application/zip; charset=UTF-8');
+        const estimatedSize = 22 + files.reduce((total, f) => total + (+f.size) + (2 * f.logicalPath.length) + 98, 0);
+        c.header('Content-Length-Estimate', '' + estimatedSize);
+        return c.body(null);
+      }
+      c.header('Content-Disposition', 'attachment');
+      //const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
+      //c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
+      //return c.text(textRes);
+
+      let body;
+      if (c.req.header('via')?.includes('nginx') && c.req.header('Nginx-Enabled-Modules')?.includes('zip')) {
+        // Use Nginx http_zip module if enabled
+        c.header('X-Archive-Files', 'zip');
+        body = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(join(ocflPathInternal, f.path)) + ' ' + f.logicalPath).join('\n');
+      } else {
+        // Use internal zip handling as default
+        const metadata = files.map(f => ({ name: f.logicalPath, size: parseInt(f.size) }));
+        async function* genFiles() {
+          for (const f of files) {
+            const ocflFile = ocflObject.getFile(f.logicalPath);
+            yield { 
+              name: f.logicalPath,
+              lastModified: f.lastModified,
+              input: ocflFile.stream()
+            };
+          }
+        }
+        body = makeZip(genFiles(), { buffersAreUTF8: true, metadata });
+        var cl = predictLength(metadata);
+        c.header('Content-Type', 'application/zip; charset=UTF-8');
+        c.header('Content-Length', cl.toString());
+      }
+      //console.log(body);
+      return c.body(body);
+    }
+  }
+  app.get('/:id', softAuth, async (c) => {
     let crateId = c.req.param('id');
     const query = c.req.query();
     //if true, return the ro-crate-metadata as it is, no modification
@@ -331,10 +395,11 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
         c.header('Content-Length-Estimate', '' + estimatedSize);
         return c.body(null);
       }
-      const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
+      //const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
       c.header('Content-Disposition', 'attachment');
       //c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
-      return c.text(textRes);
+      //return c.text(textRes);
+      return c.json(files.map(f => f.toJSON()));
     }
     /** @type {object} */
     let result = await fetchExternal(crateId);

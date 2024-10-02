@@ -23,6 +23,10 @@ export const File = sequelize.define("file",
     crc32: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    lastModified: {
+      type: DataTypes.DATE,
+      allowNull: true,
     }
   },
   {

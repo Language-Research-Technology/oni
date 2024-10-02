@@ -299,6 +299,7 @@ export default {
     "basePath": "/api",
     "ocfl": {
       "ocflPath": "/opt/storage/oni/ocfl",
+      "ocflPathInternal": "/ocfl",
       "ocflScratch": "/opt/storage/oni/scratch-ocfl",
       "ocflTestPath": "/opt/storage/oni/test/ocfl",
       "ocflTestScratch": "/opt/storage/oni/test/scratch-ocfl",
