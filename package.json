@@ -39,6 +39,7 @@
     "random-date-generator": "^1.0.2",
     "random-word": "^2.0.0",
     "ro-crate": "^3.3.6",
+    "ro-crate-html": "^0.1.4",
     "sequelize": "^6.37.1",
     "simple-oauth2": "^5.0.0",
     "swagger-jsdoc": "^6.2.8",

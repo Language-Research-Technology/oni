@@ -4,9 +4,8 @@ import { Indexer } from "./indexer.js";
 import { createRecord } from '../controllers/record.js';
 import { logger } from "#src/services/logger.js";
 import { createCRC32 } from 'hash-wasm';
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
 import { join, relative } from "node:path";
+import { createPreview } from "#src/helpers/preview.js";
 
 export class StructuralIndexer extends Indexer {
   defaultLicense;
@@ -16,8 +15,13 @@ export class StructuralIndexer extends Indexer {
     super();
     this.defaultLicense = configuration.api.license?.default?.['@id'];
     this.ocflPath = configuration.api.ocfl.ocflPath;
+    this.ocflPathInternal = configuration.api.ocfl.ocflPathInternal
+    this.previewPath = configuration.api.ocfl.previewPath;
+    this.previewPathInternal = configuration.api.ocfl.previewPathInternal;
   }
+
   async _index({ ocflObject, crate }) {
+    await ocflObject.load();
     const rootDataset = crate.rootDataset;
     const crateId = crate.rootId;
     const license = rootDataset.license?.[0]?.['@id'] || this.defaultLicense;
@@ -43,24 +47,24 @@ export class StructuralIndexer extends Indexer {
     let count = 0;
     for await (let f of await ocflObject.files()) {
       try {
-        //console.log(f.contentPath);
-        const fp = join(objectRoot, f.contentPath)
-        const rs = createReadStream(fp);
-        const stats = await stat(f.path);
+        //const fp = join(objectRoot, f.contentPath)
+        //const rs = createReadStream(fp);
+        //const stats = await stat(f.path);
+        const rs = await f.stream();
         crc32.init();
-        let size = 0;
+        //let size = 0;
         for await (const chunk of rs) {
           crc32.update(chunk);
-          size += chunk.length;
+          //size += chunk.length;
         }
         const hash = crc32.digest('hex');
         await File.create({
           path: join(relRoot, f.contentPath),
           logicalPath: f.logicalPath,
           crateId,
-          size,
+          size: f.size,
           crc32: hash,
-          lastModified: stats.mtime
+          lastModified: f.lastModified
         });
         logger.debug(`[structural] [${rec.crateId}] Indexed file ${f.logicalPath}`);
         count++;
@@ -68,6 +72,9 @@ export class StructuralIndexer extends Indexer {
         logger.error(error.message);
       }
     }
+    const internalPrefix = relative(this.ocflPathInternal, this.previewPathInternal);
+    await createPreview({ crc32, File, crate, previewPath: this.previewPath, internalPrefix});
+    
     logger.info(`[structural] Indexed ${rec.crateId} | files=${count}`);
   }
 

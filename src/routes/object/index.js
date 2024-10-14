@@ -1,16 +1,18 @@
+import { createReadStream } from "node:fs";
 import { resolve, join, basename, extname } from 'node:path/posix';
-import { createReadStream } from 'node:fs';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { makeZip, predictLength } from 'client-zip';
+
 
 import { getLogger } from '../../services/logger.js';
 import { getRecord, getFullRecords, getOauthToken, getCrate, getFilePath, getFile } from '../../controllers/record.js';
 import { pagination } from '../../middleware/pagination.js';
 import { streamMultipart } from '#src/helpers/multipart.js';
 import { badRequest } from '#src/helpers/responses.js';
-import { zipMulti } from '#src/middleware/zip.js';
 import { File } from '#src/models/file.js';
+import { Readable } from "node:stream";
+import { previewRoute } from "#src/helpers/preview.js";
 
 const log = getLogger();
 const factory = createFactory();
@@ -304,35 +306,40 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
 
   const ocflPath = configuration.api.ocfl.ocflPath;
   const ocflPathInternal = configuration.api.ocfl.ocflPathInternal;
-  async function zipMulti(c) {
-      // Check if zip is requested by reading accept header and file extension (.zip) in the url
+
+  /** 
+   * Middleware to processs a list of files and stream those files as zip
+   */
+  const zipMulti = factory.createMiddleware(async (c, next) => {
+    // Check if zip is requested by reading accept header and file extension (.zip) in the url
     const headerAccept = c.req.header('Accept');
     const ext = extname(c.req.path);
     if (headerAccept === 'application/zip' || ext === '.zip') {
       const crateId = c.req.param('id').replace(/\.zip$/, ''); //remove extension if exists
       c.set('crateId', crateId);
-      await authorize(c, async () => { });
-      // get the data in ocfl object as zip
       const files = await File.findAll({ where: { crateId } });
       if (!files.length) {
         return c.notFound();
       }
       let ocflObject;
+      let crate;
       try {
         ocflObject = repository.object(crateId);
         const inv = await ocflObject.getInventory();
         c.header('Last-Modified', (new Date(inv.created)).toUTCString());
+        crate = await getRecord({ crateId });
       } catch (e) {
         return c.notFound();
       }
       c.header('Archive-File-Count', '' + files.length);
+      c.header('Content-Disposition', 'attachment; filename=' + crate.name + '.zip');
+      c.header('Content-Type', 'application/zip; charset=UTF-8');
+      const estimatedSize = 22 + files.reduce((total, f) => total + (+f.size) + (2 * f.logicalPath.length) + 98, 0);
+      c.header('Content-Length-Estimate', '' + estimatedSize);
+      await authorize(c, async () => { });
       if (c.req.method == 'HEAD') {
-        c.header('Content-Type', 'application/zip; charset=UTF-8');
-        const estimatedSize = 22 + files.reduce((total, f) => total + (+f.size) + (2 * f.logicalPath.length) + 98, 0);
-        c.header('Content-Length-Estimate', '' + estimatedSize);
         return c.body(null);
       }
-      c.header('Content-Disposition', 'attachment');
       //const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
       //c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
       //return c.text(textRes);
@@ -348,7 +355,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
         async function* genFiles() {
           for (const f of files) {
             const ocflFile = ocflObject.getFile(f.logicalPath);
-            yield { 
+            yield {
               name: f.logicalPath,
               lastModified: f.lastModified,
               input: ocflFile.stream()
@@ -362,77 +369,52 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
       }
       //console.log(body);
       return c.body(body);
+    } else {
+      await next();
     }
-  }
-  app.get('/:id', softAuth, async (c) => {
+  });
+
+  app.get('/:id', softAuth, zipMulti, async (c) => {
     let crateId = c.req.param('id');
     const query = c.req.query();
     //if true, return the ro-crate-metadata as it is, no modification
-    const raw = (query.raw != undefined || query.noUrid != undefined || query.nourid != undefined) ? true: false; 
+    const raw = (query.raw != undefined || query.noUrid != undefined || query.nourid != undefined) ? true : false;
     //log.debug(crateId);
     if (query.version) {
       return c.json({ message: 'Version is not implemented' }, 400);
     }
-    if (c.get('format') === 'zip') {
-      crateId = crateId.replace(/\.zip$/, ''); //remove extension if exists
-      c.set('crateId', crateId);
-      await authorize(c, async () => { });
-      try {
-        const ocflObject = repository.object(crateId);
-        const inv = await ocflObject.getInventory();
-        c.header('Last-Modified', (new Date(inv.created)).toUTCString());
-      } catch (e) {
-      }
-      // get the data in ocfl object as zip
-      const files = await File.findAll({ where: { crateId } });
-      if (!files.length) {
-        return c.notFound();
-      }
-      c.header('Archive-File-Count', '' + files.length);
-      if (c.req.method == 'HEAD') {
-        c.header('Content-Type', 'application/zip; charset=UTF-8');
-        const estimatedSize = 22 + files.reduce((total, f) => total + (+f.size) + (2 * f.logicalPath.length) + 98, 0);
-        c.header('Content-Length-Estimate', '' + estimatedSize);
-        return c.body(null);
-      }
-      //const textRes = files.map(f => f.crc32 + ' ' + f.size + ' ' + encodeURI(f.path.replace('/opt/storage/oni', '')) + ' ' + f.logicalPath).join('\n');
-      c.header('Content-Disposition', 'attachment');
-      //c.header('Content-Disposition', 'attachment; filename='+encodeURIComponent(crateId)+'.zip');
-      //return c.text(textRes);
-      return c.json(files.map(f => f.toJSON()));
-    }
     /** @type {object} */
     let result = await fetchExternal(crateId);
-    if (!result) {
-      if ('meta' in query) {
-        result = await getCrate({
-          baseUrl: c.get('baseUrl'),
-          crateId,
-          types: configuration.api.rocrate.dataTransform.types,
-          //version,
-          repository,
-          raw,
-          deep: query.meta === 'all'
-        });
-      } else {
-        // show just summary from db
-        const opt = { crateId };
-        if (query.fields) {
-          opt.attributes = query.fields.split(',');
-        }
-        if (query.types !== undefined) {
-          opt.attributes = ['types'];
-        }
-        log.debug(`Get data ${crateId}`);
-        result = await getRecord(opt);
+    if (result) {
+      return c.body(result, 200, { 'Content-Type': 'application/json; charset=UTF-8' });
+    }
+
+    if ('meta' in query) {
+      result = await getCrate({
+        baseUrl: c.get('baseUrl'),
+        crateId,
+        types: configuration.api.rocrate.dataTransform.types,
+        //version,
+        repository,
+        raw,
+        deep: query.meta === 'all'
+      });
+      if (result) result = result.toJSON();
+    } else {
+      // show just summary from db
+      const opt = { crateId };
+      if (query.fields) {
+        opt.attributes = query.fields.split(',');
       }
+      if (query.types !== undefined) {
+        opt.attributes = ['types'];
+      }
+      log.debug(`Get data ${crateId}`);
+      result = await getRecord(opt);
     }
 
     if (result) {
-      if (!(result instanceof ReadableStream)) {
-        result = JSON.stringify(result);
-      }
-      return c.newResponse(result, 200, { 'Content-Type': 'application/json; charset=UTF-8' });
+      return c.json(result);
     } else {
       return c.json({ id: crateId, message: 'Not Found' }, 404);
     }
@@ -510,6 +492,9 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
     }
     return c.json({}, 200);
   });
+
+  app.get('/:id/ro-crate-preview.html', softAuth, 
+    ...previewRoute(configuration.api.ocfl.previewPath, configuration.api.ocfl.previewPathInternal));
 
   app.get('/:id/:path{.+$}', softAuth, authorize, async (c, next) => {
     const { id, path } = c.req.param();

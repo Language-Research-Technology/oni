@@ -16,7 +16,11 @@ describe('Test end point /admin', function () {
       const res = await this.app.request('admin/index/structural?force', { headers, method: 'post' });
       expect(res.status).toEqual(202);
       //console.log(await res.json());
-      await setTimeout(300);
+      while (true) {
+        await setTimeout(100);
+        const res = await this.app.request('admin/index/structural', { headers });
+        if ((await res.json())?.state === 'indexed') break;
+      }
       const records = await sequelize.models.record.count();
       expect(records).toEqual(4);
       //expect((await res.json()).state).toEqual('indexed');

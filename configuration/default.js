@@ -308,7 +308,9 @@ export default {
       "create": {
         "repoName": "ATAP",
         "collections": "../test-data/ingest-crate-list.development.json"
-      }
+      },
+      "previewPath": "/opt/storage/oni/temp/ocfl/previews/",
+      "previewPathInternal": "/ocfl/previews"
     },
     "rocrate": {
       "dataTransform": {
