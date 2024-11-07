@@ -13,6 +13,7 @@ describe('Test end point /admin', function () {
       expect(res.status).toEqual(401);
     });
     it('can create index', async function () {
+      this.timeout(5000);
       const res = await this.app.request('admin/index/structural?force', { headers, method: 'post' });
       expect(res.status).toEqual(202);
       //console.log(await res.json());

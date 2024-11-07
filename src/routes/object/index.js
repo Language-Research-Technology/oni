@@ -358,7 +358,7 @@ export function setupObjectRoutes({ configuration, repository, softAuth, streamH
             yield {
               name: f.logicalPath,
               lastModified: f.lastModified,
-              input: ocflFile.stream()
+              input: await ocflFile.stream()
             };
           }
         }

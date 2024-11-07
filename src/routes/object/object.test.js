@@ -211,6 +211,23 @@ describe('Test end point /object', function () {
       expect(res.status).toEqual(404);
     });
 
+    it('can get the contents as zip', async function () {
+      const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}.zip`);
+      expect(res.status).toEqual(200);
+    });
+
+    it('can get the contents as zip via nginx', async function () {
+      const headers = {
+        via: 'nginx',
+        'Nginx-Enabled-Modules': 'zip'
+      };
+      const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}.zip`, { headers });
+      expect(res.status).toEqual(200);
+      const content = await res.text();
+      console.log(content);
+    });
+
+
   });
 
   describe('PUT /object/:id', function () {
