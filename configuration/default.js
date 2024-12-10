@@ -430,14 +430,14 @@ export default {
     ],
     "licenseGroup": "text-commons",
     "license": {
-      "default": {
-        "@id": "https://choosealicense.com/no-permission/",
-        "@type": "OrganizationReuseLicense",
-        "metadataIsPublic": true,
-        "allowTextIndex": true,
-        "name": "Default LDaCA No License",
-        "description": "No License"
-      },
+      // "default": {
+      //   "@id": "https://choosealicense.com/no-permission/",
+      //   "@type": "OrganizationReuseLicense",
+      //   "metadataIsPublic": true,
+      //   "allowTextIndex": true,
+      //   "name": "Default LDaCA No License",
+      //   "description": "No License"
+      // },
       "defaultMetadata": {
         "isPublic": true,
         "name": "Attribution 4.0 International (CC BY 4.0)",
