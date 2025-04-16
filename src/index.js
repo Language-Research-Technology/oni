@@ -23,6 +23,7 @@ try {
 
 while (true) {
   try {
+    console.log('Sync for postgres..');
     await sequelize.sync();
     break;
   } catch (error) {

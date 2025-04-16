@@ -6,6 +6,7 @@ import { getUser } from '../../controllers/user.js';
 // import {getCiLogonMemberships} from "../../controllers/cilogon";
 import { encrypt } from '../../services/utils.js';
 import { getUserMemberships } from "../../controllers/userMembership.js";
+import { getTerms, termsAggrement, getPersonId, agreeTerms } from '#src/controllers/comanage.js';
 
 const log = getLogger();
 
@@ -139,6 +140,43 @@ export function setupUserRoutes({ configuration, auth }) {
       } else {
         return c.json({ memberships });
       }
+    } else {
+      return c.notFound();
+    }
+  });
+
+  app.get('/terms', async (c) => {
+    try{
+    const user = c.get('user');
+    if (user) {
+      log.debug('checking accepted terms -User: ' + user?.id);
+      console.log(user);
+      const personId = await getPersonId({configuration, user});
+      const agreement = await termsAggrement({ configuration, personId });
+      console.log(agreement);
+      if(!agreement) {
+        const terms = await getTerms({ configuration });
+        return  c.json({terms});
+      } else {
+        return c.json({terms: false});
+      }
+    } else {
+      return c.notFound();
+    }
+    }catch (e) {
+      return c.json({error: e.message});
+    }
+  });
+
+  app.get('/terms/accept', async (c) => {
+    const user = c.get('user');
+    if (user) {
+      log.debug('checking accepted terms -User: ' + user?.id);
+      console.log(user);
+      const personId = await getPersonId({configuration, user});      
+      const terms = await agreeTerms({ configuration, personId });
+      console.log(terms);
+      return c.json({accept: true});
     } else {
       return c.notFound();
     }
