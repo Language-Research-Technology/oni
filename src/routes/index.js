@@ -204,6 +204,10 @@ export function setupRoutes({ configuration, repository }) {
       return json(swaggerSpec);
     });
   }
+  app.use(async ({ req, res }, next) => {
+    console.log(`Testing route hierarchy ${req.method}: ${req.path}`);
+    await next();
+  });
 
   /**
    * @openapi
