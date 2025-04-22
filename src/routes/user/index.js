@@ -173,16 +173,16 @@ export function setupUserRoutes({ configuration, auth }) {
           log.debug('checking accepted terms -User: ' + user?.id);
           const personId = await getPersonId({configuration, user});
           const agreement = await termsAggrement({ configuration, personId });
-          let terms = {};
-          terms = await getTerms({ configuration });
+          const terms = await getTerms({ configuration });
           if(!agreement) {
             if(terms.error) {
               return c.json({error: terms.error});
             } else {
+              terms['agreement'] = false;
               return  c.json(terms);
             }
           } else {
-            terms['agreement'] = agreement;
+            terms['agreement'] = true;
             return c.json(terms);
           }
         } else {

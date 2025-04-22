@@ -48,6 +48,28 @@ if [ "$resp" == "y" ] ; then
       -f Dockerfile .
 fi
 
+read -p '>> Push the containers to docker hub as a test? [y|N] ' resp
+if [ "$resp" == "y" ] ; then
+    docker login
+    # Use buildx to build multiplatform containers
+    docker buildx create --use
+    echo '>> Building the API code'
+    docker buildx build --platform linux/amd64,linux/arm64 \
+      --rm \
+      -t rrkive/oni:${VERSION} \
+      -f Dockerfile .
+    docker buildx build --load \
+      -t rrkive/oni:${VERSION} \
+      -f Dockerfile .
+    echo
+    echo "Pushing oni containers to docker hub"
+    docker buildx build --platform=linux/amd64,linux/arm64 \
+      --push \
+      --rm \
+      -t rrkive/oni:${VERSION} \
+      -f Dockerfile .
+fi
+
 read -p '>> Remove local container copies? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     docker rmi rrkive/oni:latest
