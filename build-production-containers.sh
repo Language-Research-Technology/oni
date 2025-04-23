@@ -48,7 +48,7 @@ if [ "$resp" == "y" ] ; then
       -f Dockerfile .
 fi
 
-read -p '>> Push the containers to docker hub as a test? [y|N] ' resp
+read -p '>> Build and Push the containers to docker hub as a test? [y|N] ' resp
 if [ "$resp" == "y" ] ; then
     docker login
     # Use buildx to build multiplatform containers
