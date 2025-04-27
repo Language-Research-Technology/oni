@@ -21,6 +21,7 @@ import { setupSearchRoutes } from './search/index.js';
 import { setupAdminRoutes } from "./admin/index.js";
 import { authenticateUser, authorizationHeader } from '../middleware/auth.js';
 import { Session } from '../models/session.js';
+import { getState } from '../services/indexer.js';
 
 const log = getLogger();
 
@@ -140,7 +141,8 @@ export function setupRoutes({ configuration, repository }) {
       oauth_provider_login: '/oauth/:provider/login',
       oauth_provider_code: '/oauth/:provider/code',
       authenticated: '/authenticated',
-      logout: '/logout'
+      logout: '/logout',
+      status: '/status',
     });
   });
 
@@ -336,10 +338,68 @@ export function setupRoutes({ configuration, repository }) {
     }
   });
 
-  app.get('/test', c => {
-    //console.log(c.req.raw);
-    return c.json({});
-  })
+   /**
+   * @openapi
+   * /status:
+   *   get:
+   *     tags:
+   *       - general
+   *     description: |
+   *                  ### Status
+   *                  Returns status of repository and indexers
+   *                  - repository: ocfl version and error
+   *                  - structuralIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *                  - searchIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *     responses:
+   *       '200':
+   *         description: |
+   *                      Status of repository and indexers
+   *                      - repository: ocfl version and error
+   *                      - structuralIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *                      - searchIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *       '400':
+   *         description: |
+   *                      Returns error message if any
+   *       '500':
+   *         description: |
+   *                      Returns error message if any
+   *                      
+   */
+  app.get('/status', async c => {
+    let structural = {};
+    let search = {};
+    try {
+      structural = await getState('structural');
+    }
+    catch(e) {
+      log.error(e);
+      structural['error'] = 'Error checking structural indexer';
+    }
+    try {
+      search = await getState('search');
+    } catch(e) {
+      log.error(e);
+      search['error'] = 'Error checking search indexer';
+    }
+    return c.json({
+      checkedOn: new Date(),
+      repository: {
+        ocflVersion: repository.ocflVersion,
+        error: repository.error
+      },
+      structuralIndex: {
+        isIndexed: structural?.isIndexed,
+        isIndexing: structural?.isIndexing,
+        isDeleting: structural?.isDeleting,
+        objects: structural?.count,
+        error: structural?.error
+      },
+      searchIndex: {
+        items: search?.count,
+        error: search?.error,
+      }
+    });
+  });
 
   return app;
 }
