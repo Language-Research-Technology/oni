@@ -7,7 +7,7 @@ import ocfl from "@ocfl/ocfl-fs";
 import { loadConfiguration } from './services/configuration.js';
 import { getLogger } from './services/logger.js';
 import { sequelize } from './models/sequelize.js';
-import { indexRepository, loadIndexers, getState } from './services/indexer.js';
+import { indexRepository, loadIndexers } from './services/indexer.js';
 //import { elasticInit, elasticBootstrap, elasticIndex } from './indexer/elastic';
 import { setupRoutes } from './routes/index.js';
 const log = getLogger();
@@ -27,11 +27,6 @@ while (true) {
     break;
   } catch (error) {
     log.error('Waiting for postgres..');
-    log.debug(`username: ${process.env.DB_USER}`);
-    log.debug(`password: ${process.env.DB_PASSWORD}`);
-    log.debug(`host: ${process.env.DB_HOST}`);
-    log.debug(`port: ${parseInt(process.env.DB_PORT)}`);
-    log.debug(`database: ${process.env.DB_DATABASE}`);
     await setTimeout(60000);
   }
 }

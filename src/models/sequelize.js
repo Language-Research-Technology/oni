@@ -16,8 +16,7 @@ const sequelize = new Sequelize({
   port: parseInt(process.env.DB_PORT),
   dialect: 'postgres',
   database: process.env.DB_DATABASE,
-  // logging: false,
-  logging: console.log,
+  logging: process.env.NODE_ENV === 'production' ? false : console.log,
   pool: {
     max: 20,
     min: 10,
