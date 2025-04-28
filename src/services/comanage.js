@@ -66,9 +66,9 @@ export async function termsAggrement({configuration, personId}) {
         'Content-Type': 'json/application;charset=UTF-8'
       }
     });
+    let aggreed = false;
     if(response.ok) {
     const json = await response.json();
-    let aggreed = false;
     if(json?.CoTAndCAgreements?.length > 0) {
       for(const agreement of json?.CoTAndCAgreements) {
         if(agreement?.CoTermsAndConditionsId === conf.terms.id) {
@@ -76,7 +76,7 @@ export async function termsAggrement({configuration, personId}) {
         }
       }
     } 
-    return aggreed;
+    return {accepted: aggreed};
   } else { 
       throw new Error(`Error fetching terms agreement for person: ${personId} Status: ${response.status} ${response.statusText}`);
     }

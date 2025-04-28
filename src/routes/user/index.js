@@ -174,7 +174,7 @@ export function setupUserRoutes({ configuration, auth }) {
           const personId = await getPersonId({configuration, user});
           const agreement = await termsAggrement({ configuration, personId });
           const terms = await getTerms({ configuration });
-          if(!agreement) {
+          if(agreement?.accepted !== true) {
             if(terms.error) {
               return c.json({error: terms.error});
             } else {
