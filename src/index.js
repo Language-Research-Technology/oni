@@ -27,11 +27,11 @@ while (true) {
     break;
   } catch (error) {
     log.error('Waiting for postgres..');
-    console.log(`username: ${process.env.DB_USER}`);
-    console.log(`password: ${process.env.DB_PASSWORD}`);
-    console.log(`host: ${process.env.DB_HOST}`);
-    console.log(`port: ${parseInt(process.env.DB_PORT)}`);
-    console.log(`database: ${process.env.DB_DATABASE}`);
+    log.debug(`username: ${process.env.DB_USER}`);
+    log.debug(`password: ${process.env.DB_PASSWORD}`);
+    log.debug(`host: ${process.env.DB_HOST}`);
+    log.debug(`port: ${parseInt(process.env.DB_PORT)}`);
+    log.debug(`database: ${process.env.DB_DATABASE}`);
     await setTimeout(60000);
   }
 }
