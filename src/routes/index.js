@@ -133,6 +133,8 @@ export function setupRoutes({ configuration, repository }) {
       object_open: '/object/open',
       user: '/user',
       user_token: '/user/token',
+      user_terms: '/user/terms',
+      user_terms_accept: '/user/terms/accept',
       search_index: '/search/:index',
       search_fields_index: '/search/fields/:index',
       search_index_post_index: '/search/index-post/:index',
