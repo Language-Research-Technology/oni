@@ -384,11 +384,19 @@ export function setupRoutes({ configuration, repository }) {
       log.error(e);
       search['error'] = 'Error checking search indexer';
     }
+    const repo = {};
+    try {
+      await repository.load();
+      repo['ocflVersion'] = repository?.ocflVersion;
+    } catch(e) {
+      log.error(e); 
+      repo['error'] = e.message;
+    }
     return c.json({
       checkedOn: new Date(),
       repository: {
-        ocflVersion: repository.ocflVersion,
-        error: repository.error
+        ocflVersion: repo?.ocflVersion,
+        error: repo?.error
       },
       structuralIndex: {
         isIndexed: structural?.isIndexed,
