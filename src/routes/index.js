@@ -22,6 +22,7 @@ import { setupSearchRoutes } from './search/index.js';
 import { setupAdminRoutes } from "./admin/index.js";
 import { authenticateUser, authorizationHeader, authorizeUser } from '../middleware/auth.js';
 import { Session } from '../models/session.js';
+import { getState } from '../services/indexer.js';
 
 const log = getLogger();
 
@@ -33,12 +34,12 @@ export function setupRoutes({ configuration, repository }) {
   const secret = configuration.api.session.secret;
   const tokenSecret = configuration.api.tokens.secret;
   const tokenPassword = configuration.api.tokens.accessTokenPassword;
-  /** auth middleware */  
-  const softAuth = authenticateUser({secret, tokenSecret, tokenPassword});
-  const auth = authenticateUser({secret, tokenSecret, tokenPassword, isRequired: true});
+  /** auth middleware */
+  const softAuth = authenticateUser({ secret, tokenSecret, tokenPassword });
+  const auth = authenticateUser({ secret, tokenSecret, tokenPassword, isRequired: true });
   const authorize = configuration.api.authorization.disabled ? passMiddleware : authorizeUser(configuration.api.licenses);
   const basePath = configuration.api.basePath || '';
-  const app = new Hono({ strict: false,  }).basePath(basePath);
+  const app = new Hono({ strict: false, }).basePath(basePath);
 
   app.use(cors({
     maxAge: 5,
@@ -50,7 +51,7 @@ export function setupRoutes({ configuration, repository }) {
   app.use(async function detectHost(c, next) {
     let url = new URL(c.req.url);
     //console.log(c.req.header());
-    const reqProtocol = url.protocol.slice(0,-1);
+    const reqProtocol = url.protocol.slice(0, -1);
     const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || reqProtocol;
     const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
     c.set('protocol', protocol);
@@ -103,7 +104,7 @@ export function setupRoutes({ configuration, repository }) {
   // })
 
   const { version, name, homepage } = configuration.package;
-  
+
   // if (process.env.NODE_ENV === 'development') {
   //   server.get('/test-middleware', routeUser((req, res, next) => {
   //     res.send({});
@@ -138,6 +139,8 @@ export function setupRoutes({ configuration, repository }) {
       object_open: '/object/open',
       user: '/user',
       user_token: '/user/token',
+      user_terms: '/user/terms',
+      user_terms_accept: '/user/terms/accept',
       search_index: '/search/:index',
       search_fields_index: '/search/fields/:index',
       search_index_post_index: '/search/index-post/:index',
@@ -146,7 +149,8 @@ export function setupRoutes({ configuration, repository }) {
       oauth_provider_login: '/oauth/:provider/login',
       oauth_provider_code: '/oauth/:provider/code',
       authenticated: '/authenticated',
-      logout: '/logout'
+      logout: '/logout',
+      status: '/status',
     });
   });
 
@@ -163,8 +167,8 @@ export function setupRoutes({ configuration, repository }) {
    *       200:
    *         description: Returns ui configuration including licenses and aggregations.
    */
-  app.get('/configuration', ({ json }) => {    
-    const ui = {...configuration.ui};
+  app.get('/configuration', ({ json }) => {
+    const ui = { ...configuration.ui };
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.searchFields = configuration?.api?.elastic?.fields;
     ui.searchHighlights = configuration?.api?.elastic?.highlightFields;
@@ -211,6 +215,11 @@ export function setupRoutes({ configuration, repository }) {
     });
   }
 
+  // app.use(async ({ req, res }, next) => {
+  //   console.log(`Testing route hierarchy ${req.method}: ${req.path}`);
+  //   await next();
+  // });
+
   /**
    * @openapi
    * /authenticated:
@@ -256,18 +265,20 @@ export function setupRoutes({ configuration, repository }) {
    *         - org.cilogon.userinfo
    *         - offline_access
    */
-  app.get('/logout', bearerAuth({ async verifyToken(token, c){
-    const count = await Session.destroy({ where: { token } });
-    return count > 0;
-  } }), async c => {
+  app.get('/logout', bearerAuth({
+    async verifyToken(token, c) {
+      const count = await Session.destroy({ where: { token } });
+      return count > 0;
+    }
+  }), async c => {
     return c.json({}, 204);
   });
 
   const factory = createFactory();
   const streamHandlers = factory.createHandlers((c, next) => {
-    const { id, path } = c.req.query();  
+    const { id, path } = c.req.query();
     if (id) {
-      let newLoc = basePath + '/object/'+ encodeURIComponent(id);
+      let newLoc = basePath + '/object/' + encodeURIComponent(id);
       if (path) newLoc = newLoc + '/' + path;
       else newLoc += '?meta=all';
       return c.redirect(newLoc, 301);
@@ -275,7 +286,7 @@ export function setupRoutes({ configuration, repository }) {
       return c.json({ message: 'id parameter value is required' }, 400);
     }
   });
-  
+
 
   /**
    * @openapi
@@ -335,13 +346,76 @@ export function setupRoutes({ configuration, repository }) {
     }
   });
 
-  // app.get('/test/:id', c => {
-  //   console.log(c.req.method);
-  //   var p = c.req.param();
-  //   p.id = 'test';
-  //   console.log(c.req.param());
-  //   return c.body(null);
-  // })
+  /**
+   * @openapi
+   * /status:
+   *   get:
+   *     tags:
+   *       - general
+   *     description: |
+   *                  ### Status
+   *                  Returns status of repository and indexers
+   *                  - repository: ocfl version and error
+   *                  - structuralIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *                  - searchIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *     responses:
+   *       '200':
+   *         description: |
+   *                      Status of repository and indexers
+   *                      - repository: ocfl version and error
+   *                      - structuralIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *                      - searchIndex: isIndexed, isIndexing, isDeleting, objects, error
+   *       '400':
+   *         description: |
+   *                      Returns error message if any
+   *       '500':
+   *         description: |
+   *                      Returns error message if any
+   *                      
+   */
+  app.get('/status', async c => {
+    let structural = {};
+    let search = {};
+    try {
+      structural = await getState('structural');
+    }
+    catch (e) {
+      log.error(e);
+      structural['error'] = 'Error checking structural indexer';
+    }
+    try {
+      search = await getState('search');
+    } catch (e) {
+      log.error(e);
+      search['error'] = 'Error checking search indexer';
+    }
+    const repo = {};
+    try {
+      await repository.load();
+      repo['ocflVersion'] = repository?.ocflVersion;
+    } catch (e) {
+      log.error(e);
+      repo['error'] = e.message;
+    }
+    return c.json({
+      checkedOn: new Date(),
+      repository: {
+        ocflVersion: repo?.ocflVersion,
+        error: repo?.error
+      },
+      structuralIndex: {
+        isIndexed: structural?.isIndexed,
+        isIndexing: structural?.isIndexing,
+        isDeleting: structural?.isDeleting,
+        objects: structural?.count,
+        error: structural?.error
+      },
+      searchIndex: {
+        items: search?.count,
+        error: search?.error,
+      }
+    });
+  });
 
   return app;
 }

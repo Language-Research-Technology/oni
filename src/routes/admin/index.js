@@ -13,8 +13,6 @@ export function setupAdminRoutes({ configuration, repository }) {
   const token = configuration.api?.tokens?.admin;
   const app = new Hono({ strict: false });
 
-  app.get("/info", (c) => c.json({}));
-
   app.use(bearerAuth({ token }));
 
   /**

@@ -48,7 +48,6 @@ try {
   log.error(e.message);
   log.error(JSON.stringify(ocflConf));
   log.error('=======================================');
-  process.exit(1);
 }
 const types = [
   ... configuration.api.bootstrap ? ['structural'] : [],

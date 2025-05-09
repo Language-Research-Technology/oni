@@ -122,3 +122,16 @@ export function authorizeUser(licenseConfiguration) {
     await next();
   });
 };
+
+/**
+ * @param {object} opt 
+ * @param {boolean} [opt.isRequired]  If true, invalid header will throw HTTPException
+ * @param {object} opt.secret
+ * @param {object} opt.tokenSecret
+ * @param {object} opt.tokenPassword
+ * @return {import('hono').MiddlewareHandler<{Variables:{ user: object }}>} 
+ */
+export function allAuth({ isRequired, secret, tokenSecret, tokenPassword }) {
+  return async function auth(c, next) {
+  }
+}
