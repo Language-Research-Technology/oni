@@ -1,0 +1,112 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    "https://w3id.org/ldac/context",
+    {
+      "@vocab": "http://schema.org/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "arcp://name,no-licence"
+      }
+    },
+    {
+      "@id": "arcp://name,no-licence",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "conformsTo": {
+        "@id": "https://w3id.org/ldac/profile#Collection"
+      },
+      "identifier": {
+        "@id": "_:local-id:LDaCA:arcp://name,no-licence"
+      },
+      "name": "Corpus of Oni",
+      "description": "Test data that contains sub collections in one crate",
+      "publisher": {
+        "@id": "https://ldaca.edu.au"
+      },
+      "datePublished": "2023-12-21",
+      "author": [
+        {
+          "@id": "https://orcid.org/0001"
+        },
+        {
+          "@id": "https://orcid.org/0002"
+        }
+      ],
+      "rightsHolder": {
+        "@id": "https://ldaca.edu.au"
+      },
+      "accountablePerson": {
+        "@id": "https://orcid.org/0001"
+      },
+      "inLanguage": {
+        "@id": "https://glottolog.org/resource/languoid/id/stan1293"
+      },
+      "indexableText": [
+        {
+          "@id": "data.txt"
+        }
+      ]
+    },
+    {
+      "@id": "https://creativecommons.org/licenses/by/4.0/",
+      "@type": "OrganizationReuseLicense",
+      "description": "You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform and build upon the material for any purpose, even commercially).",
+      "name": "Attribution 4.0 International (CC BY 4.0)"
+    },
+    {
+      "@id": "https://ldaca.edu.au",
+      "@type": "Organization",
+      "name": "Ldaca"
+    },
+    {
+      "@id": "https://orcid.org/0001",
+      "@type": "Person",
+      "name": "John Doe"
+    },
+    {
+      "@id": "https://orcid.org/0001",
+      "@type": "Person",
+      "name": "Jane Doe"
+    },
+    {
+      "@id": "https://glottolog.org/resource/languoid/id/stan1293",
+      "@type": "Language",
+      "alternateName": [
+        "English (Standard Southern British)",
+        "Englisch",
+        "Anglais moderne [fr]",
+        "English [en]",
+        "Inglese moderno [it]",
+        "Inglês moderno [pt]",
+        "Modern English [en]",
+        "Moderna angla lingvo [eo]",
+        "Moderne engelsk [no]",
+        "Modernes Englisch [de]",
+        "Nyengelska [sv]",
+        "anglais [fr]",
+        "თანამედროვე ინგლისური პერიოდი [ka]",
+        "現代英語 [zh]",
+        "近代英語 [ja]"
+      ],
+      "geo": {
+        "@id": "#English"
+      },
+      "iso639-3": "eng",
+      "languageCode": "stan1293",
+      "name": "English",
+      "sameAs": {
+        "@id": "https://www.ethnologue.com/language/eng"
+      },
+      "source": "Glottolog"
+    }
+  ]
+}

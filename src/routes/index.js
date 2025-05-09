@@ -7,6 +7,7 @@ import { cors } from 'hono/cors';
 import { createFactory } from 'hono/factory';
 import { prettyJSON } from 'hono/pretty-json'
 import { HTTPException } from 'hono/http-exception';
+import { bearerAuth } from 'hono/bearer-auth'
 //import { logger } from 'hono/logger';
 import { getLogger } from '../services/logger.js';
 
@@ -19,21 +20,26 @@ import { setupAuthRoutes } from './auth/index.js';
 import { setupOauthRoutes } from './auth/oauth2-auth.js';
 import { setupSearchRoutes } from './search/index.js';
 import { setupAdminRoutes } from "./admin/index.js";
-import { authenticateUser, authorizationHeader } from '../middleware/auth.js';
+import { authenticateUser, authorizationHeader, authorizeUser } from '../middleware/auth.js';
 import { Session } from '../models/session.js';
 import { getState } from '../services/indexer.js';
 
 const log = getLogger();
 
+async function passMiddleware(c, next) {
+  await next();
+}
+
 export function setupRoutes({ configuration, repository }) {
   const secret = configuration.api.session.secret;
   const tokenSecret = configuration.api.tokens.secret;
   const tokenPassword = configuration.api.tokens.accessTokenPassword;
-  /** auth middleware */  
-  const softAuth = authenticateUser({secret, tokenSecret, tokenPassword});
-  const auth = authenticateUser({secret, tokenSecret, tokenPassword, isRequired: true});
+  /** auth middleware */
+  const softAuth = authenticateUser({ secret, tokenSecret, tokenPassword });
+  const auth = authenticateUser({ secret, tokenSecret, tokenPassword, isRequired: true });
+  const authorize = configuration.api.authorization.disabled ? passMiddleware : authorizeUser(configuration.api.licenses);
   const basePath = configuration.api.basePath || '';
-  const app = new Hono({ strict: false,  }).basePath(basePath);
+  const app = new Hono({ strict: false, }).basePath(basePath);
 
   app.use(cors({
     maxAge: 5,
@@ -45,7 +51,7 @@ export function setupRoutes({ configuration, repository }) {
   app.use(async function detectHost(c, next) {
     let url = new URL(c.req.url);
     //console.log(c.req.header());
-    const reqProtocol = url.protocol.slice(0,-1);
+    const reqProtocol = url.protocol.slice(0, -1);
     const protocol = configuration.api.protocol || c.req.header('x-forwarded-proto') || reqProtocol;
     const host = configuration.api.host || c.req.header('x-forwarded-host') || c.req.header('host') || url.host;
     c.set('protocol', protocol);
@@ -98,7 +104,7 @@ export function setupRoutes({ configuration, repository }) {
   // })
 
   const { version, name, homepage } = configuration.package;
-  
+
   // if (process.env.NODE_ENV === 'development') {
   //   server.get('/test-middleware', routeUser((req, res, next) => {
   //     res.send({});
@@ -161,8 +167,8 @@ export function setupRoutes({ configuration, repository }) {
    *       200:
    *         description: Returns ui configuration including licenses and aggregations.
    */
-  app.get('/configuration', ({ json }) => {    
-    const ui = {...configuration.ui};
+  app.get('/configuration', ({ json }) => {
+    const ui = { ...configuration.ui };
     ui.aggregations = configuration?.api?.elastic?.aggregations;
     ui.searchFields = configuration?.api?.elastic?.fields;
     ui.searchHighlights = configuration?.api?.elastic?.highlightFields;
@@ -208,7 +214,7 @@ export function setupRoutes({ configuration, repository }) {
       return json(swaggerSpec);
     });
   }
-  
+
   // app.use(async ({ req, res }, next) => {
   //   console.log(`Testing route hierarchy ${req.method}: ${req.path}`);
   //   await next();
@@ -259,21 +265,20 @@ export function setupRoutes({ configuration, repository }) {
    *         - org.cilogon.userinfo
    *         - offline_access
    */
-  app.get('/logout', authorizationHeader(), async c => {
-    const token = c.get('bearer');
-    if (token) {
+  app.get('/logout', bearerAuth({
+    async verifyToken(token, c) {
       const count = await Session.destroy({ where: { token } });
-      if (count > 0) return c.json({}, 204);
+      return count > 0;
     }
-    return c.json({}, 400);
+  }), async c => {
+    return c.json({}, 204);
   });
 
   const factory = createFactory();
   const streamHandlers = factory.createHandlers((c, next) => {
-    const { id, path } = c.req.query();  
+    const { id, path } = c.req.query();
     if (id) {
-      let newLoc = basePath + '/object/'+ encodeURIComponent(id);
-      console.log(c.req.url)
+      let newLoc = basePath + '/object/' + encodeURIComponent(id);
       if (path) newLoc = newLoc + '/' + path;
       else newLoc += '?meta=all';
       return c.redirect(newLoc, 301);
@@ -281,7 +286,7 @@ export function setupRoutes({ configuration, repository }) {
       return c.json({ message: 'id parameter value is required' }, 400);
     }
   });
-  
+
 
   /**
    * @openapi
@@ -320,7 +325,7 @@ export function setupRoutes({ configuration, repository }) {
 
   app.route('/auth', setupAuthRoutes({ configuration, auth }));
   app.route('/oauth', setupOauthRoutes({ configuration }));
-  const appObject = setupObjectRoutes({ configuration, repository, softAuth, streamHandlers });
+  const appObject = setupObjectRoutes({ configuration, repository, softAuth, streamHandlers, authorize });
   app.route('/object', appObject);
   app.route('/objects', appObject);
   app.route('/user', setupUserRoutes({ configuration, auth }));
@@ -341,7 +346,7 @@ export function setupRoutes({ configuration, repository }) {
     }
   });
 
-   /**
+  /**
    * @openapi
    * /status:
    *   get:
@@ -374,13 +379,13 @@ export function setupRoutes({ configuration, repository }) {
     try {
       structural = await getState('structural');
     }
-    catch(e) {
+    catch (e) {
       log.error(e);
       structural['error'] = 'Error checking structural indexer';
     }
     try {
       search = await getState('search');
-    } catch(e) {
+    } catch (e) {
       log.error(e);
       search['error'] = 'Error checking search indexer';
     }
@@ -388,8 +393,8 @@ export function setupRoutes({ configuration, repository }) {
     try {
       await repository.load();
       repo['ocflVersion'] = repository?.ocflVersion;
-    } catch(e) {
-      log.error(e); 
+    } catch (e) {
+      log.error(e);
       repo['error'] = e.message;
     }
     return c.json({

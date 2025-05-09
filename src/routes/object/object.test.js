@@ -1,7 +1,8 @@
 //import { testHost } from '../../services/index.js';
 import { ROCrate } from 'ro-crate';
-import { readFile } from 'fs/promises';
+import { readFile, stat, readdir } from 'fs/promises';
 import path from 'node:path';
+import { findCrateRootId } from '#src/services/utils.js';
 
 // const farmsToFreewaysId = 'arcp://name,farms-to-freeways/root/description';
 // const farmsToFreewaysName = 'Farms to Freeways Example Dataset';
@@ -128,13 +129,19 @@ describe('Test end point /object', function () {
       expect(res.status).toEqual(301);
       expect(res.headers.get('location')).toEqual(`/object/${id}?meta=original`);
     });
+    it('can get combined metadata', async function () {
+      const id = encodeURIComponent('arcp://name,types-of-oni');
+      const res = await app.request(`/object/meta?id=${id}&resolve-parts&noUrid`);
+      expect(res.status).toEqual(301);
+      expect(res.headers.get('location')).toEqual(`/object/${id}?noUrid&meta=all`);
+    });
   });
 
   describe('/stream and /object/open', function () {
     const id = encodeURIComponent('arcp://name,corpus-of-oni');
     const path = encodeURIComponent('media/intro.mpeg');
     const urls = [`/stream?id=${id}&path=${path}`, `/object/open?id=${id}&path=${path}`];
-    urls.forEach(async function(url){
+    urls.forEach(async function (url) {
       it(`can get file from ${url}`, async function () {
         const res = await app.request(url);
         expect(res.status).toEqual(301);
@@ -180,12 +187,19 @@ describe('Test end point /object', function () {
       expect(fileEntity).toBeTruthy();
     });
 
+    async function requestfollowRedirect(url, opt) {
+      const res = await app.request(url, opt);
+      if (res.status === 301 || res.status === 302) {
+        return requestfollowRedirect(res.headers.get('location'), opt);
+      }
+      return res;
+    }
     it('can download a file from links in metadata', async function () {
       const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}?meta=original`);
       expect(res.status).toEqual(200);
       const result = await res.json();
       const fileEntity = result['@graph'].find(e => [].concat(e['@type']).includes('File'));
-      const fileRes = await app.request(fileEntity['@id'], { headers: { authorization: users.john._tokenHeader } });
+      const fileRes = await requestfollowRedirect(fileEntity['@id'], { headers: { authorization: users.john._tokenHeader } });
       expect(fileRes.status).toEqual(200);
       const content1 = await readFile(path.join(testDataRootPath, '/ocfl/corpus-of-advanced-oni/logo.svg'), 'utf8');
       const content2 = await fileRes.text();
@@ -195,6 +209,83 @@ describe('Test end point /object', function () {
     it('should not be able to find a nested object', async function () {
       const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-oni/intro')}`);
       expect(res.status).toEqual(404);
+    });
+
+    it('can get the contents as zip', async function () {
+      const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}.zip`);
+      expect(res.status).toEqual(200);
+    });
+
+    it('can get the contents as zip via nginx', async function () {
+      const headers = {
+        via: 'nginx',
+        'Nginx-Enabled-Modules': 'zip'
+      };
+      const res = await app.request(`/object/${encodeURIComponent('arcp://name,corpus-of-advanced-oni')}.zip`, { headers });
+      expect(res.status).toEqual(200);
+      const content = await res.text();
+      console.log(content);
+    });
+
+
+  });
+
+  describe('PUT /object/:id', function () {
+    let content, crate, crateId;
+    before(async function () {
+      content = await readFile(path.join(testDataRootPath, '/rocrates/basic/ro-crate-metadata.json'), 'utf8');
+      crate = JSON.parse(content);
+      crateId = findCrateRootId('ro-crate-metadata.json', crate);
+    });
+    it('can accept a single json', async function () {
+      // send as a single json file
+      const res = await app.request(`/object/${encodeURIComponent(crateId)}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: content
+      });
+      expect(res.status).toEqual(200);
+      // check file on disk
+      const f = repository.object(crateId).getFile('ro-crate-metadata.json');
+      const fc = await f.asString();
+      expect(fc).toEqual(content);
+      // check structural api
+      // check search api
+
+    });
+    it('can accept multipart', async function () {
+      // send as multi part
+      const form = new FormData();
+      form.set('file', new Blob([content], { type: 'application/json' }), 'ro-crate-metadata.json');
+      const res = await app.request(`/object/${encodeURIComponent(crateId)}`, {
+        method: 'PUT',
+        body: form
+      });
+      expect(res.status).toEqual(200);
+      // check file on disk
+      const f = repository.object(crateId).getFile('ro-crate-metadata.json');
+      const fc = await f.asString();
+      expect(fc).toEqual(content);
+    });
+    it('can reject PUT with no file', async function () {
+      const body = new FormData();
+      body.set('name', 'test');
+      const res = await app.request(`/object/test-crate`, { method: 'PUT', body });
+      expect(res.status).toEqual(400);
+    });
+    it('can reject PUT with malformed json', async function () {
+      const res = await app.request(`/object/test-crate`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: 'test'
+      });
+      expect(res.status).toEqual(400);
+    });
+    it('can reject PUT with no metadata file', async function () {
+      const body = new FormData();
+      body.set('file', new Blob(['abc'], { type: 'text/plain' }), 'test.txt');
+      const res = await app.request(`/object/test-crate`, { method: 'PUT', body });
+      expect(res.status).toEqual(400);
     });
   });
 
@@ -233,7 +324,7 @@ describe('Test end point /object', function () {
         { ...auth },
         { via: 'nginx', ...auth }
       ].forEach(async headers => {
-        const res = await app.request(`/object/${id}/non-existing-file`, { headers } );
+        const res = await app.request(`/object/${id}/non-existing-file`, { headers });
         expect(res.status).toEqual(404);
       });
     });

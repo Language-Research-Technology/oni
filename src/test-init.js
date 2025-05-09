@@ -10,11 +10,13 @@ import { sequelize, Sequelize } from './models/index.js';
 import { setupRoutes } from "./routes/index.js";
 import { createJwtToken, createUsers } from './test-utils.js';
 
-global.testDataRootPath = path.resolve(import.meta.dirname, '../test-data');
 
 var app;
 var users;
 const configuration = await loadConfiguration();
+
+global.testDataRootPath = path.resolve(import.meta.dirname, '../test-data');
+global.testOcflRootPath = configuration.api.ocfl.ocflTestPath;
 
 configuration.api.openapi.enabled = false;
 configuration.api.elastic.index = 'test';
@@ -57,7 +59,7 @@ export async function mochaGlobalSetup() {
 
   let repository;
   try {
-    repository = await ocfl.createStorage(storage);
+    global.repository = repository = await ocfl.createStorage(storage);
     //await repository.load();
   } catch (e) {
     console.error('repository already exist');
@@ -114,6 +116,7 @@ export async function mochaGlobalTeardown() {
   // clean up, delete test db
   const ocflConf = configuration.api.ocfl;
   await fs.rm(ocflConf.ocflTestPath, { recursive: true, force: true });
+  await fs.rm(ocflConf.ocflTestScratch, { recursive: true, force: true });
   // var c = await sequelize.models.record.count();
   // console.log(c);
   await sequelize.close();

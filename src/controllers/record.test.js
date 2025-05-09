@@ -15,12 +15,18 @@ describe('controllers/record', function () {
         types: ['File']
       });
       const roc = new ROCrate(c, {link:true, array:true});
+      console.log(roc.toJSON());
       for (const id of [
-        'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/data.txt',
-        'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/image.jpg',
-        'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/intro.txt',
-        'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/media/intro.mpeg',
-        'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/history.pdf'
+        // 'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/data.txt',
+        // 'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/image.jpg',
+        // 'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/intro.txt',
+        // 'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/media/intro.mpeg',
+        // 'https://test.com/object/arcp%3A%2F%2Fname%2Ccorpus-of-oni/history.pdf'
+        'https://test.com/stream?id=arcp%3A%2F%2Fname%2Ccorpus-of-oni&path=data.txt',
+        'https://test.com/stream?id=arcp%3A%2F%2Fname%2Ccorpus-of-oni&path=image.jpg',
+        'https://test.com/stream?id=arcp%3A%2F%2Fname%2Ccorpus-of-oni&path=intro.txt',
+        'https://test.com/stream?id=arcp%3A%2F%2Fname%2Ccorpus-of-oni&path=media%2Fintro.mpeg',
+        'https://test.com/stream?id=arcp%3A%2F%2Fname%2Ccorpus-of-oni&path=history.pdf'
       ]) {
         expect(roc.getEntity(id)).toBeDefined();
       }

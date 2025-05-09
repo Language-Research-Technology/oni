@@ -2,6 +2,7 @@ import { UserModel } from "#src/models/user.js";
 import "hono";
 declare module 'hono' {
   interface ContextVariableMap {
+    crateId: string,
     offset: number,
     limit: number,
     range: {
@@ -15,6 +16,7 @@ declare module 'hono' {
     protocol: string,
     baseUrl: string,
     url: URL,
+    format: string
   }
 }
 

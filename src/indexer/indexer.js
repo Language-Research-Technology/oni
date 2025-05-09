@@ -1,7 +1,9 @@
 import { logger } from "#src/services/logger.js";
 
 export class Indexer {
-  constructor(opt) {}
+  constructor(opt) {
+    this.defaultLicense = opt?.configuration?.api?.license?.default?.['@id'];
+  }
 
   static async create({configuration}) {
     const indexer = new this({configuration});
@@ -29,10 +31,13 @@ export class Indexer {
   async index({ ocflObject, crate }) {
     const rootDataset = crate.rootDataset;
     const crateId = crate.rootId;
+    const license = rootDataset.license?.[0]?.['@id'] || this.defaultLicense;
     if (!rootDataset) {
-      logger.warn(`${ocflObject.root}: Does not contain an ROCrate with a valid root dataset`);
+      logger.warn(`${ocflObject.root}: Skipped: Does not contain an ROCrate with a valid root dataset.`);
     } else if (crateId === './') {
-      logger.warn(`${ocflObject.root}: Cannot process a crate with invalid identifier ('./').`);
+      logger.warn(`${ocflObject.root}: Skipped: Cannot process a crate with invalid identifier ('./').`);
+    } else if (!license) {
+      logger.warn(`${ocflObject.root}: Skipped: No license found.`);
     } else {
       //logger.debug('index ' + ocflObject.root);
       //console.log(this.__state);
