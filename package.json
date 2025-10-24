@@ -1,6 +1,6 @@
 {
   "name": "oni",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "",
   "homepage": "http://github.com/Language-Research-Technology/oni",
   "main": "src/index.js",

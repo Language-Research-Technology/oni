@@ -18,6 +18,7 @@ export class StructuralIndexer extends Indexer {
     this.ocflPathInternal = configuration.api.ocfl.ocflPathInternal
     this.previewPath = configuration.api.ocfl.previewPath;
     this.previewPathInternal = configuration.api.ocfl.previewPathInternal;
+    this.memberOfField = configuration.api.memberOfField || 'pcdm:memberOf';
   }
 
   async _index({ ocflObject, crate }) {
@@ -37,7 +38,7 @@ export class StructuralIndexer extends Indexer {
     logger.info(`[structural] Indexing ${rec.crateId}`);
     await createRecord({
       data: rec,
-      memberOfs: rootDataset.memberOf || [],
+      memberOfs: rootDataset[this.memberOfField ] || [],
       atTypes: rootDataset['@type'] || [],
       conformsTos: rootDataset.conformsTo || []
     });
