@@ -128,9 +128,9 @@ export class SearchIndexer extends Indexer {
           for (const f of entity.indexableText || []) {
             f.__$contentIndexable = true;
           }
-          for (let members of [entity.hasMember || [], entity['@reverse'].memberOf || []]) {
+          for (let members of [entity['pcdm:hasMember'] || [], entity['@reverse']['pcdm:hasMember'] || []]) {
             for (let member of members) {
-              if (!member.memberOf || !member.memberOf.length) member.memberOf = { '@id': crate['@id'] };
+              if (!member['pcdm:hasMember'] || !member['pcdm:hasMember'].length) member['pcdm:hasMember'] = { '@id': crate['@id'] };
               stack.push([member, [...parents, entity]]);
             }
           }

@@ -1,5 +1,6 @@
 /**
  * Index the ocfl repo to the sql database
+ * Is this file being used??
  * 
  */
 import {getLogger} from './logger.js';
@@ -28,6 +29,7 @@ export async function bootstrap({configuration}) {
 export async function bootstrapObject({configuration, object}) {
   const license = configuration.api.license;
   const identifier = configuration.api.identifier;
+  const memberOfField = configuration.api.memberOfField || 'pcdm:memberOf';
   let crate;
   const skip = configuration.api?.skipByMatch || [];
   let skipRegExp;
@@ -70,7 +72,7 @@ export async function bootstrapObject({configuration, object}) {
         //const recordCreate = await createRecordWithCrate(rec, root['hasMember'], crate.__item_by_type);
         const recordCreate = await createRecord({
           data: rec,
-          memberOfs: root['memberOf'] || [],
+          memberOfs: root[memberOfField] || [],
           atTypes: root['@type'] || [],
           conformsTos: root['conformsTo'] || []
         });

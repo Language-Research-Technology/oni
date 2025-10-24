@@ -93,6 +93,23 @@ export default {
         {"field":"inLanguage", "label": "Language", "name": "inLanguage.name.@value"}
       ]
     },
+      "textReplacements": {
+      "^_": "",
+      "^ldac:doi$": "DOI",
+      "^ldac:isDeIdentified$": "Is De-Identified",
+      "^citation$": "Related Works",
+      "^ldac:": "",
+      "^dct:": "",
+      "^local:": "",
+      "^prov:": "",
+      "^pcdm:": "",
+      "^isbn$": "ISBN",
+      "^issn$": "ISSN",
+      "^url$": "URL",
+      "^@id$": "ID",
+      "^@type$": "Type",
+      "^arcp://name,custom/terms#": ""
+    },
     "main": {
       "fields": [
         {
@@ -161,7 +178,7 @@ export default {
           "hasMember",
           "_memberOf",
           "_isSubLevel",
-          "memberOf",
+          "pcdm:memberOf",
           "_access",
           "_collectionStack",
           "_metadataIsPublic",
@@ -287,6 +304,8 @@ export default {
     }
   },
   "api": {
+    "memberOfField": "pcdm:memberOf",
+    "hasMemberField": "pcdm:hasMember",
     "openapi": {
       "enabled": true
     },
