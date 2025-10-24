@@ -24,7 +24,7 @@ export class Indexer {
     throw new Error('Not Implemented');
   }
 
-  async delete() {
+  async delete(crateId) {
     throw new Error('Not Implemented');
   }
 

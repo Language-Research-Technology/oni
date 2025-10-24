@@ -1,6 +1,7 @@
 "use strict";
 
 import { Sequelize, DataTypes } from "sequelize";
+import { logger } from "../services/logger.js";
 
 console.log('Loading sequelize..');
 console.log(`username: ${process.env.DB_USER},
@@ -16,7 +17,7 @@ const sequelize = new Sequelize({
   port: parseInt(process.env.DB_PORT),
   dialect: 'postgres',
   database: process.env.DB_DATABASE,
-  logging: process.env.NODE_ENV === 'production' ? false : console.log,
+  logging: process.env.NODE_ENV === 'production' ? false : msg => logger.verbose(msg),
   pool: {
     max: 20,
     min: 10,
