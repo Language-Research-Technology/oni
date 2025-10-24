@@ -29,20 +29,20 @@ export function setupAdminRoutes({ configuration, repository }) {
    *         description: |
    *                      - Returns a message that it has started indexing.
    */
-  app.post("/index/:type", async ({ req, json }) => {
-    const { type } = req.param();
-    const { force } = req.query();
+  app.post("/index/:type/:crateId?", async ({ req, json }) => {
+    const { type, crateId } = req.param();
+    const force = req.query('force') != null;
     const state = await getState(type);
     if (state) {
       try {
-        if (state.isIndexed && force == null) {
+        if (state.isIndexed && !crateId && !force) {
           return conflict('Index already exists');
         } else if (state.isDeleting) {
           return conflict('Deleting is in progress');
         }
         if (!state.isIndexing) {
           log.debug(`running [${type}] indexer`);
-          createIndex(type, force != null);
+          createIndex(type, crateId, force);
         }
         return json(state, 202);
       } catch (e) {

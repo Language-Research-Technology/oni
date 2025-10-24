@@ -317,9 +317,9 @@ export default {
     "host": "",
     "basePath": "/api",
     "ocfl": {
-      "ocflPath": "/opt/storage/oni/ocfl",
+      "ocflPath": process.env.OCFL_PATH || "/opt/storage/oni/ocfl",
       "ocflPathInternal": "/ocfl",
-      "ocflScratch": "/opt/storage/oni/scratch-ocfl",
+      "ocflScratch": process.env.OCFL_SCRATCH_PATH || "/opt/storage/oni/scratch-ocfl",
       "ocflTestPath": "/opt/storage/oni/test/ocfl",
       "ocflTestScratch": "/opt/storage/oni/test/scratch-ocfl",
       "catalogFilename": "ro-crate-metadata.json",
