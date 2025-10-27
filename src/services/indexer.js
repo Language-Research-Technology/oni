@@ -144,7 +144,7 @@ export async function indexRepository({ repository, skipByMatch = [], types = []
         if (!crateId || crate.rootId.startsWith(crateId)) {
           for (const t of types) {
             try {
-              if (crateId) await indexer[t].delete(crateId);
+              if (crateId) await indexer[t].delete(crate.rootId);
               await indexer[t].index({ ocflObject, crate });
               counts[t]++;
             } catch (error) {
