@@ -81,8 +81,9 @@ export class StructuralIndexer extends Indexer {
 
   async delete(crateId) {
     const where = crateId ? { crateId } : {};
-    await Record.destroy({ truncate: true, cascade: true, where });
-    await File.destroy({ truncate: true, where });
+    const truncate = !crateId;
+    await Record.destroy({ truncate, cascade: true, where });
+    await File.destroy({ truncate, where });
   }
 
   async count(crateId) {
