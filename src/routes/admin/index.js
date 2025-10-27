@@ -64,15 +64,15 @@ export function setupAdminRoutes({ configuration, repository }) {
     }
   });
 
-  app.delete("/index/:type", async ({ req, json }) => {
-    const { type } = req.param();
+  app.delete("/index/:type/:crateId?", async ({ req, json }) => {
+    const { type, crateId } = req.param();
     const state = await getState(type);
     if (state) {
       if (state.isIndexing) {
         return conflict('Indexing is in progress');
       }
       if (!state.isDeleting) {
-        deleteIndex(type);
+        deleteIndex(type, crateId);
       }
       return json(state, 202);
     } else {

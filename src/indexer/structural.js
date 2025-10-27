@@ -6,7 +6,7 @@ import { logger } from "#src/services/logger.js";
 import { createCRC32 } from 'hash-wasm';
 import { join, relative } from "node:path";
 import { createPreview } from "#src/helpers/preview.js";
-import { where } from "sequelize";
+import { Op } from "sequelize";
 
 export class StructuralIndexer extends Indexer {
   ocflBase;
@@ -38,7 +38,7 @@ export class StructuralIndexer extends Indexer {
     logger.info(`[structural] Indexing ${rec.crateId}`);
     await createRecord({
       data: rec,
-      memberOfs: rootDataset[this.memberOfField ] || [],
+      memberOfs: rootDataset[this.memberOfField] || [],
       atTypes: rootDataset['@type'] || [],
       conformsTos: rootDataset.conformsTo || []
     });
@@ -75,12 +75,12 @@ export class StructuralIndexer extends Indexer {
     }
     //const internalPrefix = relative(this.ocflPathInternal, this.previewPathInternal);
     //await createPreview({ crc32, File, crate, previewPath: this.previewPath, internalPrefix});
-    
+
     logger.info(`[structural] Indexed ${rec.crateId} | files=${count}`);
   }
 
   async delete(crateId) {
-    const where = crateId ? { crateId } : {};
+    const where = crateId ? { crateId: { [Op.startsWith]: crateId } } : {};
     const truncate = !crateId;
     await Record.destroy({ truncate, cascade: true, where });
     await File.destroy({ truncate, where });
